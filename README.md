@@ -1,4 +1,4 @@
-# Cassandra
+# Db2-zOS
 
 Plugin to enable Db2 zOS (Mainframe) database as a target in [Hackolade](https://hackolade.com) data modeling.  Requires prior download of the Hackolade application from our [download page](https://hackolade.com/download.html)
 
