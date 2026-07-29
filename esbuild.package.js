@@ -25,8 +25,9 @@ const { getCommandOption, parseBooleanOption, readCommandOptions } = require('./
  * @returns {Promise<void>} Resolves when the esbuild packaging step finishes.
  */
 async function packagePlugin() {
-	/** @type {{ name: string; version: string }} */
-	const packageData = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf8'));
+	const { default: packageData } = await import('./package.json', {
+		with: { type: 'json' },
+	});
 	const RELEASE_FOLDER_PATH = path.join(DEFAULT_RELEASE_FOLDER_PATH, `${packageData.name}-${packageData.version}`);
 	const commandOptions = readCommandOptions(process.argv.slice(2), ['write']);
 	const write = getCommandOption(commandOptions, 'write', {
