@@ -17,9 +17,9 @@
 		"useUnknownInCatchVariables": true,
 		"resolveJsonModule": true,
 		"forceConsistentCasingInFileNames": true,
-		"typeRoots": ["./node_modules/@types", "./types"],
+		"typeRoots": ["./node_modules/@types", "shared/types"],
 		"types": ["node"]
 	},
-	"include": ["**/*.js", "**/*.cjs", "types/**/*.d.ts"],
+	"include": ["**/*.js", "**/*.cjs", "shared/types/**/*.d.ts"],
 	"exclude": ["**/node_modules/**", "release/**/*"]
 }

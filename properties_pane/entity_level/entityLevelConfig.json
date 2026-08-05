@@ -1,0 +1,967 @@
+/*
+* Copyright © 2016-2024 by IntegrIT S.A. dba Hackolade.  All rights reserved.
+*
+* The copyright to the computer software herein is the property of IntegrIT S.A.
+* The software may be used and/or copied only with the written permission of
+* IntegrIT S.A. or in accordance with the terms and conditions stipulated in
+* the agreement/contract under which the software has been supplied.
+
+In order to define custom properties for any object's properties pane, you may copy/paste from the following,
+making sure that you maintain a proper JSON format.
+
+			{
+				"propertyName": "Simple text",
+				"propertyKeyword": "simpletextProp",
+				"propertyType": "text",
+				"sampleGen": "&containerName|&entityName|&random|<value>"
+			},
+			{
+				"propertyName": "Text area",
+				"propertyKeyword": "textareaProp",
+				"propertyTooltip": "Popup for multi-line text entry",
+				"propertyType": "details",
+				"template": "textarea"
+			},
+			{
+				"propertyName": "Dropdown selection",
+				"propertyKeyword": "dropdownProp",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"Option 1",
+					"Option 2",
+					"Option 3",
+					"Option 4"
+				]
+			},
+			{
+				"propertyName": "Numeric",
+				"propertyKeyword": "numericProp",
+				"propertyValidate": true,
+				"propertyType": "numeric",
+				"valueType": "number",
+				"allowNegative": false,
+				"sampleGen": "&containerName|&entityName|&random|<value>"
+			},
+			{
+				"propertyName": "Checkbox",
+				"propertyKeyword": "checkboxProp",
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Group",
+				"propertyKeyword": "grpProp",
+				"propertyType": "group",
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Simple Grp Text",
+						"propertyKeyword": "simpleGrpText",
+						"propertyTooltip": "",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Group Number",
+						"propertyKeyword": "grpNumber",
+						"propertyType": "numeric",
+						"valueType": "number",
+						"allowNegative": false
+					}
+				]
+			},
+// “groupInput” can have the following states - 0 items, 1 item, and many items.
+// “blockInput” has only 2 states - 0 items or 1 item.
+// This gives us an easy way to represent it as an object and not as an array internally which is beneficial for processing
+// and forward-engineering in particular.
+			{
+				"propertyName": "Block",
+				"propertyKeyword": "grpProp",
+				"propertyType": "block",
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Simple Grp Text",
+						"propertyKeyword": "simpleGrpText",
+						"propertyTooltip": "",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Group Number",
+						"propertyKeyword": "grpNumber",
+						"propertyType": "numeric",
+						"valueType": "number",
+						"allowNegative": false
+					}
+				]
+			},
+			{
+				"propertyName": "Field List",
+				"propertyKeyword": "keyList",
+				"propertyType": "fieldList",
+				"template": "orderedList"
+			},
+			{
+				"propertyName": "List with attribute",
+				"propertyKeyword": "keyListOrder",
+				"propertyType": "fieldList",
+				"template": "orderedList",
+				"attributeList": [
+					"ascending",
+					"descending"
+				]
+			}
+
+*/
+[
+	{
+		"lowerTab": "Details",
+		"structure": [
+			{
+				"propertyName": "Comments",
+				"propertyKeyword": "description",
+				"shouldValidate": false,
+				"propertyTooltip": "comments",
+				"addTimestampButton": false,
+				"propertyType": "details",
+				"template": "codeEditor",
+				"templateOptions": {
+					"editorDialect": "markdown"
+				}
+			},
+			{
+				"propertyName": "Auxiliary",
+				"propertyKeyword": "auxiliary",
+				"propertyTooltip": "CREATE AUXILIARY TABLE used to store LOB column data for a base table.",
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Table",
+				"propertyKeyword": "auxiliaryBaseTable",
+				"propertyTooltip": "Identifies the base table that is to be stored in the auxiliary table.",
+				"propertyType": "selecthashed",
+				"template": "entities",
+				"withEmptyOption": true,
+				"excludeCurrent": true,
+				"dependency": {
+					"key": "auxiliary",
+					"value": true
+				}
+			},
+			{
+				"propertyName": "Column",
+				"propertyKeyword": "auxiliaryBaseColumn",
+				"propertyTooltip": "Identifies the column of the base table that is to be stored in the auxiliary table.",
+				"propertyType": "fieldList",
+				"template": "orderedList",
+				"dataToLoad": "auxiliaryBaseTable",
+				"templateOptions": {
+					"maxFields": 1
+				},
+				"dependency": {
+					"key": "auxiliary",
+					"value": true
+				}
+			},
+			{
+				"propertyName": "Append",
+				"propertyKeyword": "auxiliaryAppend",
+				"propertyTooltip": "Specifies whether append processing is used for the auxiliary table. The APPEND clause must not be specified for a table in a work file table space.",
+				"propertyType": "select",
+				"options": ["", "yes", "no"],
+				"dependency": {
+					"key": "auxiliary",
+					"value": true
+				}
+			},
+			{
+				"propertyName": "Part",
+				"propertyKeyword": "auxiliaryPart",
+				"propertyTooltip": "Specifies the partition of the base table for which the auxiliary table is to store the specified column.",
+				"propertyType": "numeric",
+				"valueType": "integer",
+				"allowNegative": false,
+				"dependency": {
+					"key": "auxiliary",
+					"value": true
+				}
+			},
+			{
+				"propertyName": "IN clause",
+				"propertyKeyword": "inClauseType",
+				"propertyTooltip": "Placement of the table: IN database.tablespace, IN DATABASE database-name, or IN ACCELERATOR accelerator-name.",
+				"propertyType": "select",
+				"options": ["", "tablespace", "database", "accelerator"],
+				"dependency": {
+					"type": "not",
+					"values": {
+						"key": "auxiliary",
+						"value": true
+					}
+				}
+			},
+			{
+				"propertyName": "Database name",
+				"propertyKeyword": "databaseName",
+				"propertyTooltip": "Database name for IN database-name.table-space-name or IN DATABASE database-name. If omitted with a tablespace, DSNDB04 may be used.",
+				"propertyType": "text",
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"type": "not",
+							"values": {
+								"key": "auxiliary",
+								"value": true
+							}
+						},
+						{
+							"key": "inClauseType",
+							"value": ["tablespace", "database"]
+						}
+					]
+				}
+			},
+			{
+				"propertyName": "Tablespace name",
+				"propertyKeyword": "table_tablespace_name",
+				"propertyTooltip": "Table space name for IN database-name.table-space-name. Must identify an existing table space when specified.",
+				"propertyType": "text",
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"type": "not",
+							"values": {
+								"key": "auxiliary",
+								"value": true
+							}
+						},
+						{
+							"key": "inClauseType",
+							"value": "tablespace"
+						}
+					]
+				}
+			},
+			{
+				"propertyName": "Accelerator name",
+				"propertyKeyword": "acceleratorName",
+				"propertyTooltip": "Accelerator name for IN ACCELERATOR. Creates an accelerator-only table.",
+				"propertyType": "text",
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"type": "not",
+							"values": {
+								"key": "auxiliary",
+								"value": true
+							}
+						},
+						{
+							"key": "inClauseType",
+							"value": "accelerator"
+						}
+					]
+				}
+			},
+			{
+				"propertyName": "Table options",
+				"propertyKeyword": "tableOptions",
+				"propertyType": "block",
+				"propertyTooltip": "Db2 for z/OS CREATE TABLE physical and behavioral options. Several options apply only when the table space is created implicitly (not when an existing table space or IN ACCELERATOR is specified).",
+				"dependency": {
+					"type": "not",
+					"values": {
+						"key": "auxiliary",
+						"value": true
+					}
+				},
+				"structure": [
+					{
+						"propertyName": "Edit procedure",
+						"propertyKeyword": "editProc",
+						"propertyTooltip": "EDITPROC program-name. Identifies the user-written edit procedure for the table.",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Editproc row attributes",
+						"propertyKeyword": "editProcRowAttributes",
+						"propertyTooltip": "WITH ROW ATTRIBUTES (default) or WITHOUT ROW ATTRIBUTES for the edit procedure parameter list.",
+						"propertyType": "select",
+						"options": ["", "WITH ROW ATTRIBUTES", "WITHOUT ROW ATTRIBUTES"],
+						"dependency": {
+							"type": "and",
+							"values": [
+								{
+									"key": "editProc",
+									"exist": true
+								},
+								{
+									"key": "editProc",
+									"isEmpty": false
+								}
+							]
+						}
+					},
+					{
+						"propertyName": "Validation procedure",
+						"propertyKeyword": "validProc",
+						"propertyTooltip": "VALIDPROC program-name. Must not be specified with IN ACCELERATOR.",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Audit",
+						"propertyKeyword": "audit",
+						"propertyTooltip": "AUDIT NONE, CHANGES, or ALL. Must not be specified with IN ACCELERATOR.",
+						"propertyType": "select",
+						"options": ["", "NONE", "CHANGES", "ALL"]
+					},
+					{
+						"propertyName": "OBID",
+						"propertyKeyword": "obid",
+						"propertyTooltip": "OBID integer. Identifier for the object's internal descriptor. Must be greater than 1 and unused in the database. If omitted, Db2 generates a value.",
+						"propertyType": "numeric",
+						"valueType": "integer",
+						"allowNegative": false,
+						"minValue": 2
+					},
+					{
+						"propertyName": "Data capture",
+						"propertyKeyword": "dataCapture",
+						"propertyTooltip": "DATA CAPTURE NONE or CHANGES. Do not specify CHANGES for tables in NOT LOGGED table spaces. Not valid for accelerator-only tables.",
+						"propertyType": "select",
+						"options": ["", "NONE", "CHANGES"]
+					},
+					{
+						"propertyName": "With restrict on drop",
+						"propertyKeyword": "withRestrictOnDrop",
+						"propertyTooltip": "WITH RESTRICT ON DROP. Prevents the table, its database, and its table space from being dropped.",
+						"propertyType": "checkbox"
+					},
+					{
+						"propertyName": "CCSID",
+						"propertyKeyword": "ccsid",
+						"propertyTooltip": "CCSID ASCII, EBCDIC, or UNICODE for the encoding scheme of the table.",
+						"propertyType": "select",
+						"options": ["", "ASCII", "EBCDIC", "UNICODE"]
+					},
+					{
+						"propertyName": "Volatile",
+						"propertyKeyword": "volatile",
+						"propertyTooltip": "VOLATILE or NOT VOLATILE CARDINALITY. VOLATILE prefers index access. Must not be specified with IN ACCELERATOR.",
+						"propertyType": "select",
+						"options": ["", "VOLATILE", "NOT VOLATILE"]
+					},
+					{
+						"propertyName": "Logged",
+						"propertyKeyword": "logged",
+						"propertyTooltip": "LOGGED or NOT LOGGED. Applies only when the table space is created implicitly. Do not specify when IN table-space-name or IN ACCELERATOR is used.",
+						"propertyType": "select",
+						"options": ["", "LOGGED", "NOT LOGGED"]
+					},
+					{
+						"propertyName": "Compress",
+						"propertyKeyword": "compress",
+						"propertyTooltip": "COMPRESS NO, YES, YES FIXEDLENGTH, or YES HUFFMAN. Applies only to an implicitly created table space. Do not specify when IN table-space-name or IN ACCELERATOR is used.",
+						"propertyType": "select",
+						"options": ["", "NO", "YES", "YES FIXEDLENGTH", "YES HUFFMAN"]
+					},
+					{
+						"propertyName": "Append",
+						"propertyKeyword": "append",
+						"propertyTooltip": "APPEND YES or NO. Must not be specified for a table in a work file table space.",
+						"propertyType": "select",
+						"options": ["", "YES", "NO"]
+					},
+					{
+						"propertyName": "DSSIZE (G)",
+						"propertyKeyword": "dssize",
+						"propertyTooltip": "DSSIZE integer G for an implicitly created table space. Do not specify with IN table-space-name, IN ACCELERATOR, or PARTITION BY SIZE EVERY n G.",
+						"propertyType": "numeric",
+						"valueType": "integer",
+						"allowNegative": false
+					},
+					{
+						"propertyName": "Buffer pool",
+						"propertyKeyword": "bufferPool",
+						"propertyTooltip": "BUFFERPOOL bpname for an implicitly created table space. Do not specify when IN table-space-name or IN ACCELERATOR is used.",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Member cluster",
+						"propertyKeyword": "memberCluster",
+						"propertyTooltip": "MEMBER CLUSTER for an implicitly created table space. Do not specify when IN table-space-name or IN ACCELERATOR is used.",
+						"propertyType": "checkbox"
+					},
+					{
+						"propertyName": "Trackmod",
+						"propertyKeyword": "trackMod",
+						"propertyTooltip": "TRACKMOD YES or NO for an implicitly created table space. Do not specify when IN table-space-name or IN ACCELERATOR is used.",
+						"propertyType": "select",
+						"options": ["", "YES", "NO"]
+					},
+					{
+						"propertyName": "Pagenum",
+						"propertyKeyword": "pageNum",
+						"propertyTooltip": "PAGENUM RELATIVE or ABSOLUTE for an implicitly created partition-by-range table space. PAGENUM RELATIVE is allowed only when a partitioning clause is specified.",
+						"propertyType": "select",
+						"options": ["", "RELATIVE", "ABSOLUTE"]
+					},
+					{
+						"propertyName": "Key label",
+						"propertyKeyword": "keyLabelMode",
+						"propertyTooltip": "KEY LABEL key-label-name or NO KEY LABEL for table-level encryption. Not valid for accelerator-only or auxiliary tables.",
+						"propertyType": "select",
+						"options": ["", "KEY LABEL", "NO KEY LABEL"]
+					},
+					{
+						"propertyName": "Key label name",
+						"propertyKeyword": "keyLabelName",
+						"propertyTooltip": "ICSF key label used to encrypt table spaces and index spaces associated with the table.",
+						"propertyType": "text",
+						"dependency": {
+							"key": "keyLabelMode",
+							"value": "KEY LABEL"
+						}
+					}
+				]
+			},
+			{
+				"propertyName": "Partitioning",
+				"propertyKeyword": "partitioning",
+				"propertyType": "group",
+				"groupItemLimit": 1,
+				"propertyTooltip": "PARTITION BY SIZE (partition-by-growth) or PARTITION BY RANGE (partition-by-range). Must not be specified with IN ACCELERATOR.",
+				"dependency": {
+					"type": "not",
+					"values": {
+						"key": "auxiliary",
+						"value": true
+					}
+				},
+				"structure": [
+					{
+						"propertyName": "Partition by",
+						"propertyKeyword": "partitionBy",
+						"propertyTooltip": "SIZE for partition-by-growth, or RANGE for table-controlled range partitioning.",
+						"propertyType": "select",
+						"options": ["", "SIZE", "RANGE"]
+					},
+					{
+						"propertyName": "Every size (G)",
+						"propertyKeyword": "everySize",
+						"propertyTooltip": "PARTITION BY SIZE EVERY integer G. Integer must not be greater than 256. If an existing table space is specified, integer must match its DSSIZE.",
+						"propertyType": "numeric",
+						"valueType": "integer",
+						"allowNegative": false,
+						"maxValue": 256,
+						"dependency": {
+							"key": "partitionBy",
+							"value": "SIZE"
+						}
+					},
+					{
+						"propertyName": "Key",
+						"propertyKeyword": "partitionKey",
+						"propertyTooltip": "Ordered partitioning key columns for PARTITION BY RANGE (column-name [NULLS LAST] ASC|DESC).",
+						"propertyType": "compositeKeySetter",
+						"disabledItemStrategy": "default",
+						"isCompositeKey": true,
+						"setPrimaryKey": false,
+						"template": "collectiontree",
+						"abbr": "PT",
+						"dependency": {
+							"key": "partitionBy",
+							"value": "RANGE"
+						}
+					},
+					{
+						"propertyName": "Nulls last",
+						"propertyKeyword": "nullsLast",
+						"propertyTooltip": "NULLS LAST on the partition-expression. Applies to the partitioning key columns.",
+						"propertyType": "checkbox",
+						"dependency": {
+							"key": "partitionBy",
+							"value": "RANGE"
+						}
+					},
+					{
+						"propertyName": "Partitions",
+						"propertyType": "group",
+						"propertyKeyword": "partitions",
+						"propertyTooltip": "PARTITION integer ENDING AT (constant | MAXVALUE | MINVALUE) [INCLUSIVE].",
+						"dependency": {
+							"key": "partitionBy",
+							"value": "RANGE"
+						},
+						"structure": [
+							{
+								"propertyName": "Partition number",
+								"propertyKeyword": "partitionNumber",
+								"propertyTooltip": "PARTITION integer identifier.",
+								"propertyType": "numeric",
+								"valueType": "integer",
+								"allowNegative": false,
+								"minValue": 1
+							},
+							{
+								"propertyName": "Ending at",
+								"propertyKeyword": "endingAt",
+								"propertyTooltip": "ENDING AT values: comma-separated constants, or MAXVALUE / MINVALUE.",
+								"propertyType": "details",
+								"template": "textarea",
+								"markdown": false
+							},
+							{
+								"propertyName": "Inclusive",
+								"propertyKeyword": "inclusive",
+								"propertyTooltip": "INCLUSIVE — specified range values are included in the data partition.",
+								"propertyType": "checkbox"
+							}
+						]
+					}
+				]
+			},
+			{
+				"propertyName": "Period for system time",
+				"propertyKeyword": "periodForSystemTime",
+				"erdIndexAbbr": "ST",
+				"propertyType": "group",
+				"groupItemLimit": 1,
+				"propertyTooltip": "PERIOD FOR SYSTEM_TIME (begin-column-name, end-column-name). Must not be specified with IN ACCELERATOR.",
+				"dependency": {
+					"type": "not",
+					"values": {
+						"key": "auxiliary",
+						"value": true
+					}
+				},
+				"structure": [
+					{
+						"propertyName": "Start column",
+						"propertyKeyword": "startColumn",
+						"propertyType": "fieldList",
+						"template": "orderedList",
+						"templateOptions": {
+							"maxFields": 1
+						}
+					},
+					{
+						"propertyName": "End column",
+						"propertyKeyword": "endColumn",
+						"propertyType": "fieldList",
+						"template": "orderedList",
+						"templateOptions": {
+							"maxFields": 1
+						}
+					}
+				]
+			},
+			{
+				"propertyName": "Period for business time",
+				"propertyKeyword": "periodForBusinessTime",
+				"erdIndexAbbr": "BT",
+				"propertyType": "group",
+				"groupItemLimit": 1,
+				"propertyTooltip": "PERIOD FOR BUSINESS_TIME (begin-column-name, end-column-name [EXCLUSIVE | INCLUSIVE]). Must not be specified with IN ACCELERATOR.",
+				"dependency": {
+					"type": "not",
+					"values": {
+						"key": "auxiliary",
+						"value": true
+					}
+				},
+				"structure": [
+					{
+						"propertyName": "Start column",
+						"propertyKeyword": "startColumn",
+						"propertyType": "fieldList",
+						"template": "orderedList",
+						"templateOptions": {
+							"maxFields": 1
+						}
+					},
+					{
+						"propertyName": "End column",
+						"propertyKeyword": "endColumn",
+						"propertyType": "fieldList",
+						"template": "orderedList",
+						"templateOptions": {
+							"maxFields": 1
+						}
+					},
+					{
+						"propertyName": "End inclusive",
+						"propertyKeyword": "endInclusive",
+						"propertyTooltip": "EXCLUSIVE or INCLUSIVE for the BUSINESS_TIME end column.",
+						"propertyType": "select",
+						"options": ["", "EXCLUSIVE", "INCLUSIVE"]
+					}
+				]
+			},
+			{
+				"propertyName": "Table properties",
+				"propertyKeyword": "tableProperties",
+				"propertyTooltip": "Optional raw DDL fragments appended after structured table options for clauses not modeled in the UI.",
+				"propertyType": "details",
+				"template": "textarea",
+				"markdown": false,
+				"dependency": {
+					"type": "not",
+					"values": {
+						"key": "auxiliary",
+						"value": true
+					}
+				}
+			},
+			{
+				"propertyName": "Custom scripts",
+				"propertyType": "block",
+				"propertyKeyword": "customScripts",
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Before CREATE TABLE",
+						"propertyKeyword": "beforeCreateEntity",
+						"propertyType": "details",
+						"markdown": false,
+						"template": "codeEditor",
+						"templateOptions": {
+							"editorDialect": "sql",
+							"customScriptVariables": true
+						}
+					},
+					{
+						"propertyName": "After CREATE TABLE",
+						"propertyKeyword": "afterCreateEntity",
+						"propertyType": "details",
+						"markdown": false,
+						"template": "codeEditor",
+						"templateOptions": {
+							"editorDialect": "sql",
+							"customScriptVariables": true
+						}
+					}
+				]
+			},
+			{
+				"propertyName": "Remarks",
+				"propertyKeyword": "comments",
+				"propertyTooltip": "remarks",
+				"addTimestampButton": true,
+				"propertyType": "details",
+				"template": "codeEditor",
+				"templateOptions": {
+					"editorDialect": "markdown"
+				},
+				"valueType": "string"
+			}
+		],
+		"columnsRatio": [3.7, 5]
+	},
+	{
+		"lowerTab": "Composite keys",
+		"structure": [
+			{
+				"propertyName": "Primary key",
+				"propertyType": "group",
+				"groupItemLimit": 1,
+				"propertyKeyword": "primaryKey",
+				"propertyTooltip": {
+					"disabled": [
+						{
+							"tooltip": "Remove the existing single column primary key definition prior to unlock the possibility to create a composite primary key definition for this table",
+							"dependency": {
+								"type": "and",
+								"values": [
+									{
+										"level": "children",
+										"key": "primaryKey",
+										"value": true
+									},
+									{
+										"type": "not",
+										"values": {
+											"level": "children",
+											"key": "compositePrimaryKey",
+											"value": true
+										}
+									}
+								]
+							}
+						},
+						{
+							"tooltip": "Remove or update the existing composite primary key definition prior to unlock the possibility to create a new composite primary key definition for this table",
+							"dependency": {
+								"key": "primaryKey",
+								"minLength": 1
+							}
+						}
+					]
+				},
+				"structure": [
+					{
+						"propertyName": "Constraint name",
+						"propertyKeyword": "constraintName",
+						"propertyTooltip": "",
+						"propertyType": "text",
+						"validation": {
+							"indexKey": "compositePrimaryKey",
+							"message": "A primary key constraint cannot be created without any primary key selected"
+						}
+					},
+					{
+						"propertyName": "Key",
+						"propertyKeyword": "compositePrimaryKey",
+						"propertyType": "primaryKeySetter",
+						"requiredProperty": true,
+						"abbr": "pk"
+					},
+					{
+						"propertyName": "Comment",
+						"propertyKeyword": "indexComment",
+						"propertyTooltip": "comment",
+						"addTimestampButton": false,
+						"propertyType": "details",
+						"template": "codeEditor",
+						"templateOptions": {
+							"editorDialect": "markdown"
+						}
+					}
+				],
+				"disabledOnCondition": [
+					{
+						"level": "children",
+						"value": {
+							"type": "and",
+							"values": [
+								{
+									"key": "primaryKey",
+									"value": true
+								},
+								{
+									"type": "or",
+									"values": [
+										{
+											"key": "compositePrimaryKey",
+											"value": false
+										},
+										{
+											"key": "compositePrimaryKey",
+											"exist": false
+										}
+									]
+								},
+								{
+									"type": "or",
+									"values": [
+										{
+											"key": "compositeUniqueKey",
+											"value": false
+										},
+										{
+											"key": "compositeUniqueKey",
+											"exist": false
+										}
+									]
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"propertyName": "Unique key",
+				"propertyType": "group",
+				"propertyKeyword": "uniqueKey",
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Constraint name",
+						"propertyKeyword": "constraintName",
+						"propertyTooltip": "",
+						"propertyType": "text",
+						"validation": {
+							"indexKey": "compositeUniqueKey",
+							"message": "A unique key constraint cannot be created without any unique key selected"
+						}
+					},
+					{
+						"propertyName": "Key",
+						"propertyKeyword": "compositeUniqueKey",
+						"propertyType": "compositeKeySetter",
+						"disabledItemStrategy": "default",
+						"setPrimaryKey": false,
+						"template": "collectiontree",
+						"requiredProperty": true,
+						"isCompositeKey": true,
+						"abbr": "uk"
+					},
+					{
+						"propertyName": "Comment",
+						"propertyKeyword": "indexComment",
+						"propertyTooltip": "comment",
+						"addTimestampButton": false,
+						"propertyType": "details",
+						"template": "codeEditor",
+						"templateOptions": {
+							"editorDialect": "markdown"
+						}
+					},
+					{
+						"propertyName": "Alternate key",
+						"propertyKeyword": "alternateKey",
+						"propertyTooltip": "",
+						"propertyType": "checkbox",
+						"setFieldPropertyBy": "compositeUniqueKey"
+					}
+				]
+			}
+		]
+	},
+	{
+		"lowerTab": "Indexes",
+		"structure": [
+			{
+				"propertyName": "Index",
+				"propertyType": "group",
+				"propertyKeyword": "Indxs",
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Name",
+						"propertyKeyword": "indxName",
+						"propertyTooltip": "",
+						"propertyType": "text",
+						"validation": {
+							"required": true
+						}
+					},
+					{
+						"propertyName": "Activated",
+						"propertyKeyword": "isActivated",
+						"propertyTooltip": "Deactivated item will be not included in FE script",
+						"propertyType": "checkbox",
+						"defaultValue": true
+					},
+					{
+						"propertyName": "Type",
+						"propertyKeyword": "indxType",
+						"propertyType": "select",
+						"options": ["", "unique"]
+					},
+					{
+						"propertyName": "Keys",
+						"propertyKeyword": "indxKey",
+						"propertyType": "fieldList",
+						"template": "orderedList",
+						"attributeList": ["asc", "desc", "random"],
+						"validation": {
+							"minLength": 1,
+							"required": true
+						}
+					},
+					{
+						"propertyName": "Include keys",
+						"propertyKeyword": "indxIncludeKey",
+						"propertyType": "fieldList",
+						"propertyTooltip": "Introduces a clause that specifies additional columns to be appended to the set of index key columns. Any columns included with this clause are not used to enforce uniqueness.",
+						"template": "orderedList",
+						"attributeList": [],
+						"dependency": {
+							"key": "indxType",
+							"value": "unique"
+						}
+					},
+					{
+						"propertyName": "Compress",
+						"propertyKeyword": "indxCompress",
+						"propertyType": "select",
+						"propertyTooltip": "Specifies whether index compression is enabled.",
+						"options": ["", "yes", "no"]
+					},
+					{
+						"propertyName": "Null keys",
+						"propertyKeyword": "indxNullKeys",
+						"propertyType": "select",
+						"propertyTooltip": "'Include' specifies that an index entry is created when all parts of the index key contain the null value.",
+						"options": ["", "include", "exclude"]
+					},
+					{
+						"propertyName": "Tablespace",
+						"propertyKeyword": "indxTablespace",
+						"propertyTooltip": "Specify the tablespace in which Db2 Database creates the table. If you omit TABLESPACE, then the database creates that item in the default tablespace of the owner of the schema containing the table.",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Description",
+						"propertyKeyword": "indxDescription",
+						"propertyTooltip": "description",
+						"propertyType": "details",
+						"template": "codeEditor",
+						"templateOptions": {
+							"editorDialect": "markdown"
+						}
+					},
+					{
+						"propertyName": "Comments",
+						"propertyKeyword": "indxComments",
+						"propertyTooltip": "comments",
+						"addTimestampButton": false,
+						"propertyType": "details",
+						"template": "codeEditor",
+						"templateOptions": {
+							"editorDialect": "markdown"
+						}
+					}
+				]
+			}
+		]
+	},
+	{
+		"lowerTab": "Check Constraints",
+		"structure": [
+			{
+				"propertyName": "Check Constraint",
+				"propertyType": "group",
+				"propertyKeyword": "chkConstr",
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Name",
+						"propertyKeyword": "chkConstrName",
+						"propertyTooltip": "",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Expression",
+						"propertyKeyword": "constrExpression",
+						"propertyTooltip": "Expression",
+						"propertyType": "details",
+						"template": "textarea",
+						"markdown": false,
+						"validation": {
+							"required": true
+						}
+					},
+					{
+						"propertyName": "Description",
+						"propertyKeyword": "constrDescription",
+						"propertyTooltip": "description",
+						"propertyType": "details",
+						"template": "textarea"
+					},
+					{
+						"propertyName": "Comments",
+						"propertyKeyword": "constrComments",
+						"propertyTooltip": "comments",
+						"addTimestampButton": false,
+						"propertyType": "details",
+						"template": "textarea"
+					}
+				]
+			}
+		]
+	}
+]

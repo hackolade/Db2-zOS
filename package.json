@@ -22,7 +22,6 @@
 			"disablePatternField": true,
 			"disableMultipleTypes": true,
 			"enableForwardEngineering": true,
-			"disableReverseEngineering": false,
 			"enableReverseEngineering": {
 				"jsonDocument": true,
 				"jsonSchema": true,
