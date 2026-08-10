@@ -17,7 +17,8 @@
 	},
 	"compMode": {
 		"entity": true,
-		"container": true
+		"container": true,
+		"useDdlProvider": true
 	},
 	"namePrefix": "Db2 for z/OS",
 	"level": {

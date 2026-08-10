@@ -1,0 +1,61 @@
+module.exports = {
+	createSchema: 'CREATE SCHEMA ${schemaName};',
+
+	dropSchema: 'DROP SCHEMA ${schemaName} RESTRICT;',
+
+	alterSchema: 'ALTER SCHEMA ${schemaName};',
+
+	createTable: 'CREATE${tableType} TABLE ${name}${tableProps}${tableOptions};',
+
+	dropTable: 'DROP TABLE ${tableName};',
+
+	addColumn: 'ALTER TABLE ${tableName} ADD COLUMN ${columnDefinition};',
+
+	dropColumn: 'ALTER TABLE ${tableName} DROP COLUMN ${columnName};',
+
+	createAuxiliaryTable: 'CREATE${tableType} TABLE ${name}${tableOptions};',
+
+	comment: '\nCOMMENT ON ${objectType} ${objectName} IS ${comment};\n',
+
+	createTableProps: '${columns}${keyConstraints}${foreignKeyConstraints}',
+
+	columnDefinition: '${name}${type}${default}${constraints}',
+
+	createForeignKey:
+		'ALTER TABLE ${foreignTable} ADD CONSTRAINT ${name} FOREIGN KEY (${foreignKey}) REFERENCES ${primaryTable} (${primaryKey})${onDelete};',
+
+	dropForeignKey: 'ALTER TABLE ${tableName} DROP FOREIGN KEY ${constraintName};',
+
+	createForeignKeyConstraint:
+		'${name} FOREIGN KEY (${foreignKey}) REFERENCES ${primaryTable} (${primaryKey})${onDelete}',
+
+	createKeyConstraint: '${constraintName}${keyType}${columns}${options}',
+
+	createView: 'CREATE VIEW ${name}${viewColumns}${viewProperties}${withCheckOption}\n\tAS ${selectStatement};',
+
+	viewSelectStatement: 'SELECT ${keys}\n\tFROM ${tableName}',
+
+	dropView: 'DROP VIEW ${viewName};',
+
+	alterPkConstraint: 'ALTER TABLE ${tableName} ADD CONSTRAINT ${constraintName} PRIMARY KEY${columns}${options};',
+
+	dropPK: 'ALTER TABLE ${tableName} DROP PRIMARY KEY;',
+
+	alterNotNull: 'ALTER TABLE ${tableName} ALTER COLUMN ${columnName} SET NOT NULL;',
+
+	dropNotNull: 'ALTER TABLE ${tableName} ALTER COLUMN ${columnName} DROP NOT NULL;',
+
+	alterUkConstraint: 'ALTER TABLE ${tableName} ADD CONSTRAINT ${constraintName} UNIQUE${columns}${options};',
+
+	dropUkConstraint: 'ALTER TABLE ${tableName} DROP UNIQUE ${constraintName};',
+
+	updateColumnType: 'ALTER TABLE ${tableName} ALTER COLUMN ${columnName} SET DATA TYPE ${dataType};',
+
+	updateColumnDefaultValue: 'ALTER TABLE ${tableName} ALTER COLUMN ${columnName} SET DEFAULT ${defaultValue};',
+
+	dropColumnDefaultValue: 'ALTER TABLE ${tableName} ALTER COLUMN ${columnName} DROP DEFAULT;',
+
+	renameColumn: 'ALTER TABLE ${tableName} RENAME COLUMN ${oldColumnName} TO ${newColumnName};',
+
+	renameTable: 'RENAME TABLE ${oldTableName} TO ${newTableName};',
+};

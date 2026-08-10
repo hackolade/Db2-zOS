@@ -6,18 +6,41 @@ const { generateScript } = require('./api/generateScript');
 module.exports = {
 	generateScript,
 
-	generateViewScript(data, logger, callback, app) {
+	/**
+	 * Generate view script stub.
+	 *
+	 * @param {unknown} _data Script data.
+	 * @param {unknown} _logger Logger.
+	 * @param {unknown} _callback Callback.
+	 * @param {unknown} _app App instance.
+	 * @returns {never} Always throws.
+	 */
+	generateViewScript(_data, _logger, _callback, _app) {
 		throw new Error('Not implemented');
 	},
 
 	generateContainerScript,
 
-	getDatabases(connectionInfo, logger, callback, app) {
+	/**
+	 * Get databases stub.
+	 *
+	 * @param {unknown} _connectionInfo Connection info.
+	 * @param {unknown} _logger Logger.
+	 * @param {unknown} _callback Callback.
+	 * @param {unknown} _app App instance.
+	 * @returns {never} Always throws.
+	 */
+	getDatabases(_connectionInfo, _logger, _callback, _app) {
 		throw new Error('Not implemented');
 	},
 
 	applyToInstance,
 
+	/**
+	 * Test connection stub.
+	 *
+	 * @returns {never} Always throws.
+	 */
 	testConnection() {
 		throw new Error('Not implemented');
 	},

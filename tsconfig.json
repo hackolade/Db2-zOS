@@ -20,6 +20,6 @@
 		"typeRoots": ["./node_modules/@types", "shared/types"],
 		"types": ["node"]
 	},
-	"include": ["**/*.js", "**/*.cjs", "shared/types/**/*.d.ts"],
+	"include": ["**/*.js", "**/*.cjs", "shared/types/**/*.d.ts", "forward_engineering/types/**/*.d.ts"],
 	"exclude": ["**/node_modules/**", "release/**/*"]
 }
