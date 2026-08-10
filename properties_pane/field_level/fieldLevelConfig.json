@@ -128,14 +128,7 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Subtype",
 				"propertyKeyword": "mode",
 				"propertyType": "select",
-				"options": [
-					"char",
-					"varchar",
-					"clob",
-					"graphic",
-					"vargraphic",
-					"dbclob"
-				],
+				"options": ["char", "varchar", "clob", "graphic", "vargraphic", "dbclob"],
 				"data": "options",
 				"valueType": "string"
 			},
@@ -144,10 +137,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "synonym",
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
-				"options": [
-					"",
-					"character"
-				],
+				"options": ["", "character"],
 				"defaultValue": "",
 				"dependency": {
 					"key": "mode",
@@ -159,11 +149,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "synonym",
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
-				"options": [
-					"",
-					"char varying",
-					"character varying"
-				],
+				"options": ["", "char varying", "character varying"],
 				"defaultValue": "",
 				"dependency": {
 					"key": "mode",
@@ -175,11 +161,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "synonym",
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
-				"options": [
-					"",
-					"char large object",
-					"character large object"
-				],
+				"options": ["", "char large object", "character large object"],
 				"defaultValue": "",
 				"dependency": {
 					"key": "mode",
@@ -280,21 +262,13 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Length semantics",
 				"propertyKeyword": "lengthSemantics",
 				"propertyType": "select",
-				"options": [
-					"",
-					"K",
-					"M",
-					"G"
-				],
+				"options": ["", "K", "M", "G"],
 				"dependency": {
 					"type": "and",
 					"values": [
 						{
 							"key": "mode",
-							"value": [
-								"clob",
-								"dbclob"
-							]
+							"value": ["clob", "dbclob"]
 						}
 					]
 				}
@@ -304,22 +278,13 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "characterSubtype",
 				"propertyTooltip": "FOR SBCS DATA, FOR MIXED DATA, or FOR BIT DATA",
 				"propertyType": "select",
-				"options": [
-					"",
-					"SBCS",
-					"MIXED",
-					"BIT"
-				],
+				"options": ["", "SBCS", "MIXED", "BIT"],
 				"dependency": {
 					"type": "and",
 					"values": [
 						{
 							"key": "mode",
-							"value": [
-								"char",
-								"varchar",
-								"clob"
-							]
+							"value": ["char", "varchar", "clob"]
 						}
 					]
 				}
@@ -337,14 +302,7 @@ making sure that you maintain a proper JSON format.
 					"values": [
 						{
 							"key": "mode",
-							"value": [
-								"char",
-								"varchar",
-								"clob",
-								"graphic",
-								"vargraphic",
-								"dbclob"
-							]
+							"value": ["char", "varchar", "clob", "graphic", "vargraphic", "dbclob"]
 						}
 					]
 				}
@@ -893,16 +851,7 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Subtype",
 				"propertyKeyword": "mode",
 				"propertyType": "select",
-				"options": [
-					"integer",
-					"smallint",
-					"bigint",
-					"decimal",
-					"float",
-					"real",
-					"double",
-					"decfloat"
-				],
+				"options": ["integer", "smallint", "bigint", "decimal", "float", "real", "double", "decfloat"],
 				"data": "options",
 				"valueType": "string"
 			},
@@ -911,10 +860,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "synonym",
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
-				"options": [
-					"",
-					"int"
-				],
+				"options": ["", "int"],
 				"defaultValue": "",
 				"dependency": {
 					"key": "mode",
@@ -926,12 +872,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "synonym",
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
-				"options": [
-					"",
-					"dec",
-					"numeric",
-					"num"
-				],
+				"options": ["", "dec", "numeric", "num"],
 				"defaultValue": "",
 				"dependency": {
 					"key": "mode",
@@ -943,10 +884,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "synonym",
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
-				"options": [
-					"",
-					"double precision"
-				],
+				"options": ["", "double precision"],
 				"defaultValue": "",
 				"dependency": {
 					"key": "mode",
@@ -997,11 +935,7 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Precision",
 				"propertyKeyword": "precision",
 				"propertyType": "select",
-				"options": [
-					"",
-					"16",
-					"34"
-				],
+				"options": ["", "16", "34"],
 				"propertyTooltip": "DECFLOAT precision must be 16 or 34",
 				"typeDecorator": true,
 				"dependency": {
@@ -1107,11 +1041,7 @@ making sure that you maintain a proper JSON format.
 						"propertyKeyword": "generated",
 						"propertyTooltip": "Select type of value generation",
 						"propertyType": "select",
-						"options": [
-							"",
-							"ALWAYS",
-							"BY DEFAULT"
-						]
+						"options": ["", "ALWAYS", "BY DEFAULT"]
 					},
 					{
 						"propertyName": "Start",
@@ -1168,11 +1098,7 @@ making sure that you maintain a proper JSON format.
 						"propertyKeyword": "cycle",
 						"propertyTooltip": "The CYCLE or NO CYCLE option determines whether Db2 wraps values when it has generated all values between the START WITH value and MAXVALUE.",
 						"propertyType": "select",
-						"options": [
-							"",
-							"CYCLE",
-							"NO CYCLE"
-						],
+						"options": ["", "CYCLE", "NO CYCLE"],
 						"dependency": {
 							"type": "not",
 							"values": {
@@ -1243,11 +1169,7 @@ making sure that you maintain a proper JSON format.
 						"propertyKeyword": "cache",
 						"propertyTooltip": "Specify how many values of the sequence the database preallocates and keeps in memory for faster access. Specify NOCACHE to indicate that values of the sequence are not preallocated. If you omit both CACHE and NOCACHE, then the database caches 20 sequence numbers by default.",
 						"propertyType": "select",
-						"options": [
-							"",
-							"CACHE",
-							"NO CACHE"
-						],
+						"options": ["", "CACHE", "NO CACHE"],
 						"dependency": {
 							"type": "not",
 							"values": {
@@ -1283,11 +1205,7 @@ making sure that you maintain a proper JSON format.
 						"propertyKeyword": "order",
 						"propertyTooltip": "Specify ORDER to guarantee that sequence numbers are generated in order of request. Specify NO ORDER if you do not want to guarantee sequence numbers are generated in order of request.",
 						"propertyType": "select",
-						"options": [
-							"",
-							"ORDER",
-							"NO ORDER"
-						],
+						"options": ["", "ORDER", "NO ORDER"],
 						"dependency": {
 							"type": "not",
 							"values": {
@@ -1767,11 +1685,7 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Subtype",
 				"propertyKeyword": "mode",
 				"propertyType": "select",
-				"options": [
-					"date",
-					"time",
-					"timestamp"
-				],
+				"options": ["date", "time", "timestamp"],
 				"data": "options",
 				"valueType": "string"
 			},
@@ -1790,9 +1704,7 @@ making sure that you maintain a proper JSON format.
 					"values": [
 						{
 							"key": "mode",
-							"value": [
-								"timestamp"
-							]
+							"value": ["timestamp"]
 						}
 					]
 				}
@@ -1806,9 +1718,7 @@ making sure that you maintain a proper JSON format.
 					"values": [
 						{
 							"key": "mode",
-							"value": [
-								"timestamp"
-							]
+							"value": ["timestamp"]
 						}
 					]
 				}
@@ -2304,11 +2214,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "mode",
 				"propertyType": "select",
 				"defaultValue": "binary",
-				"options": [
-					"binary",
-					"varbinary",
-					"blob"
-				],
+				"options": ["binary", "varbinary", "blob"],
 				"data": "options",
 				"valueType": "string"
 			},
@@ -2362,12 +2268,7 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Length semantics",
 				"propertyKeyword": "lengthSemantics",
 				"propertyType": "select",
-				"options": [
-					"",
-					"K",
-					"M",
-					"G"
-				],
+				"options": ["", "K", "M", "G"],
 				"dependency": {
 					"key": "mode",
 					"value": "blob"
@@ -2936,9 +2837,7 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Subtype",
 				"propertyKeyword": "mode",
 				"propertyType": "select",
-				"options": [
-					"rowid"
-				],
+				"options": ["rowid"],
 				"data": "options",
 				"valueType": "string",
 				"defaultValue": "rowid"
@@ -2948,10 +2847,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "generated",
 				"propertyTooltip": "ROWID values are GENERATED ALWAYS or GENERATED BY DEFAULT",
 				"propertyType": "select",
-				"options": [
-					"ALWAYS",
-					"BY DEFAULT"
-				],
+				"options": ["ALWAYS", "BY DEFAULT"],
 				"defaultValue": "ALWAYS"
 			},
 			{

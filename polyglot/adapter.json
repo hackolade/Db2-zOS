@@ -33,7 +33,7 @@
  * 		},
  * }
  */
- {
+{
 	"modify": {
 		"field": [
 			{
@@ -55,7 +55,7 @@
 					"length": 255
 				}
 			},
-            {
+			{
 				"from": {
 					"type": "nvarchar",
 					"hasMaxLength": true
@@ -74,10 +74,10 @@
 					"length": 255
 				}
 			},
-            {
+			{
 				"from": {
 					"type": "binary",
-                    "mode": "varbinary",
+					"mode": "varbinary",
 					"hasMaxLength": true
 				},
 				"to": {

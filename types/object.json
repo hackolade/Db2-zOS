@@ -9,15 +9,7 @@
 	},
 	"subtypes": {
 		"object": {
-			"childValueType": [
-				"char",
-				"binary",
-				"datetime",
-				"number",
-				"rowid",
-				"xml",
-				"object"
-			]
+			"childValueType": ["char", "binary", "datetime", "number", "rowid", "xml", "object"]
 		}
 	}
 }
