@@ -46,6 +46,7 @@ const {
 	getTableCommentStatement,
 	getColumnComments,
 	getSchemaCommentStatement,
+	getIndexCommentStatement,
 } = require('./ddlHelpers/comment/commentHelper.js');
 const { getTableProps } = require('./ddlHelpers/table/getTableProps.js');
 const { getTableOptions } = require('./ddlHelpers/table/getTableOptions.js');
@@ -54,6 +55,9 @@ const { getTableType } = require('./ddlHelpers/table/getTableType.js');
 const { hydrateAuxiliaryTableData } = require('./ddlHelpers/table/hydrateAuxiliaryTableData.js');
 const { hydratePartitioning, hydrateTemporalPeriod } = require('./ddlHelpers/table/hydrateZosTableData.js');
 const { joinActivatedAndDeactivatedStatements } = require('../utils/joinActivatedAndDeactivatedStatements');
+const { getIndexName } = require('./ddlHelpers/index/getIndexName.js');
+const { getIndexType } = require('./ddlHelpers/index/getIndexType.js');
+const { getIndexOptions } = require('./ddlHelpers/index/getIndexOptions.js');
 
 /**
  * Format view columns as a string.
@@ -265,14 +269,29 @@ const hydrateCheckConstraint = checkConstraint => ({
 	expression: checkConstraint.constrExpression,
 	comments: checkConstraint.constrComments,
 	description: checkConstraint.constrDescription,
+	enforced: checkConstraint.constrEnforced,
 });
 
 /**
  * Create check constraint DDL.
  *
- * @returns {string} Empty stub.
+ * @param {HydratedCheckConstraint} params Check constraint data.
+ * @returns {string} Check constraint fragment.
  */
-const createCheckConstraint = () => '';
+const createCheckConstraint = ({ name, expression, enforced } = {}) => {
+	if (!expression) {
+		return '';
+	}
+
+	return assignTemplates({
+		template: templates.checkConstraint,
+		templateData: {
+			name: name ? `CONSTRAINT ${wrapInQuotes(name)} ` : '',
+			expression: lodash.trim(expression).replace(/^\(([\s\S]*)\)$/u, '$1'),
+			enforced: enforced ? ` ${enforced}` : '',
+		},
+	});
+};
 
 /**
  * Create foreign key constraint fragment.
@@ -452,6 +471,7 @@ const createTable = (tableData, isActivated = true) => {
 		columns,
 		foreignKeyConstraints,
 		keyConstraints,
+		checkConstraints,
 		name,
 		schemaData,
 		auxiliary,
@@ -501,6 +521,7 @@ const createTable = (tableData, isActivated = true) => {
 		columns: columns ?? [],
 		foreignKeyConstraints: foreignKeyConstraints ?? [],
 		keyConstraints: keyConstraints ?? [],
+		checkConstraints: checkConstraints ?? [],
 		isActivated,
 	});
 	const renderedTableOptions = getTableOptions({
@@ -571,28 +592,75 @@ const dropView = ({ viewName }) => assignTemplates({ template: templates.dropVie
  * Hydrate index data.
  *
  * @param {IndexData} indexData Index data.
- * @param {unknown} [_tableData] Table data.
+ * @param {unknown} [tableData] Table data.
  * @param {SchemaData} [schemaData] Schema data.
  * @returns {IndexData} Hydrated index.
  */
-const hydrateIndex = (indexData, _tableData, schemaData) => ({
-	...indexData,
-	schemaName: schemaData?.schemaName,
-});
+const hydrateIndex = (indexData, tableData, schemaData) => {
+	const isParentActivated = lodash.get(tableData, '[0].isActivated', true);
+
+	return {
+		...indexData,
+		schemaName: schemaData?.schemaName,
+		isParentActivated,
+	};
+};
 
 /**
  * Create index DDL.
  *
- * @returns {string} Empty stub.
+ * @param {string} tableName Table name.
+ * @param {IndexData} index Index data.
+ * @returns {string} Index DDL.
  */
-const createIndex = () => '';
+const createIndex = (tableName, index) => {
+	if (!index?.indxName || !index?.indxKey?.length) {
+		return '';
+	}
+
+	const indexName = getIndexName({ index });
+	const indexType = getIndexType({ index });
+	const indexOptions = getIndexOptions({ index });
+	const indexTableName = getNamePrefixedWithSchemaName({ name: tableName, schemaName: index.schemaName });
+	const statement = assignTemplates({
+		template: templates.createIndex,
+		templateData: { indexType, indexName, indexOptions, indexTableName },
+	});
+	const commentStatement = getIndexCommentStatement({
+		indexName: lodash.trim(indexName),
+		description: index.indxDescription,
+	});
+
+	let finalStatement = commentDeactivatedStatement(statement, {
+		isActivated: Boolean(index.isActivated && index.isParentActivated),
+	});
+
+	if (commentStatement) {
+		finalStatement +=
+			'\n' +
+			commentDeactivatedStatement(commentStatement, {
+				isPartOfLine: true,
+				isActivated: Boolean(index.isActivated && index.isParentActivated),
+			}) +
+			'\n';
+	}
+
+	return finalStatement;
+};
 
 /**
  * Drop index DDL.
  *
- * @returns {string} Empty stub.
+ * @param {string} name Index name.
+ * @returns {string} Drop index DDL.
  */
-const dropIndex = () => '';
+const dropIndex = name => {
+	if (!name) {
+		return '';
+	}
+
+	return assignTemplates({ template: templates.dropIndex, templateData: { name } });
+};
 
 /**
  * Hydrate view column.

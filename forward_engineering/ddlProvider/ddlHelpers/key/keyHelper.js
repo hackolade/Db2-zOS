@@ -86,7 +86,7 @@ const hydrateKeyOptions = ({ columnName, isActivated, options, keyType }) => {
 				isActivated: isActivated,
 			},
 		],
-		...lodash.pickBy(options ?? {}, value => !lodash.isNil(value)),
+		constraintName: options?.constraintName,
 	};
 };
 

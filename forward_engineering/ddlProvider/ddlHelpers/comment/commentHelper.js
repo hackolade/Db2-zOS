@@ -16,6 +16,7 @@ const OBJECT_TYPE = {
 	schema: 'SCHEMA',
 	column: 'COLUMN',
 	table: 'TABLE',
+	index: 'INDEX',
 };
 
 /** @enum {string} */
@@ -85,6 +86,36 @@ const getTableCommentStatement = ({ tableName, description }) => {
 };
 
 /**
+ * Build an index comment statement.
+ *
+ * @param {{ indexName: string; description?: string }} params Index comment params.
+ * @returns {string} Comment statement.
+ */
+const getIndexCommentStatement = ({ indexName, description }) => {
+	return getCommentStatement({
+		objectName: indexName,
+		objectType: OBJECT_TYPE.index,
+		description,
+		mode: COMMENT_MODE.set,
+	});
+};
+
+/**
+ * Build a drop-style index comment (empty comment).
+ *
+ * @param {{ indexName: string }} params Index name.
+ * @returns {string} Comment statement.
+ */
+const dropIndexCommentStatement = ({ indexName }) => {
+	return getCommentStatement({
+		objectName: indexName,
+		objectType: OBJECT_TYPE.index,
+		description: '',
+		mode: COMMENT_MODE.remove,
+	});
+};
+
+/**
  * Build a schema comment statement.
  *
  * @param {{ schemaName: string; description?: string }} params Schema comment params.
@@ -121,9 +152,56 @@ const getColumnComments = ({ tableName, columnDefinitions }) => {
 		.join('\n');
 };
 
+/**
+ * Build the statement removing a schema comment.
+ *
+ * @param {{ schemaName: string }} params Schema name.
+ * @returns {string} Comment statement.
+ */
+const dropSchemaCommentStatement = ({ schemaName }) =>
+	getCommentStatement({
+		objectName: schemaName,
+		objectType: OBJECT_TYPE.schema,
+		description: '',
+		mode: COMMENT_MODE.remove,
+	});
+
+/**
+ * Build the statement removing a table comment.
+ *
+ * @param {{ tableName: string }} params Table name.
+ * @returns {string} Comment statement.
+ */
+const dropTableCommentStatement = ({ tableName }) =>
+	getCommentStatement({
+		objectName: tableName,
+		objectType: OBJECT_TYPE.table,
+		description: '',
+		mode: COMMENT_MODE.remove,
+	});
+
+/**
+ * Build the statement removing a column comment.
+ *
+ * @param {{ tableName: string; columnName: string }} params Table and column names.
+ * @returns {string} Comment statement.
+ */
+const dropTableColumnCommentStatement = ({ tableName, columnName }) =>
+	getCommentStatement({
+		objectName: tableName + '.' + wrapInQuotes(columnName),
+		objectType: OBJECT_TYPE.column,
+		description: '',
+		mode: COMMENT_MODE.remove,
+	});
+
 module.exports = {
 	getColumnCommentStatement,
 	getSchemaCommentStatement,
 	getTableCommentStatement,
+	getIndexCommentStatement,
+	dropIndexCommentStatement,
 	getColumnComments,
+	dropSchemaCommentStatement,
+	dropTableCommentStatement,
+	dropTableColumnCommentStatement,
 };

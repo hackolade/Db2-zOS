@@ -101,7 +101,7 @@ const getDividedForeignKeyConstraints = ({ foreignKeyConstraints }) => {
  * @param {TablePropsParams} params Table props input.
  * @returns {string} Table props DDL.
  */
-const getTableProps = ({ columns, foreignKeyConstraints, keyConstraints, isActivated }) => {
+const getTableProps = ({ columns, foreignKeyConstraints, keyConstraints, checkConstraints, isActivated }) => {
 	const dividedKeysConstraints = getDividedKeysConstraints({ keyConstraints, isActivated });
 	const dividedForeignKeyConstraints = getDividedForeignKeyConstraints({ foreignKeyConstraints });
 	const keyConstraintsString = generateConstraintsString({
@@ -112,6 +112,10 @@ const getTableProps = ({ columns, foreignKeyConstraints, keyConstraints, isActiv
 		dividedConstraints: dividedForeignKeyConstraints,
 		isParentActivated: isActivated,
 	});
+	const checkConstraintsString = generateConstraintsString({
+		dividedConstraints: { activatedItems: checkConstraints ?? [], deactivatedItems: [] },
+		isParentActivated: isActivated,
+	});
 	const columnsString = joinActivatedAndDeactivatedStatements({ statements: columns, indent: '\n\t' });
 
 	const tableProps = assignTemplates({
@@ -120,6 +124,7 @@ const getTableProps = ({ columns, foreignKeyConstraints, keyConstraints, isActiv
 			columns: columnsString,
 			foreignKeyConstraints: foreignKeyConstraintsString,
 			keyConstraints: keyConstraintsString,
+			checkConstraints: checkConstraintsString,
 		},
 	});
 

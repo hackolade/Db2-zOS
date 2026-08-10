@@ -17,7 +17,7 @@ module.exports = {
 
 	comment: '\nCOMMENT ON ${objectType} ${objectName} IS ${comment};\n',
 
-	createTableProps: '${columns}${keyConstraints}${foreignKeyConstraints}',
+	createTableProps: '${columns}${keyConstraints}${checkConstraints}${foreignKeyConstraints}',
 
 	columnDefinition: '${name}${type}${default}${constraints}',
 
@@ -29,11 +29,15 @@ module.exports = {
 	createForeignKeyConstraint:
 		'${name} FOREIGN KEY (${foreignKey}) REFERENCES ${primaryTable} (${primaryKey})${onDelete}',
 
+	checkConstraint: '${name}CHECK (${expression})${enforced}',
+
 	createKeyConstraint: '${constraintName}${keyType}${columns}${options}',
 
 	createView: 'CREATE VIEW ${name}${viewColumns}${viewProperties}${withCheckOption}\n\tAS ${selectStatement};',
 
 	viewSelectStatement: 'SELECT ${keys}\n\tFROM ${tableName}',
+
+	createIndex: 'CREATE${indexType} INDEX${indexName} ON ${indexTableName}${indexOptions};\n',
 
 	dropView: 'DROP VIEW ${viewName};',
 
@@ -49,6 +53,10 @@ module.exports = {
 
 	dropUkConstraint: 'ALTER TABLE ${tableName} DROP UNIQUE ${constraintName};',
 
+	alterCheckConstraint: 'ALTER TABLE ${tableName} ADD CONSTRAINT ${constraintName} CHECK (${expression})${enforced};',
+
+	dropCheckConstraint: 'ALTER TABLE ${tableName} DROP CHECK ${constraintName};',
+
 	updateColumnType: 'ALTER TABLE ${tableName} ALTER COLUMN ${columnName} SET DATA TYPE ${dataType};',
 
 	updateColumnDefaultValue: 'ALTER TABLE ${tableName} ALTER COLUMN ${columnName} SET DEFAULT ${defaultValue};',
@@ -58,4 +66,8 @@ module.exports = {
 	renameColumn: 'ALTER TABLE ${tableName} RENAME COLUMN ${oldColumnName} TO ${newColumnName};',
 
 	renameTable: 'RENAME TABLE ${oldTableName} TO ${newTableName};',
+
+	renameIndex: 'RENAME INDEX ${oldIndexName} TO ${newIndexName};',
+
+	dropIndex: 'DROP INDEX ${name};',
 };

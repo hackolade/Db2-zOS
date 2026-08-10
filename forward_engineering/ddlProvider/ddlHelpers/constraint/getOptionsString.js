@@ -8,21 +8,17 @@
 const { wrapInQuotes } = require('../../../utils/general');
 
 /**
- * Build constraint option fragments.
+ * Build constraint option fragments for Db2 for z/OS. Only constraint names are modeled; LUW-only clauses are ignored.
  *
  * @param {KeyOptions} params Constraint options.
  * @returns {ConstraintOptionsResult} Constraint fragments.
  */
-const getOptionsString = ({ constraintName, deferClause, rely, validate, indexClause, exceptionClause }) => {
+const getOptionsString = ({ constraintName }) => {
 	const constraintString = constraintName ? ` CONSTRAINT ${wrapInQuotes(constraintName.trim())}` : '';
-	const statement = [deferClause, rely, indexClause, validate, exceptionClause]
-		.filter(Boolean)
-		.map(option => ` ${option}`)
-		.join('');
 
 	return {
 		constraintString,
-		statement,
+		statement: '',
 	};
 };
 

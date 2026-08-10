@@ -43,7 +43,7 @@ export type ColumnDefinitionInput = {
 	name: string;
 	type?: string;
 	nullable?: boolean;
-	default?: string | number;
+	default?: DefaultValue;
 	isActivated?: boolean;
 	scale?: number;
 	precision?: number;
@@ -51,12 +51,8 @@ export type ColumnDefinitionInput = {
 };
 
 export type KeyOptions = {
+	id?: string;
 	constraintName?: string;
-	deferClause?: string;
-	rely?: string;
-	validate?: string;
-	indexClause?: string;
-	exceptionClause?: string;
 };
 
 export type JsonSchemaColumn = {
@@ -121,7 +117,7 @@ export type HydratedColumn = {
 	unique: boolean;
 	uniqueKeyOptions?: KeyOptions;
 	nullable?: boolean;
-	default?: string | number;
+	default?: DefaultValue;
 	comment?: string;
 	isActivated?: boolean;
 	scale?: number;
@@ -259,11 +255,18 @@ export type KeyConstraint = {
 	keyType: string;
 	constraintName?: string;
 	columns: KeyConstraintColumn[];
-	deferClause?: string;
-	rely?: string;
-	validate?: string;
-	indexClause?: string;
-	exceptionClause?: string;
+};
+
+export type AlterKeyConfig = {
+	keyType: string;
+	name: string;
+	columns: KeyConstraintColumn[];
+	options?: KeyOptions;
+};
+
+export type AlterKeyStatement = {
+	statement: string;
+	isActivated: boolean;
 };
 
 export type ForeignKeyStatement = {
@@ -289,9 +292,10 @@ export type ForeignKeyInput = {
 
 export type HydratedTable = {
 	name: string;
-	schemaData?: SchemaData;
+	schemaData: SchemaData;
 	relatedSchemas?: Record<string, JsonSchema>;
 	keyConstraints?: KeyConstraint[];
+	checkConstraints?: string[];
 	description?: string;
 	tableProperties?: string;
 	auxiliary?: boolean;
@@ -317,6 +321,7 @@ export type CreateTableParams = {
 	columns?: string[];
 	foreignKeyConstraints?: ForeignKeyStatement[];
 	keyConstraints?: KeyConstraint[];
+	checkConstraints?: string[];
 	name: string;
 	schemaData: SchemaData;
 	description?: string;
@@ -362,6 +367,7 @@ export type CheckConstraintInput = {
 	constrExpression?: string;
 	constrComments?: string;
 	constrDescription?: string;
+	constrEnforced?: string;
 };
 
 export type HydratedCheckConstraint = {
@@ -369,11 +375,43 @@ export type HydratedCheckConstraint = {
 	expression?: string;
 	comments?: string;
 	description?: string;
+	enforced?: string;
+};
+
+export type IndexKeyRef = {
+	name?: string;
+	type?: string;
+	isActivated?: boolean;
 };
 
 export type IndexData = {
 	indxName?: string;
-	indxKey?: unknown[];
+	indxType?: string;
+	indxKey?: IndexKeyRef[];
+	indxIncludeKey?: IndexKeyRef[];
+	indxCompress?: string;
+	indxNullKeys?: string;
+	indxCluster?: string;
+	indxPartitioned?: boolean;
+	indxPadded?: string;
+	indxUsingType?: string;
+	indxStogroup?: string;
+	indxVcat?: string;
+	indxPriQty?: number;
+	indxSecQty?: number;
+	indxErase?: string;
+	indxFreepage?: number;
+	indxPctfree?: number;
+	indxDefine?: string;
+	indxBufferPool?: string;
+	indxClose?: string;
+	indxDefer?: string;
+	indxCopy?: string;
+	indxPiecesize?: number;
+	indxPiecesizeUnit?: string;
+	indxProperties?: string;
+	indxDescription?: string;
+	indxComments?: string;
 	isActivated?: boolean;
 	schemaName?: string;
 	isParentActivated?: boolean;
@@ -402,12 +440,12 @@ export type ActivatedKey = {
 	type?: string;
 };
 
-export type DefaultValue = string | number;
+export type DefaultValue = string | number | boolean;
 
 export type CompMod = {
-	collectionName?: { new?: string };
+	collectionName?: PropertyPair<string>;
 	keyspaceName?: string;
-	isActivated?: { new?: boolean };
+	isActivated?: PropertyPair<boolean>;
 	bucketProperties?: { isActivated?: boolean };
 };
 
@@ -489,6 +527,7 @@ export type TablePropsParams = {
 	columns: string[];
 	foreignKeyConstraints: ForeignKeyStatement[];
 	keyConstraints: KeyConstraint[];
+	checkConstraints?: string[];
 	isActivated: boolean;
 };
 
@@ -656,7 +695,7 @@ export type DdlProvider = {
 	dropView(params: { viewName: string }): string;
 
 	hydrateCheckConstraint(checkConstraint: CheckConstraintInput): HydratedCheckConstraint;
-	createCheckConstraint(params?: { name?: string; expression?: string }): string;
+	createCheckConstraint(params?: HydratedCheckConstraint): string;
 
 	hydrateIndex(indexData: IndexData, tableData?: unknown, schemaData?: SchemaData): IndexData;
 	createIndex(tableName?: string, index?: IndexData): string;
@@ -674,5 +713,5 @@ export type DdlProvider = {
 export type DdlProviderFactory = (
 	baseProvider: BaseProvider | null,
 	options: DdlProviderOptions | null,
-	app: App,
+	app: App | null,
 ) => DdlProvider;

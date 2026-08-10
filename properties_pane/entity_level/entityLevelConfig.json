@@ -704,7 +704,7 @@ making sure that you maintain a proper JSON format.
 					{
 						"propertyName": "Constraint name",
 						"propertyKeyword": "constraintName",
-						"propertyTooltip": "",
+						"propertyTooltip": "Optional CONSTRAINT name for the PRIMARY KEY. On Db2 for z/OS a unique index is required for PRIMARY KEY (implicitly created in some cases; otherwise create one under Indexes).",
 						"propertyType": "text",
 						"validation": {
 							"indexKey": "compositePrimaryKey",
@@ -721,7 +721,7 @@ making sure that you maintain a proper JSON format.
 					{
 						"propertyName": "Comment",
 						"propertyKeyword": "indexComment",
-						"propertyTooltip": "comment",
+						"propertyTooltip": "Optional comment for the primary key constraint.",
 						"addTimestampButton": false,
 						"propertyType": "details",
 						"template": "codeEditor",
@@ -775,12 +775,12 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Unique key",
 				"propertyType": "group",
 				"propertyKeyword": "uniqueKey",
-				"propertyTooltip": "",
+				"propertyTooltip": "Table-level UNIQUE constraint. On Db2 for z/OS a unique index is required (implicitly created in some cases; otherwise create one under Indexes).",
 				"structure": [
 					{
 						"propertyName": "Constraint name",
 						"propertyKeyword": "constraintName",
-						"propertyTooltip": "",
+						"propertyTooltip": "Optional CONSTRAINT name for the UNIQUE key.",
 						"propertyType": "text",
 						"validation": {
 							"indexKey": "compositeUniqueKey",
@@ -801,7 +801,7 @@ making sure that you maintain a proper JSON format.
 					{
 						"propertyName": "Comment",
 						"propertyKeyword": "indexComment",
-						"propertyTooltip": "comment",
+						"propertyTooltip": "Optional comment for the unique key constraint.",
 						"addTimestampButton": false,
 						"propertyType": "details",
 						"template": "codeEditor",
@@ -812,7 +812,7 @@ making sure that you maintain a proper JSON format.
 					{
 						"propertyName": "Alternate key",
 						"propertyKeyword": "alternateKey",
-						"propertyTooltip": "",
+						"propertyTooltip": "Marks the unique key as an alternate key for ERD display.",
 						"propertyType": "checkbox",
 						"setFieldPropertyBy": "compositeUniqueKey"
 					}
@@ -827,12 +827,12 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Index",
 				"propertyType": "group",
 				"propertyKeyword": "Indxs",
-				"propertyTooltip": "",
+				"propertyTooltip": "Db2 for z/OS CREATE INDEX definition.",
 				"structure": [
 					{
 						"propertyName": "Name",
 						"propertyKeyword": "indxName",
-						"propertyTooltip": "",
+						"propertyTooltip": "Index name (optionally schema-qualified in FE as schema.index-name).",
 						"propertyType": "text",
 						"validation": {
 							"required": true
@@ -841,19 +841,31 @@ making sure that you maintain a proper JSON format.
 					{
 						"propertyName": "Activated",
 						"propertyKeyword": "isActivated",
-						"propertyTooltip": "Deactivated item will be not included in FE script",
+						"propertyTooltip": "Deactivated indexes are excluded from forward-engineering scripts.",
 						"propertyType": "checkbox",
 						"defaultValue": true
 					},
 					{
 						"propertyName": "Type",
 						"propertyKeyword": "indxType",
+						"propertyTooltip": "Blank for a non-unique index, UNIQUE, or UNIQUE WHERE NOT NULL.",
 						"propertyType": "select",
-						"options": ["", "unique"]
+						"options": [
+							"",
+							{
+								"name": "UNIQUE",
+								"value": "unique"
+							},
+							{
+								"name": "UNIQUE WHERE NOT NULL",
+								"value": "uniqueWhereNotNull"
+							}
+						]
 					},
 					{
 						"propertyName": "Keys",
 						"propertyKeyword": "indxKey",
+						"propertyTooltip": "Index key columns with ASC, DESC, or RANDOM ordering.",
 						"propertyType": "fieldList",
 						"template": "orderedList",
 						"attributeList": ["asc", "desc", "random"],
@@ -866,38 +878,245 @@ making sure that you maintain a proper JSON format.
 						"propertyName": "Include keys",
 						"propertyKeyword": "indxIncludeKey",
 						"propertyType": "fieldList",
-						"propertyTooltip": "Introduces a clause that specifies additional columns to be appended to the set of index key columns. Any columns included with this clause are not used to enforce uniqueness.",
+						"propertyTooltip": "INCLUDE (column-name) for unique indexes. Included columns are not used to enforce uniqueness. Not valid with EXCLUDE NULL KEYS.",
 						"template": "orderedList",
 						"attributeList": [],
 						"dependency": {
-							"key": "indxType",
-							"value": "unique"
+							"type": "and",
+							"values": [
+								{
+									"type": "or",
+									"values": [
+										{
+											"key": "indxType",
+											"value": "unique"
+										},
+										{
+											"key": "indxType",
+											"value": "uniqueWhereNotNull"
+										}
+									]
+								},
+								{
+									"type": "not",
+									"values": {
+										"key": "indxNullKeys",
+										"value": "exclude"
+									}
+								}
+							]
 						}
+					},
+					{
+						"propertyName": "Cluster",
+						"propertyKeyword": "indxCluster",
+						"propertyTooltip": "CLUSTER or NOT CLUSTER. Specifies whether the index is the clustering index for the table.",
+						"propertyType": "select",
+						"options": ["", "CLUSTER", "NOT CLUSTER"]
+					},
+					{
+						"propertyName": "Partitioned",
+						"propertyKeyword": "indxPartitioned",
+						"propertyTooltip": "PARTITIONED. Data-partitioned secondary index on a partition-by-range table space.",
+						"propertyType": "checkbox"
+					},
+					{
+						"propertyName": "Padded",
+						"propertyKeyword": "indxPadded",
+						"propertyTooltip": "PADDED or NOT PADDED for varying-length string columns in the index key.",
+						"propertyType": "select",
+						"options": ["", "PADDED", "NOT PADDED"]
+					},
+					{
+						"propertyName": "Using",
+						"propertyKeyword": "indxUsingType",
+						"propertyTooltip": "USING STOGROUP or USING VCAT for index data set definition.",
+						"propertyType": "select",
+						"options": [
+							"",
+							{
+								"name": "STOGROUP",
+								"value": "STOGROUP"
+							},
+							{
+								"name": "VCAT",
+								"value": "VCAT"
+							}
+						]
+					},
+					{
+						"propertyName": "Storage group",
+						"propertyKeyword": "indxStogroup",
+						"propertyTooltip": "STOGROUP stogroup-name.",
+						"propertyType": "text",
+						"dependency": {
+							"key": "indxUsingType",
+							"value": "STOGROUP"
+						}
+					},
+					{
+						"propertyName": "PRIQTY",
+						"propertyKeyword": "indxPriQty",
+						"propertyTooltip": "Primary space allocation quantity in kilobytes for USING STOGROUP.",
+						"propertyType": "numeric",
+						"valueType": "integer",
+						"allowNegative": true,
+						"dependency": {
+							"key": "indxUsingType",
+							"value": "STOGROUP"
+						}
+					},
+					{
+						"propertyName": "SECQTY",
+						"propertyKeyword": "indxSecQty",
+						"propertyTooltip": "Secondary space allocation quantity in kilobytes for USING STOGROUP.",
+						"propertyType": "numeric",
+						"valueType": "integer",
+						"allowNegative": true,
+						"dependency": {
+							"key": "indxUsingType",
+							"value": "STOGROUP"
+						}
+					},
+					{
+						"propertyName": "ERASE",
+						"propertyKeyword": "indxErase",
+						"propertyTooltip": "ERASE YES or NO for USING STOGROUP.",
+						"propertyType": "select",
+						"options": ["", "YES", "NO"],
+						"dependency": {
+							"key": "indxUsingType",
+							"value": "STOGROUP"
+						}
+					},
+					{
+						"propertyName": "VCAT name",
+						"propertyKeyword": "indxVcat",
+						"propertyTooltip": "USING VCAT catalog-name.",
+						"propertyType": "text",
+						"dependency": {
+							"key": "indxUsingType",
+							"value": "VCAT"
+						}
+					},
+					{
+						"propertyName": "FREEPAGE",
+						"propertyKeyword": "indxFreepage",
+						"propertyTooltip": "FREEPAGE integer. How often to leave a free page when the index is created.",
+						"propertyType": "numeric",
+						"valueType": "integer",
+						"allowNegative": false,
+						"minValue": 0
+					},
+					{
+						"propertyName": "PCTFREE",
+						"propertyKeyword": "indxPctfree",
+						"propertyTooltip": "PCTFREE integer. Percentage of each index page to leave free.",
+						"propertyType": "numeric",
+						"valueType": "integer",
+						"allowNegative": false,
+						"minValue": 0,
+						"maxValue": 99
+					},
+					{
+						"propertyName": "DEFINE",
+						"propertyKeyword": "indxDefine",
+						"propertyTooltip": "DEFINE YES or NO. DEFINE NO applies only when USING STOGROUP is specified.",
+						"propertyType": "select",
+						"options": ["", "YES", "NO"]
 					},
 					{
 						"propertyName": "Compress",
 						"propertyKeyword": "indxCompress",
 						"propertyType": "select",
-						"propertyTooltip": "Specifies whether index compression is enabled.",
-						"options": ["", "yes", "no"]
+						"propertyTooltip": "COMPRESS YES or NO. COMPRESS YES requires an 8 KB, 16 KB, or 32 KB buffer pool.",
+						"options": ["", "YES", "NO"]
 					},
 					{
 						"propertyName": "Null keys",
 						"propertyKeyword": "indxNullKeys",
 						"propertyType": "select",
-						"propertyTooltip": "'Include' specifies that an index entry is created when all parts of the index key contain the null value.",
-						"options": ["", "include", "exclude"]
+						"propertyTooltip": "INCLUDE NULL KEYS (default) or EXCLUDE NULL KEYS. EXCLUDE NULL KEYS cannot be specified with INCLUDE columns.",
+						"options": [
+							"",
+							{
+								"name": "INCLUDE NULL KEYS",
+								"value": "include"
+							},
+							{
+								"name": "EXCLUDE NULL KEYS",
+								"value": "exclude"
+							}
+						]
 					},
 					{
-						"propertyName": "Tablespace",
-						"propertyKeyword": "indxTablespace",
-						"propertyTooltip": "Specify the tablespace in which Db2 Database creates the table. If you omit TABLESPACE, then the database creates that item in the default tablespace of the owner of the schema containing the table.",
+						"propertyName": "BUFFERPOOL",
+						"propertyKeyword": "indxBufferPool",
+						"propertyTooltip": "BUFFERPOOL bpname. Must identify an activated 4 KB, 8 KB, 16 KB, or 32 KB buffer pool.",
 						"propertyType": "text"
+					},
+					{
+						"propertyName": "CLOSE",
+						"propertyKeyword": "indxClose",
+						"propertyTooltip": "CLOSE YES or NO. Controls whether the data sets can be closed when the index is not in use.",
+						"propertyType": "select",
+						"options": ["", "YES", "NO"]
+					},
+					{
+						"propertyName": "DEFER",
+						"propertyKeyword": "indxDefer",
+						"propertyTooltip": "DEFER YES or NO. DEFER YES builds the index later (index is in rebuild-pending status).",
+						"propertyType": "select",
+						"options": ["", "YES", "NO"]
+					},
+					{
+						"propertyName": "PIECESIZE",
+						"propertyKeyword": "indxPiecesize",
+						"propertyTooltip": "Maximum addressability of each data set for a non-partitioned index. Must be a power of two.",
+						"propertyType": "numeric",
+						"valueType": "integer",
+						"allowNegative": false,
+						"minValue": 1
+					},
+					{
+						"propertyName": "PIECESIZE unit",
+						"propertyKeyword": "indxPiecesizeUnit",
+						"propertyTooltip": "Unit for PIECESIZE: K, M, or G.",
+						"propertyType": "select",
+						"options": ["", "K", "M", "G"],
+						"dependency": {
+							"type": "and",
+							"values": [
+								{
+									"key": "indxPiecesize",
+									"exist": true
+								},
+								{
+									"key": "indxPiecesize",
+									"isEmpty": false
+								}
+							]
+						}
+					},
+					{
+						"propertyName": "COPY",
+						"propertyKeyword": "indxCopy",
+						"propertyTooltip": "COPY YES or NO. Controls whether the COPY utility is allowed for the index.",
+						"propertyType": "select",
+						"options": ["", "YES", "NO"]
+					},
+					{
+						"propertyName": "Index properties",
+						"propertyKeyword": "indxProperties",
+						"propertyTooltip": "Optional raw DDL fragments appended after structured index options (e.g. PARTITION BY RANGE, GBPCACHE, BUSINESS_TIME WITHOUT OVERLAPS).",
+						"propertyType": "details",
+						"template": "textarea",
+						"markdown": false
 					},
 					{
 						"propertyName": "Description",
 						"propertyKeyword": "indxDescription",
-						"propertyTooltip": "description",
+						"propertyTooltip": "Emitted as COMMENT ON INDEX.",
 						"propertyType": "details",
 						"template": "codeEditor",
 						"templateOptions": {
@@ -907,7 +1126,7 @@ making sure that you maintain a proper JSON format.
 					{
 						"propertyName": "Comments",
 						"propertyKeyword": "indxComments",
-						"propertyTooltip": "comments",
+						"propertyTooltip": "Internal modeling comments (not emitted as DDL).",
 						"addTimestampButton": false,
 						"propertyType": "details",
 						"template": "codeEditor",
@@ -926,18 +1145,18 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Check Constraint",
 				"propertyType": "group",
 				"propertyKeyword": "chkConstr",
-				"propertyTooltip": "",
+				"propertyTooltip": "Table check constraint: CONSTRAINT name CHECK (search-condition) [ENFORCED | NOT ENFORCED].",
 				"structure": [
 					{
 						"propertyName": "Name",
 						"propertyKeyword": "chkConstrName",
-						"propertyTooltip": "",
+						"propertyTooltip": "Optional CONSTRAINT name for the check constraint.",
 						"propertyType": "text"
 					},
 					{
 						"propertyName": "Expression",
 						"propertyKeyword": "constrExpression",
-						"propertyTooltip": "Expression",
+						"propertyTooltip": "Search condition for CHECK (...). Outer parentheses are optional.",
 						"propertyType": "details",
 						"template": "textarea",
 						"markdown": false,
@@ -946,16 +1165,33 @@ making sure that you maintain a proper JSON format.
 						}
 					},
 					{
+						"propertyName": "Enforced",
+						"propertyKeyword": "constrEnforced",
+						"propertyTooltip": "ENFORCED (default) validates data. NOT ENFORCED defines an informational constraint.",
+						"propertyType": "select",
+						"options": [
+							"",
+							{
+								"name": "ENFORCED",
+								"value": "ENFORCED"
+							},
+							{
+								"name": "NOT ENFORCED",
+								"value": "NOT ENFORCED"
+							}
+						]
+					},
+					{
 						"propertyName": "Description",
 						"propertyKeyword": "constrDescription",
-						"propertyTooltip": "description",
+						"propertyTooltip": "Description of the check constraint.",
 						"propertyType": "details",
 						"template": "textarea"
 					},
 					{
 						"propertyName": "Comments",
 						"propertyKeyword": "constrComments",
-						"propertyTooltip": "comments",
+						"propertyTooltip": "Internal modeling comments (not emitted as DDL).",
 						"addTimestampButton": false,
 						"propertyType": "details",
 						"template": "textarea"

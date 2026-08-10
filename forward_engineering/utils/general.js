@@ -245,8 +245,9 @@ const getFullCollectionName = ({ collectionSchema, preferAlterName = true }) => 
 /**
  * Get schema of an alter collection.
  *
- * @param {ModelObject} collection Collection.
- * @returns {ModelObject} Merged schema.
+ * @template {ModelObject} T
+ * @param {T} collection Collection.
+ * @returns {T} Merged schema.
  */
 const getSchemaOfAlterCollection = collection => {
 	return { ...collection, ...lodash.omit(collection?.role, 'properties') };
