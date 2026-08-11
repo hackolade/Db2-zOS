@@ -3,7 +3,7 @@ const path = require('path');
 
 const DEFAULT_RELEASE_FOLDER_PATH = path.resolve(__dirname, 'release');
 
-const EXCLUDED_EXTENSIONS = ['.js', '.g4', '.interp', '.tokens'];
+const EXCLUDED_EXTENSIONS = ['.js', '.g4', '.interp', '.tokens', '.d.ts'];
 const EXCLUDED_FILES = [
 	'.github',
 	'.DS_Store',
@@ -18,7 +18,6 @@ const EXCLUDED_FILES = [
 	'.sonarlint',
 	'.sonarcloud.properties',
 	'tsconfig.json',
-	'types',
 	'build',
 	'release',
 	'node_modules',
