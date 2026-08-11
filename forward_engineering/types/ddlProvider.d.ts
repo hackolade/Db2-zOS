@@ -202,6 +202,7 @@ export type PeriodConfig = {
 	startColumn?: FieldListRef;
 	endColumn?: FieldListRef;
 	endInclusive?: string;
+	historyTable?: string;
 };
 
 export type HydratedTemporalPeriod = {
@@ -235,11 +236,20 @@ export type EntityDetailsTab = {
 	partitioning?: PartitioningConfig | PartitioningConfig[];
 	periodForSystemTime?: PeriodConfig | PeriodConfig[];
 	periodForBusinessTime?: PeriodConfig | PeriodConfig[];
-	auxiliary?: boolean;
 	auxiliaryBaseTable?: string;
 	auxiliaryBaseColumn?: FieldListRef;
 	auxiliaryAppend?: string;
 	auxiliaryPart?: number;
+	tableKind?: string;
+	likeTable?: string;
+	gttCcsid?: string;
+	mqtQuery?: string;
+	mqtDataOption?: string;
+	mqtRefresh?: string;
+	mqtMaintainedBy?: string;
+	mqtQueryOptimization?: string;
+	archiveEnabled?: boolean;
+	archiveTable?: string;
 	selectStatement?: string;
 	withCheckOption?: boolean;
 	checkTestingScope?: string;
@@ -304,6 +314,14 @@ export type HydratedTable = {
 	auxiliaryPart?: number;
 	auxiliaryBaseTable?: string;
 	auxiliaryBaseColumn?: string;
+	tableKind?: string;
+	likeTable?: string;
+	gttCcsid?: string;
+	mqtQuery?: string;
+	mqtDataOption?: string;
+	mqtRefresh?: string;
+	mqtMaintainedBy?: string;
+	mqtQueryOptimization?: string;
 	inClauseType?: string;
 	databaseName?: string;
 	table_tablespace_name?: string;
@@ -332,6 +350,14 @@ export type CreateTableParams = {
 	auxiliaryPart?: number;
 	auxiliaryBaseTable?: string;
 	auxiliaryBaseColumn?: string;
+	tableKind?: string;
+	likeTable?: string;
+	gttCcsid?: string;
+	mqtQuery?: string;
+	mqtDataOption?: string;
+	mqtRefresh?: string;
+	mqtMaintainedBy?: string;
+	mqtQueryOptimization?: string;
 	inClauseType?: string;
 	databaseName?: string;
 	table_tablespace_name?: string;
@@ -498,6 +524,11 @@ export type HydrateTemporalPeriodParams = {
 };
 
 export type HydrateAuxiliaryTableParams = {
+	tableData: HydratedTable;
+	detailsTab: EntityDetailsTab;
+};
+
+export type HydrateGlobalTemporaryTableParams = {
 	tableData: HydratedTable;
 	detailsTab: EntityDetailsTab;
 };

@@ -3,6 +3,7 @@
  *   AlterRelationship,
  *   AlterScriptData,
  *   AlterScriptDto,
+ *   AlterTable,
  *   DeltaBucket,
  *   DeltaModel,
  *   DeltaSection
@@ -18,6 +19,8 @@ const {
 	getModifyForeignKeyScriptDtos,
 } = require('./alterScriptHelpers/alterForeignKeyHelper');
 const { getViewsScripts } = require('./alterScriptHelpers/alterViewHelper');
+const { getAddVersioningScriptDto, getEnableArchiveScriptDto } = require('./alterScriptHelpers/alterVersioningHelper');
+const { getSchemaOfAlterCollection, getSchemaNameFromCollection } = require('../utils/general');
 
 /**
  * Read the objects of one side of a delta section. The studio serializes a single object as-is and several objects as
@@ -72,13 +75,42 @@ const getAlterContainersScriptDtos = ({ collection, app }) => {
 };
 
 /**
+ * Build a GUID-to-schema lookup table of every entity in the current model/container batch, so a single entity's script
+ * builder can resolve cross-entity references (e.g. auxiliary base table, LIKE table, history table) that are plain
+ * GUID-valued fields rather than Studio-resolved ERD relationships.
+ *
+ * @param {{ added: AlterTable[]; deleted: AlterTable[]; modified: AlterTable[] }} params Entities of the delta section.
+ * @returns {Record<string, AlterTable>} Entities keyed by GUID.
+ */
+const buildRelatedSchemas = ({ added, deleted, modified }) => {
+	/** @type {Record<string, AlterTable>} */
+	const relatedSchemas = {};
+
+	[...added, ...deleted, ...modified].forEach(item => {
+		const schema = getSchemaOfAlterCollection(item);
+		if (schema.id) {
+			// Merging role onto the delta item (above) overwrites its own compMod, losing keyspaceName, so the schema
+			// name is resolved from the unmerged item and reattached as bucketName for cross-entity consumers.
+			relatedSchemas[schema.id] = { ...schema, bucketName: getSchemaNameFromCollection({ collection: item }) };
+		}
+	});
+
+	return relatedSchemas;
+};
+
+/**
  * Build the table and column statements.
  *
- * @param {{ collection: DeltaModel; app: App; inlineDeltaRelationships: AlterRelationship[] }} params Delta model, app
- *   instance and relationships rendered inline in table definitions.
+ * @param {{
+ * 	collection: DeltaModel;
+ * 	app: App;
+ * 	inlineDeltaRelationships: AlterRelationship[];
+ * 	relatedSchemas: Record<string, AlterTable>;
+ * }} params
+ *   Delta model, app instance, relationships rendered inline in table definitions and sibling entities keyed by GUID.
  * @returns {AlterScriptDto[]} Alter script DTOs.
  */
-const getAlterCollectionScriptDtos = ({ collection, app, inlineDeltaRelationships }) => {
+const getAlterCollectionScriptDtos = ({ collection, app, inlineDeltaRelationships, relatedSchemas }) => {
 	const { added, deleted, modified } = getSectionItems(collection.properties?.entities);
 	const {
 		getAddCollectionScriptDto,
@@ -88,7 +120,7 @@ const getAlterCollectionScriptDtos = ({ collection, app, inlineDeltaRelationship
 		getModifyColumnScriptDtos,
 		getAddColumnScriptDtos,
 		getDeleteColumnScriptDtos,
-	} = getEntitiesScripts(app, inlineDeltaRelationships);
+	} = getEntitiesScripts(app, inlineDeltaRelationships, relatedSchemas);
 
 	return [
 		...deleted
@@ -106,6 +138,27 @@ const getAlterCollectionScriptDtos = ({ collection, app, inlineDeltaRelationship
 		...modified.flatMap(item => getModifyColumnScriptDtos(item)),
 		...modified.flatMap(item => getModifyCollectionKeysScriptDtos(item)),
 	];
+};
+
+/**
+ * Build the ALTER TABLE ... ADD VERSIONING and ALTER TABLE ... ENABLE ARCHIVE statements linking a table to its history
+ * table or archive table, for every added or modified entity. Runs after all entities in the batch are created, so the
+ * referenced tables already exist by the time it runs.
+ *
+ * @param {{ collection: DeltaModel; relatedSchemas: Record<string, AlterTable> }} params Delta model and sibling
+ *   entities keyed by GUID.
+ * @returns {AlterScriptDto[]} Alter script DTOs.
+ */
+const getAlterVersioningScriptDtos = ({ collection, relatedSchemas }) => {
+	const { added, modified } = getSectionItems(collection.properties?.entities);
+	const entities = [...added, ...modified];
+	const addVersioningScriptDto = getAddVersioningScriptDto(relatedSchemas);
+	const enableArchiveScriptDto = getEnableArchiveScriptDto(relatedSchemas);
+
+	return [
+		...entities.map(item => addVersioningScriptDto(item)),
+		...entities.map(item => enableArchiveScriptDto(item)),
+	].filter(dto => dto !== undefined);
 };
 
 /**
@@ -233,6 +286,7 @@ const getAlterScriptDtos = (data, app) => {
 	const ignoreRelationshipIDs = inlineDeltaRelationships
 		.map(relationship => relationship.role?.id)
 		.filter(id => id !== undefined);
+	const relatedSchemas = buildRelatedSchemas(getSectionItems(collection.properties?.entities));
 
 	const { deletedContainersScriptDtos, upsertedContainersScriptDtos } = getAlterContainersScriptDtos({
 		collection,
@@ -241,7 +295,8 @@ const getAlterScriptDtos = (data, app) => {
 
 	return [
 		...upsertedContainersScriptDtos,
-		...getAlterCollectionScriptDtos({ collection, app, inlineDeltaRelationships }),
+		...getAlterCollectionScriptDtos({ collection, app, inlineDeltaRelationships, relatedSchemas }),
+		...getAlterVersioningScriptDtos({ collection, relatedSchemas }),
 		...getAlterRelationshipsScriptDtos({ collection, ignoreRelationshipIDs }),
 		...getAlterViewScriptDtos({ collection, app }),
 		...deletedContainersScriptDtos,

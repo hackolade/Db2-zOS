@@ -119,6 +119,8 @@ export type AlterCollection = {
 	description?: string;
 	chkConstr?: CheckConstraintInput[];
 	Indxs?: AlterIndex[];
+	/** Schema name resolved for a `relatedSchemas` entry; not part of the studio's own delta payload. */
+	bucketName?: string;
 };
 
 export type AlterContainerRole = {
@@ -143,6 +145,8 @@ export type ViewDefinitionRef = {
 };
 
 export type AlterView = AlterCollection & EntityDetailsTab;
+
+export type AlterTable = AlterCollection & EntityDetailsTab;
 
 /**
  * `mapProperties` from `@hackolade/ddl-fe-utils`: iterates the properties of a view schema and collects the mapped
@@ -235,7 +239,7 @@ export type DeltaSection<T> = {
 export type DeltaModel = {
 	properties?: {
 		containers?: DeltaSection<AlterContainer>;
-		entities?: DeltaSection<AlterCollection>;
+		entities?: DeltaSection<AlterTable>;
 		views?: DeltaSection<AlterView>;
 		relationships?: DeltaSection<AlterRelationship>;
 	};

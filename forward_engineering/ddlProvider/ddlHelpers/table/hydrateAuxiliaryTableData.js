@@ -15,7 +15,9 @@ const { getName, getIdToNameHashTable } = require('../jsonSchema/jsonSchemaHelpe
  * @returns {Partial<HydratedTable>} Auxiliary table data.
  */
 const hydrateAuxiliaryTableData = ({ tableData, detailsTab }) => {
-	if (!detailsTab.auxiliary) {
+	const isAuxiliary = detailsTab.tableKind === 'auxiliary';
+
+	if (!isAuxiliary) {
 		return {};
 	}
 
@@ -35,7 +37,7 @@ const hydrateAuxiliaryTableData = ({ tableData, detailsTab }) => {
 	const auxiliaryBaseColumn = auxiliaryBaseColumnKey ? idToNameHashTable[auxiliaryBaseColumnKey] : undefined;
 
 	return {
-		auxiliary: detailsTab.auxiliary,
+		auxiliary: isAuxiliary,
 		auxiliaryAppend: detailsTab.auxiliaryAppend,
 		auxiliaryPart: detailsTab.auxiliaryPart,
 		auxiliaryBaseTable,

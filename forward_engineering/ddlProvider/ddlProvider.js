@@ -56,6 +56,7 @@ const { getTableOptions } = require('./ddlHelpers/table/getTableOptions.js');
 const { getViewData } = require('./ddlHelpers/view/getViewData.js');
 const { getTableType } = require('./ddlHelpers/table/getTableType.js');
 const { hydrateAuxiliaryTableData } = require('./ddlHelpers/table/hydrateAuxiliaryTableData.js');
+const { hydrateGlobalTemporaryTableData } = require('./ddlHelpers/table/hydrateGlobalTemporaryTableData.js');
 const { hydratePartitioning, hydrateTemporalPeriod } = require('./ddlHelpers/table/hydrateZosTableData.js');
 const { joinActivatedAndDeactivatedStatements } = require('../utils/joinActivatedAndDeactivatedStatements');
 const { getIndexName } = require('./ddlHelpers/index/getIndexName.js');
@@ -436,6 +437,7 @@ const createForeignKey = (constraint, _dbData, schemaData) => {
 const hydrateTable = ({ tableData, entityData, jsonSchema }) => {
 	const detailsTab = entityData[0] ?? {};
 	const auxiliaryTableData = hydrateAuxiliaryTableData({ tableData, detailsTab });
+	const globalTemporaryTableData = hydrateGlobalTemporaryTableData({ tableData, detailsTab });
 	const partitioning = hydratePartitioning({ jsonSchema, partitioning: detailsTab.partitioning });
 	const periodForSystemTime = hydrateTemporalPeriod({
 		jsonSchema,
@@ -449,6 +451,7 @@ const hydrateTable = ({ tableData, entityData, jsonSchema }) => {
 	return {
 		...tableData,
 		...auxiliaryTableData,
+		...globalTemporaryTableData,
 		keyConstraints: keyHelper.getTableKeyConstraints({ jsonSchema, entityName: tableData.name }),
 		description: detailsTab.description,
 		tableProperties: detailsTab.tableProperties,
@@ -460,6 +463,13 @@ const hydrateTable = ({ tableData, entityData, jsonSchema }) => {
 		partitioning: partitioning ?? undefined,
 		periodForSystemTime: periodForSystemTime ?? undefined,
 		periodForBusinessTime: periodForBusinessTime ?? undefined,
+		tableKind: detailsTab.tableKind,
+		gttCcsid: detailsTab.gttCcsid,
+		mqtQuery: detailsTab.mqtQuery,
+		mqtDataOption: detailsTab.mqtDataOption,
+		mqtRefresh: detailsTab.mqtRefresh,
+		mqtMaintainedBy: detailsTab.mqtMaintainedBy,
+		mqtQueryOptimization: detailsTab.mqtQueryOptimization,
 	};
 };
 
@@ -484,6 +494,14 @@ const createTable = (tableData, isActivated = true) => {
 		auxiliaryBaseColumn,
 		auxiliaryAppend,
 		auxiliaryPart,
+		tableKind,
+		likeTable,
+		gttCcsid,
+		mqtQuery,
+		mqtDataOption,
+		mqtRefresh,
+		mqtMaintainedBy,
+		mqtQueryOptimization,
 		inClauseType,
 		databaseName,
 		table_tablespace_name,
@@ -495,7 +513,7 @@ const createTable = (tableData, isActivated = true) => {
 		description,
 		tableProperties,
 	} = tableData;
-	const tableType = getTableType({ auxiliary });
+	const tableType = getTableType({ auxiliary, tableKind });
 	const tableName = getNamePrefixedWithSchemaName({ name, schemaName: schemaData.schemaName });
 	const comment = getTableCommentStatement({ tableName, description });
 
@@ -522,14 +540,49 @@ const createTable = (tableData, isActivated = true) => {
 		});
 	}
 
-	const tableProps = getTableProps({
-		columns: columns ?? [],
-		foreignKeyConstraints: foreignKeyConstraints ?? [],
-		keyConstraints: keyConstraints ?? [],
-		checkConstraints: checkConstraints ?? [],
-		isActivated,
-	});
+	if (tableKind === 'globalTemporary') {
+		const globalTemporaryTableProps = likeTable
+			? ` LIKE ${likeTable}`
+			: getTableProps({
+					columns: columns ?? [],
+					foreignKeyConstraints: [],
+					keyConstraints: [],
+					checkConstraints: [],
+					isActivated,
+				});
+		const createTableStatement = assignTemplates({
+			template: templates.createTable,
+			templateData: {
+				name: tableName,
+				tableProps: globalTemporaryTableProps,
+				tableType,
+				tableOptions: gttCcsid ? ` CCSID ${gttCcsid}` : '',
+			},
+		});
+		const commentStatement = comment ? '\n' + comment + '\n' : '\n';
+
+		return commentDeactivatedStatement(createTableStatement + commentStatement, {
+			isActivated,
+		});
+	}
+
+	const isMaterializedQuery = tableKind === 'materializedQuery';
+	const tableProps = isMaterializedQuery
+		? ''
+		: getTableProps({
+				columns: columns ?? [],
+				foreignKeyConstraints: foreignKeyConstraints ?? [],
+				keyConstraints: keyConstraints ?? [],
+				checkConstraints: checkConstraints ?? [],
+				isActivated,
+			});
 	const renderedTableOptions = getTableOptions({
+		tableKind,
+		mqtQuery,
+		mqtDataOption,
+		mqtRefresh,
+		mqtMaintainedBy,
+		mqtQueryOptimization,
 		inClauseType,
 		databaseName,
 		table_tablespace_name,

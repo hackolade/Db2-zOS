@@ -74,9 +74,11 @@ const getInlineForeignKeyConstraints = ({ collection, inlineDeltaRelationships, 
  *
  * @param {DdlProvider} ddlProvider DDL provider.
  * @param {AlterRelationship[]} inlineDeltaRelationships Relationships rendered inline in the table definition.
+ * @param {Record<string, AlterCollection>} [relatedSchemas] Sibling entities of the model/container batch, keyed by
+ *   entity GUID, used to resolve cross-entity references (e.g. auxiliary base table, LIKE table, history table).
  * @returns {(collection: AlterCollection) => AlterScriptDto | undefined} Add collection script builder.
  */
-const getAddCollectionScriptDto = (ddlProvider, inlineDeltaRelationships) => collection => {
+const getAddCollectionScriptDto = (ddlProvider, inlineDeltaRelationships, relatedSchemas) => collection => {
 	const collectionSchema = getSchemaOfAlterCollection(collection);
 	const schemaName = getSchemaNameFromCollection({ collection }) ?? '';
 	const schemaData = { schemaName };
@@ -108,6 +110,7 @@ const getAddCollectionScriptDto = (ddlProvider, inlineDeltaRelationships) => col
 			}),
 			schemaData,
 			columnDefinitions,
+			relatedSchemas,
 		},
 		entityData: [collectionSchema],
 		jsonSchema: collectionSchema,
@@ -230,6 +233,8 @@ const getModifyColumnScriptDtos = ddlProvider => collection => {
  *
  * @param {App} app App instance.
  * @param {AlterRelationship[]} inlineDeltaRelationships Relationships rendered inline in table definitions.
+ * @param {Record<string, AlterCollection>} [relatedSchemas] Sibling entities of the model/container batch, keyed by
+ *   entity GUID, used to resolve cross-entity references.
  * @returns {{
  * 	getAddCollectionScriptDto: (collection: AlterCollection) => AlterScriptDto | undefined;
  * 	getDeleteCollectionScriptDto: (collection: AlterCollection) => AlterScriptDto | undefined;
@@ -241,11 +246,11 @@ const getModifyColumnScriptDtos = ddlProvider => collection => {
  * }}
  *   Entity script builders.
  */
-const getEntitiesScripts = (app, inlineDeltaRelationships) => {
+const getEntitiesScripts = (app, inlineDeltaRelationships, relatedSchemas) => {
 	const ddlProvider = require('../../ddlProvider/ddlProvider')(null, null, app);
 
 	return {
-		getAddCollectionScriptDto: getAddCollectionScriptDto(ddlProvider, inlineDeltaRelationships),
+		getAddCollectionScriptDto: getAddCollectionScriptDto(ddlProvider, inlineDeltaRelationships, relatedSchemas),
 		getDeleteCollectionScriptDto: getDeleteCollectionScriptDto(ddlProvider),
 		getModifyCollectionScriptDtos,
 		getModifyCollectionKeysScriptDtos: getModifyCollectionKeysScriptDtos(ddlProvider),

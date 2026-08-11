@@ -300,6 +300,25 @@ const getTemporalPeriodsClause = ({ periodForSystemTime, periodForBusinessTime }
 };
 
 /**
+ * Build the AS (fullselect) clause and refresh/maintenance options of a materialized query table.
+ *
+ * @param {Partial<CreateTableParams>} tableData Table data.
+ * @returns {string} MQT clause.
+ */
+const getMqtClause = ({ mqtQuery, mqtDataOption, mqtRefresh, mqtMaintainedBy, mqtQueryOptimization }) => {
+	if (!mqtQuery) {
+		return '';
+	}
+
+	const refresh = mqtRefresh ? `REFRESH ${mqtRefresh}` : '';
+	const maintainedBy = mqtMaintainedBy ? `MAINTAINED BY ${mqtMaintainedBy}` : '';
+
+	return [`AS (${mqtQuery})`, mqtDataOption, refresh, maintainedBy, mqtQueryOptimization]
+		.filter(Boolean)
+		.join('\n\t');
+};
+
+/**
  * Build full table options clause.
  *
  * @param {Partial<CreateTableParams>} tableData Table data.
@@ -339,6 +358,7 @@ const getTableOptions = tableData => {
 		return getOptionsByConfigs({ configs, data: tableData });
 	}
 
+	const mqtClause = tableData.tableKind === 'materializedQuery' ? getMqtClause(tableData) : '';
 	const inClause = getInClause(tableData);
 	const structuredOptions = getStructuredTableOptions(tableData);
 	const partitioning = tableData.inClauseType === 'accelerator' ? '' : getPartitioningClause(tableData);
@@ -351,7 +371,7 @@ const getTableOptions = tableData => {
 				});
 	const tableProperties = tableData.tableProperties ?? '';
 
-	const statements = [inClause, structuredOptions.trim(), partitioning, temporal, tableProperties]
+	const statements = [mqtClause, inClause, structuredOptions.trim(), partitioning, temporal, tableProperties]
 		.filter(Boolean)
 		.join('\n\t');
 
@@ -363,4 +383,5 @@ module.exports = {
 	getInClause,
 	getPartitioningClause,
 	getTemporalPeriodsClause,
+	getMqtClause,
 };

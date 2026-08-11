@@ -15,6 +15,10 @@ module.exports = {
 
 	createAuxiliaryTable: 'CREATE${tableType} TABLE ${name}${tableOptions};',
 
+	addVersioning: 'ALTER TABLE ${tableName} ADD VERSIONING USE HISTORY TABLE ${historyTableName};',
+
+	enableArchive: 'ALTER TABLE ${tableName} ENABLE ARCHIVE USE ARCHIVE TABLE ${archiveTableName};',
+
 	comment: '\nCOMMENT ON ${objectType} ${objectName} IS ${comment};\n',
 
 	createTableProps: '${columns}${keyConstraints}${checkConstraints}${foreignKeyConstraints}',
