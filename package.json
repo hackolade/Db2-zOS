@@ -63,7 +63,7 @@
 	"description": "Hackolade plugin for IBM Db2 for z/OS",
 	"disabled": false,
 	"simple-git-hooks": {
-		"pre-commit": "lint-staged --config lint-staged.config.js",
+		"pre-commit": "npx lint-staged --config lint-staged.config.js",
 		"pre-push": "npm run check"
 	},
 	"scripts": {
