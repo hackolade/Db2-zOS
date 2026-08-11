@@ -10,29 +10,47 @@ const { createAlterScriptDto, createDropAndRecreateAlterScriptDto } = require('.
 const { getNamePrefixedWithSchemaName, wrapInQuotes } = require('../../utils/general');
 const templates = require('../../ddlProvider/templates');
 const { assignTemplates } = require('../../utils/assignTemplates');
+const { getDefaultConstraintName } = require('../../ddlProvider/ddlHelpers/key/getDefaultConstraintName');
+const { CONSTRAINT_POSTFIX } = require('../../../shared/constants/constants');
 
 /**
- * Resolve the current name of a relationship.
+ * Resolve the current name of a relationship, falling back to a generated name (matching the PK/UK pattern) when the
+ * relationship has none, so the FK statement is not silently dropped.
  *
  * @param {AlterRelationship} relationship Relationship delta.
  * @returns {string} Relationship name.
  */
 const getRelationshipName = relationship => {
 	const compMod = relationship.role.compMod;
+	const name = compMod?.code?.new ?? compMod?.name?.new ?? relationship.role.code ?? relationship.role.name ?? '';
 
-	return compMod?.code?.new ?? compMod?.name?.new ?? relationship.role.code ?? relationship.role.name ?? '';
+	return (
+		name ||
+		getDefaultConstraintName({
+			entityName: compMod?.child?.collection?.name,
+			postfix: CONSTRAINT_POSTFIX.foreignKey,
+		})
+	);
 };
 
 /**
- * Resolve the previous name of a relationship.
+ * Resolve the previous name of a relationship, falling back to a generated name (matching the PK/UK pattern) when the
+ * relationship has none, so the FK statement is not silently dropped.
  *
  * @param {AlterRelationship} relationship Relationship delta.
  * @returns {string} Relationship name.
  */
 const getOldRelationshipName = relationship => {
 	const compMod = relationship.role.compMod;
+	const name = compMod?.code?.old ?? compMod?.name?.old ?? relationship.role.code ?? relationship.role.name ?? '';
 
-	return compMod?.code?.old ?? compMod?.name?.old ?? relationship.role.code ?? relationship.role.name ?? '';
+	return (
+		name ||
+		getDefaultConstraintName({
+			entityName: compMod?.child?.collection?.name,
+			postfix: CONSTRAINT_POSTFIX.foreignKey,
+		})
+	);
 };
 
 /**

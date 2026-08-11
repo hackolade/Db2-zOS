@@ -193,10 +193,21 @@ making sure that you maintain a proper JSON format.
 				"options": ["", "NO ACTION", "RESTRICT", "CASCADE", "SET NULL"]
 			},
 			{
-				"propertyName": "On Update",
-				"propertyKeyword": "relationshipOnUpdate",
+				"propertyName": "Enforced",
+				"propertyKeyword": "relationshipEnforced",
+				"propertyTooltip": "ENFORCED (default) validates data on insert/update/delete. NOT ENFORCED defines an informational referential constraint.",
 				"propertyType": "select",
-				"options": ["", "NO ACTION", "RESTRICT"]
+				"options": [
+					"",
+					{
+						"name": "ENFORCED",
+						"value": "ENFORCED"
+					},
+					{
+						"name": "NOT ENFORCED",
+						"value": "NOT ENFORCED"
+					}
+				]
 			}
 		]
 	}

@@ -287,7 +287,7 @@ export type ForeignKeyInput = {
 	foreignTable?: string;
 	customProperties?: {
 		relationshipOnDelete?: string;
-		relationshipOnUpdate?: string;
+		relationshipEnforced?: string;
 	};
 };
 

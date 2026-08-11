@@ -257,18 +257,18 @@ const foreignActiveKeysToString = ({ keys }) => {
 };
 
 /**
- * Build ON DELETE / ON UPDATE clauses for foreign keys.
+ * Build ON DELETE / ENFORCED clauses for foreign keys.
  *
  * @param {ForeignKeyCustomPropertiesParams} params Custom properties.
  * @returns {string} Foreign key action clauses.
  */
 const customPropertiesForForeignKey = ({ customProperties }) => {
 	const properties = customProperties ?? {};
-	const { relationshipOnDelete, relationshipOnUpdate } = properties;
+	const { relationshipOnDelete, relationshipEnforced } = properties;
 	const relationshipOnDeleteClause = relationshipOnDelete ? ' ON DELETE ' + relationshipOnDelete : '';
-	const relationshipOnUpdateClause = relationshipOnUpdate ? ' ON UPDATE ' + relationshipOnUpdate : '';
+	const relationshipEnforcedClause = relationshipEnforced ? ' ' + relationshipEnforced : '';
 
-	return relationshipOnDeleteClause + relationshipOnUpdateClause;
+	return relationshipOnDeleteClause + relationshipEnforcedClause;
 };
 
 module.exports = {
