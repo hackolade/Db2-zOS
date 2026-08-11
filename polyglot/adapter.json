@@ -1,0 +1,89 @@
+/**
+ *
+ * {
+ * 		"add": {
+ * 			"entity": [<names of new property>],
+ * 			"container": [<names of new property>],
+ * 			"model": [<names of new property>],
+ * 			"view": [<names of new property>],
+ *			"field": {
+ *				"<type>": [<names of new property>]
+ *			}
+ * 		},
+ * 		"delete": {
+ * 			"entity": [<names of new property>],
+ * 			"container": [<names of new property>],
+ * 			"model": [<names of new property>],
+ * 			"view": [<names of new property>],
+ *			"field": {
+ *				"<type>": [<names of new property>]
+ *			}
+ * 		},
+ * 		"modify": {
+ *	 		"entity": [
+ *	 			{
+ *					"from": { <properties that identify record> },
+ *					"to": { <properties that need to be changed> }
+ *				}
+ *			],
+ *			"container": [],
+ *			"model": [],
+ *			"view": [],
+ *			"field": []
+ * 		},
+ * }
+ */
+{
+	"modify": {
+		"field": [
+			{
+				"from": {
+					"type": "varchar",
+					"hasMaxLength": true
+				},
+				"to": {
+					"length": 32704
+				}
+			},
+			{
+				"from": {
+					"type": "varchar",
+					"mode": "char",
+					"hasMaxLength": true
+				},
+				"to": {
+					"length": 255
+				}
+			},
+			{
+				"from": {
+					"type": "nvarchar",
+					"hasMaxLength": true
+				},
+				"to": {
+					"length": 32704
+				}
+			},
+			{
+				"from": {
+					"type": "nvarchar",
+					"mode": "nchar",
+					"hasMaxLength": true
+				},
+				"to": {
+					"length": 255
+				}
+			},
+			{
+				"from": {
+					"type": "binary",
+					"mode": "varbinary",
+					"hasMaxLength": true
+				},
+				"to": {
+					"length": 32704
+				}
+			}
+		]
+	}
+}

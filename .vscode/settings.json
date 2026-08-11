@@ -1,0 +1,11 @@
+{
+	"editor.formatOnSave": true,
+	"editor.formatOnSaveMode": "file",
+	"editor.defaultFormatter": "oxc.oxc-vscode",
+	"oxc.enable": true,
+	"oxc.typeAware": false,
+	"editor.codeActionsOnSave": {
+		"source.fixAll.oxlint": "always"
+	},
+	"cSpell.words": ["jridgewell", "oxfmt", "oxlint", "tsgolint"]
+}

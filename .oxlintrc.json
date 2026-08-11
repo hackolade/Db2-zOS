@@ -1,0 +1,62 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["eslint", "typescript", "unicorn", "oxc", "jsdoc"],
+	"jsPlugins": [
+		{
+			"name": "jsdoc-js",
+			"specifier": "eslint-plugin-jsdoc"
+		}
+	],
+	"categories": {
+		"correctness": "error",
+		"suspicious": "error",
+		"perf": "error",
+		"pedantic": "warn"
+	},
+	"rules": {
+		"eslint/no-inline-comments": "off",
+		"max-classes-per-file": "off",
+		"max-lines": "off",
+		"max-lines-per-function": "off",
+		"no-bitwise": "warn",
+		"require-await": "off",
+		"typescript/prefer-readonly-parameter-types": "off",
+		"typescript/strict-boolean-expressions": "off",
+		"typescript/no-unsafe-assignment": "error",
+		"unicorn/require-module-specifiers": "off",
+		"unicorn/prefer-top-level-await": "off",
+		"unicorn/prefer-module": "off",
+		"jsdoc-js/require-jsdoc": [
+			"error",
+			{
+				"require": {
+					"FunctionDeclaration": true,
+					"MethodDefinition": true,
+					"ClassDeclaration": true,
+					"ArrowFunctionExpression": true,
+					"FunctionExpression": true
+				}
+			}
+		],
+		"jsdoc-js/check-param-names": "error",
+		"jsdoc-js/check-types": "error",
+		"jsdoc-js/no-undefined-types": "error",
+		"jsdoc-js/require-returns-check": "error",
+		"jsdoc/require-param": "error",
+		"jsdoc/require-param-name": "error",
+		"jsdoc/require-param-type": "error",
+		"jsdoc/require-returns": "error",
+		"jsdoc/require-returns-type": "error"
+	},
+	"ignorePatterns": [
+		"**/*.config.*",
+		"**/*.d.ts",
+		".git",
+		".idea",
+		".vscode",
+		"build",
+		"node_modules",
+		"out/**/*",
+		"release"
+	]
+}

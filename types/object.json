@@ -1,0 +1,15 @@
+{
+	"name": "object",
+	"parentType": "document",
+	"structureType": true,
+	"hiddenOnEntity": "view",
+	"defaultValues": {
+		"subtype": "object",
+		"properties": []
+	},
+	"subtypes": {
+		"object": {
+			"childValueType": ["char", "binary", "datetime", "number", "rowid", "xml", "object"]
+		}
+	}
+}
