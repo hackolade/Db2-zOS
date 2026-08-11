@@ -8,6 +8,15 @@
 const lodash = require('lodash');
 
 /**
+ * Check whether an option carries a value worth rendering. Zero is a meaningful setting for Db2 options such as
+ * `PCTFREE 0` and `FREEPAGE 0`, so it cannot be filtered out along with the empty and disabled ones.
+ *
+ * @param {unknown} value Option value.
+ * @returns {boolean} Whether the option has to be rendered.
+ */
+const hasOptionValue = value => value !== undefined && value !== null && value !== '' && value !== false;
+
+/**
  * Build a basic prefixed/postfixed value formatter.
  *
  * @template T
@@ -35,7 +44,7 @@ const getBasicValue = ({ prefix = '', postfix = '', modifier }) => {
 	 * @returns {string} Formatted value.
 	 */
 	return value =>
-		value
+		hasOptionValue(value)
 			? [prefix, String(resolveModifier(value)), postfix]
 					.filter(Boolean)
 					.map(part => lodash.trim(part))
@@ -49,7 +58,7 @@ const getBasicValue = ({ prefix = '', postfix = '', modifier }) => {
  */
 const getOptionsByConfigs = ({ configs, data }) => {
 	const statements = configs
-		.filter(({ key }) => lodash.get(data, key))
+		.filter(({ key }) => hasOptionValue(lodash.get(data, key)))
 		.map(({ key, getValue }) => getValue(lodash.get(data, key), data))
 		.filter(Boolean)
 		.join('\n\t');

@@ -7,7 +7,7 @@
 
 const lodash = require('lodash');
 const { getBasicValue, getOptionsByConfigs } = require('../options/getOptionsByConfigs');
-const { wrapInQuotes } = require('../../../utils/general');
+const { wrapInQuotes, columnMapToStringWithOrder } = require('../../../utils/general');
 
 /**
  * Convert a value to upper case.
@@ -26,7 +26,8 @@ const toUpperCase = value => lodash.toUpper(value);
 const getUpperCaseValue = prefix => getBasicValue({ prefix, modifier: toUpperCase });
 
 /**
- * Build index key list clause.
+ * Build index key list clause. The model stores the order as `ascending`/`descending`, which Db2 for z/OS spells
+ * `ASC`/`DESC`.
  *
  * @param {IndexKeyRef[]} [keys] Index keys.
  * @returns {string} Keys clause.
@@ -36,15 +37,14 @@ const getIndexKeys = (keys = []) => {
 		return '';
 	}
 
-	const keysClause = keys
-		.map(({ name, type }) => wrapInQuotes(name ?? '') + getUpperCaseValue(' ')(type ?? ''))
-		.join(', ');
+	const keysClause = keys.map(({ name, type }) => columnMapToStringWithOrder({ name: name ?? '', type })).join(', ');
 
 	return `(${keysClause})`;
 };
 
 /**
- * Build INCLUDE column list for unique indexes.
+ * Build INCLUDE column list for unique indexes. An INCLUDE column list carries names only - the columns are not part of
+ * the index key, so they take no ordering.
  *
  * @param {IndexKeyRef[] | undefined} keys Include keys.
  * @param {IndexData} index Index data.
@@ -52,11 +52,11 @@ const getIndexKeys = (keys = []) => {
  */
 const getIncludeIndexKeys = (keys, index) => {
 	const isUnique = index.indxType === 'unique' || index.indxType === 'uniqueWhereNotNull';
-	if (!isUnique || index.indxNullKeys === 'exclude') {
+	if (!isUnique || index.indxNullKeys === 'exclude' || !keys?.length) {
 		return '';
 	}
 
-	const includeIndexKeys = getIndexKeys(keys);
+	const includeIndexKeys = `(${keys.map(({ name }) => wrapInQuotes(name ?? '')).join(', ')})`;
 
 	return getBasicValue({ prefix: 'INCLUDE' })(includeIndexKeys);
 };

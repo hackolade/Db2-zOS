@@ -246,26 +246,26 @@ const getPartitioningClause = ({ partitioning }) => {
 	}
 
 	if (partitioning.partitionBy === 'RANGE') {
+		// NULLS LAST belongs to each partition-expression, not to the key list as a whole.
+		const nullsLast = partitioning.nullsLast ? ' NULLS LAST' : '';
 		const keyColumns = (partitioning.partitionKey ?? [])
-			.map(key => columnMapToStringWithOrder(key))
-			.filter(Boolean)
+			.map(key => columnMapToStringWithOrder(key) + nullsLast)
 			.join(', ');
 
 		if (!keyColumns) {
 			return '';
 		}
 
-		const nullsLast = partitioning.nullsLast ? ' NULLS LAST' : '';
 		const partitions = (partitioning.partitions ?? [])
 			.filter(partition => lodash.isNumber(partition.partitionNumber) && partition.endingAt)
 			.map(partition => {
 				const inclusive = partition.inclusive ? ' INCLUSIVE' : '';
 				return `PARTITION ${partition.partitionNumber} ENDING AT (${partition.endingAt})${inclusive}`;
-			})
-			.join('\n\t');
+			});
 
-		const partitionsClause = partitions ? `\n\t${partitions}` : '';
-		return `PARTITION BY RANGE (${keyColumns})${nullsLast}${partitionsClause}`;
+		const partitionsClause = partitions.length > 0 ? ` (\n\t\t${partitions.join(',\n\t\t')}\n\t)` : '';
+
+		return `PARTITION BY RANGE (${keyColumns})${partitionsClause}`;
 	}
 
 	return '';

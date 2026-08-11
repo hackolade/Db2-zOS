@@ -2,8 +2,7 @@
  * @import {
  *   FieldNameLookupParams,
  *   IdToNameMap,
- *   JsonSchema,
- *   JsonSchemaColumn,
+ *   WalkableSchema,
  *   WalkSchemaParams
  * } from '../../../types/ddlProvider'
  */
@@ -11,7 +10,7 @@
 /**
  * Resolve a schema item name.
  *
- * @param {{ item?: JsonSchemaColumn }} params Schema item.
+ * @param {{ item?: WalkableSchema }} params Schema item.
  * @returns {string} Item name.
  */
 const getName = ({ item }) => {
@@ -52,7 +51,7 @@ const eachProperty = ({ jsonSchema, path, callback }) => {
 /**
  * Build GUID-to-name lookup table.
  *
- * @param {{ jsonSchema?: JsonSchema }} params JSON schema.
+ * @param {{ jsonSchema?: WalkableSchema }} params JSON schema.
  * @returns {IdToNameMap} Id to name map.
  */
 const getIdToNameHashTable = ({ jsonSchema }) => {
@@ -63,7 +62,7 @@ const getIdToNameHashTable = ({ jsonSchema }) => {
 	/**
 	 * Collect a property name.
 	 *
-	 * @param {{ propertyName: string; property: JsonSchemaColumn }} params Property info.
+	 * @param {{ propertyName: string; property: WalkableSchema }} params Property info.
 	 * @returns {void}
 	 */
 	const callback = ({ propertyName, property }) => {

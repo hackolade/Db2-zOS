@@ -41,6 +41,7 @@ export type IdentityOptions = {
 
 export type ColumnDefinitionInput = {
 	name: string;
+	entityName?: string;
 	type?: string;
 	nullable?: boolean;
 	default?: DefaultValue;
@@ -77,7 +78,7 @@ export type JsonSchemaColumn = {
 	generatedColumn?: boolean;
 	columnGenerationExpression?: string;
 	generated?: string;
-	items?: { mode?: string; type?: string };
+	items?: JsonSchemaColumn | JsonSchemaColumn[];
 	ofType?: string;
 	notPersistable?: boolean;
 	size?: string | number;
@@ -103,11 +104,11 @@ export type JsonSchema = JsonSchemaColumn & {
 	properties?: Record<string, JsonSchemaColumn>;
 	primaryKey?: CompositeKeyGroup[];
 	uniqueKey?: CompositeKeyGroup[];
-	items?: JsonSchema | JsonSchema[];
 };
 
 export type HydratedColumn = {
 	name: string;
+	entityName?: string;
 	type: string;
 	ofType?: string;
 	notPersistable?: boolean;
@@ -459,7 +460,7 @@ export type ModelObject = {
 
 export type JsonSchemaPropertyCallback = (params: {
 	propertyName: string;
-	property: JsonSchemaColumn;
+	property: WalkableSchema;
 	path: string[];
 }) => void;
 
@@ -474,6 +475,7 @@ export type ColumnConstraintParams = {
 	primaryKey: boolean;
 	primaryKeyOptions?: KeyOptions;
 	uniqueKeyOptions?: KeyOptions;
+	entityName?: string;
 };
 
 export type ColumnDefaultParams = {
@@ -617,6 +619,7 @@ export type HydrateKeyOptionsParams = {
 	isActivated?: boolean;
 	options?: KeyOptions | CompositeKeyGroup;
 	keyType: string;
+	entityName?: string;
 };
 
 export type KeyPropertyLookupParams = {
@@ -630,8 +633,21 @@ export type ForeignKeyCustomPropertiesParams = {
 
 export type IdToNameMap = Record<string, string>;
 
+/**
+ * The subset of a JSON schema the recursive walker needs. `items` is modeled as a schema rather than as the `{ mode,
+ * type }` pair `JsonSchemaColumn` carries, so that `Array.isArray` narrows to a schema list instead of `any[]`.
+ */
+export type WalkableSchema = {
+	GUID?: string;
+	code?: string;
+	name?: string;
+	collectionName?: string;
+	properties?: Record<string, WalkableSchema>;
+	items?: WalkableSchema | WalkableSchema[];
+};
+
 export type WalkSchemaParams = {
-	jsonSchema: JsonSchemaColumn;
+	jsonSchema: WalkableSchema;
 	path: string[];
 	callback: JsonSchemaPropertyCallback;
 };

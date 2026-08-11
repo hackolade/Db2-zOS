@@ -31,17 +31,19 @@ const {
 	isParentContainerActivated,
 	isObjectInDeltaModelActivated,
 } = require('../../../utils/general');
+const { getDefaultConstraintName } = require('../../../ddlProvider/ddlHelpers/key/getDefaultConstraintName');
 
 const AMOUNT_OF_COLUMNS_IN_REGULAR_KEY = 1;
 
 /**
- * Build the constraint name Db2 for z/OS falls back to when the user did not provide one.
+ * Build the constraint name to fall back on when the user did not name a key.
  *
  * @param {string} entityName Table name.
  * @param {AlterKeyKind} keyKind Key kind.
  * @returns {string} Constraint name.
  */
-const getDefaultConstraintName = (entityName, keyKind) => [entityName, keyKind.constraintPostfix].join('_');
+const getKeyKindDefaultConstraintName = (entityName, keyKind) =>
+	getDefaultConstraintName({ entityName, postfix: keyKind.constraintPostfix });
 
 /**
  * Keep only the options that end up in the generated DDL.
@@ -225,7 +227,7 @@ const getAddCompositeKeyScriptModifications = ({ collection, keyKind }) => {
 				isParentActivated: isCollectionActivated,
 				keyConfig: {
 					keyType: keyKind.keyType,
-					name: compositeKey.constraintName ?? getDefaultConstraintName(entityName, keyKind),
+					name: compositeKey.constraintName ?? getKeyKindDefaultConstraintName(entityName, keyKind),
 					columns,
 				},
 			});
@@ -270,7 +272,7 @@ const getDropCompositeKeyScriptModifications = ({ collection, keyKind }) => {
 
 	return oldKeys
 		.map(compositeKey => {
-			const constraintName = compositeKey.constraintName ?? getDefaultConstraintName(entityName, keyKind);
+			const constraintName = compositeKey.constraintName ?? getKeyKindDefaultConstraintName(entityName, keyKind);
 			const script = keyKind.buildDropStatement({
 				tableName: fullTableName,
 				constraintName: wrapInQuotes(constraintName),
@@ -405,7 +407,7 @@ const getAddRegularKeyScriptModifications = ({ collection, keyKind }) => {
 			const configuredConstraintName = columnJsonSchema[keyKind.keyOptionsProperty]?.constraintName?.trim();
 			const constraintName =
 				configuredConstraintName === undefined || configuredConstraintName === ''
-					? getDefaultConstraintName(entityName, keyKind)
+					? getKeyKindDefaultConstraintName(entityName, keyKind)
 					: configuredConstraintName;
 			const statement = keyKind.buildAlterStatement({
 				tableName: fullTableName,
@@ -464,7 +466,7 @@ const getDropRegularKeyScriptModifications = ({ collection, keyKind }) => {
 			const configuredConstraintName = oldColumnJsonSchema?.[keyKind.keyOptionsProperty]?.constraintName?.trim();
 			const constraintName =
 				configuredConstraintName === undefined || configuredConstraintName === ''
-					? getDefaultConstraintName(entityName, keyKind)
+					? getKeyKindDefaultConstraintName(entityName, keyKind)
 					: configuredConstraintName;
 			const script = keyKind.buildDropStatement({
 				tableName: fullTableName,

@@ -101,9 +101,15 @@ const getRenameIndexScriptDto = ({ schemaName, oldIndexName, newIndexName, isAct
  */
 const getCreateIndexScriptDto = ({ index, collection, ddlProvider }) => {
 	const collectionSchema = getSchemaOfAlterCollection(collection);
-	const script = ddlProvider.createIndex(getEntityName(collectionSchema), addNameToIndexKey({ index, collection }));
+	// `createIndex` comments the statement out unless both flags are set, and only `hydrateIndex` - which the alter
+	// flow does not go through - would otherwise fill `isParentActivated` in.
+	const isCollectionActivated = isObjectInDeltaModelActivated(collection);
+	const script = ddlProvider.createIndex(getEntityName(collectionSchema), {
+		...addNameToIndexKey({ index, collection }),
+		isParentActivated: isCollectionActivated,
+	});
 
-	return createAlterScriptDto([script], true, false);
+	return createAlterScriptDto([script], isCollectionActivated && Boolean(index.isActivated), false);
 };
 
 /**

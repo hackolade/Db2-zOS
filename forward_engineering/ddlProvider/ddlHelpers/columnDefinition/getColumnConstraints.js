@@ -5,7 +5,10 @@
  * } from '../../../types/ddlProvider'
  */
 
+const lodash = require('lodash');
 const { getOptionsString } = require('../constraint/getOptionsString');
+const { getDefaultConstraintName } = require('../key/getDefaultConstraintName');
+const { CONSTRAINT_POSTFIX } = require('../../../../shared/constants/constants');
 
 /**
  * Resolve primary/unique key options.
@@ -26,15 +29,34 @@ const getOptions = ({ primaryKey, unique, primaryKeyOptions, uniqueKeyOptions })
 };
 
 /**
+ * Resolve the name of the key declared inline on a column, falling back to the name the alter script would later use to
+ * drop it.
+ *
+ * @param {ColumnConstraintParams} params Column constraint flags.
+ * @returns {string | undefined} Constraint name.
+ */
+const getConstraintName = ({ unique, primaryKey, primaryKeyOptions, uniqueKeyOptions, entityName }) => {
+	if (!primaryKey && !unique) {
+		return void 0;
+	}
+
+	const options = getOptions({ primaryKey, unique, primaryKeyOptions, uniqueKeyOptions });
+	const postfix = primaryKey ? CONSTRAINT_POSTFIX.primaryKey : CONSTRAINT_POSTFIX.uniqueKey;
+
+	return lodash.trim(options.constraintName) || getDefaultConstraintName({ entityName, postfix });
+};
+
+/**
  * Build column constraint clauses.
  *
  * @param {ColumnConstraintParams} params Column constraint flags.
  * @returns {string} Constraints DDL fragment.
  */
-const getColumnConstraints = ({ nullable, unique, primaryKey, primaryKeyOptions, uniqueKeyOptions }) => {
-	const { constraintString, statement } = getOptionsString(
-		getOptions({ primaryKey, unique, primaryKeyOptions, uniqueKeyOptions }),
-	);
+const getColumnConstraints = ({ nullable, unique, primaryKey, primaryKeyOptions, uniqueKeyOptions, entityName }) => {
+	const { constraintString, statement } = getOptionsString({
+		...getOptions({ primaryKey, unique, primaryKeyOptions, uniqueKeyOptions }),
+		constraintName: getConstraintName({ unique, primaryKey, primaryKeyOptions, uniqueKeyOptions, entityName }),
+	});
 	const primaryKeyString = primaryKey ? ` PRIMARY KEY` : '';
 	const uniqueKeyString = unique ? ` UNIQUE` : '';
 	const nullableString = nullable ? '' : ' NOT NULL';

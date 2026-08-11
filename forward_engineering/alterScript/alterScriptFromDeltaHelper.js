@@ -101,7 +101,8 @@ const getAlterCollectionScriptDtos = ({ collection, app, inlineDeltaRelationship
 			.filter(scriptDto => scriptDto !== undefined),
 		...deleted.filter(item => !item.role?.compMod?.deleted).flatMap(item => getDeleteColumnScriptDtos(item)),
 		...modified.flatMap(item => getModifyCollectionScriptDtos(item)),
-		...added.flatMap(item => getAddColumnScriptDtos(item)),
+		// Columns of a created table are already part of its CREATE TABLE, so only existing tables get ADD COLUMN.
+		...added.filter(item => !item.role?.compMod?.created).flatMap(item => getAddColumnScriptDtos(item)),
 		...modified.flatMap(item => getModifyColumnScriptDtos(item)),
 		...modified.flatMap(item => getModifyCollectionKeysScriptDtos(item)),
 	];
@@ -201,6 +202,18 @@ const prettifyAlterScriptDto = dto => {
 };
 
 /**
+ * Parse the delta model the studio serializes into the FE data. This is the single point where the untyped payload
+ * enters the plugin, so the assertion is kept here instead of letting `any` spread through the helpers.
+ *
+ * @param {string} json Serialized delta model.
+ * @returns {DeltaModel} Delta model.
+ */
+const parseDeltaModel = json =>
+	// The studio owns the payload shape and there is nothing to validate it against, so the assertion is unchecked.
+	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
+	/** @type {DeltaModel} */ (JSON.parse(json));
+
+/**
  * Build every alter script DTO of a delta model.
  *
  * @param {AlterScriptData} data FE data.
@@ -208,8 +221,7 @@ const prettifyAlterScriptDto = dto => {
  * @returns {AlterScriptDto[]} Alter script DTOs.
  */
 const getAlterScriptDtos = (data, app) => {
-	/** @type {DeltaModel} */
-	const collection = JSON.parse(data.jsonSchema);
+	const collection = parseDeltaModel(data.jsonSchema);
 
 	if (!collection) {
 		throw new Error(

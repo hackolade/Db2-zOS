@@ -12,6 +12,7 @@
  */
 
 const lodash = require('lodash');
+const { getEntityName } = require('../../utils/general');
 
 /**
  * Resolve whether a column is nullable from the required list of its parent.
@@ -109,6 +110,7 @@ const createColumnDefinitionBySchema = ({ name, jsonSchema, parentJsonSchema, dd
 	/** @type {ColumnDefinitionInput} */
 	const columnDefinition = {
 		name,
+		entityName: getEntityName(parentJsonSchema),
 		type: getType(jsonSchema),
 		nullable: isNullable(parentJsonSchema, name),
 		default: getDefault(jsonSchema),

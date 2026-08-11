@@ -13,6 +13,8 @@
 
 const lodash = require('lodash');
 const { wrapInQuotes, commentIfDeactivated, checkIsKeyActivated } = require('../../../utils/general');
+const { CONSTRAINT_POSTFIX } = require('../../../../shared/constants/constants');
+const { getDefaultConstraintName } = require('./getDefaultConstraintName');
 
 /** @enum {string} */
 const KEY_TYPE = {
@@ -72,12 +74,15 @@ const isInlinePrimaryKey = ({ column }) => {
 };
 
 /**
- * Hydrate key constraint options.
+ * Hydrate key constraint options. An unnamed key gets the same fallback name the alter script uses, so that a
+ * constraint created here can be dropped again later.
  *
  * @param {HydrateKeyOptionsParams} params Key options.
  * @returns {KeyConstraint} Hydrated key options.
  */
-const hydrateKeyOptions = ({ columnName, isActivated, options, keyType }) => {
+const hydrateKeyOptions = ({ columnName, isActivated, options, keyType, entityName }) => {
+	const postfix = keyType === KEY_TYPE.primaryKey ? CONSTRAINT_POSTFIX.primaryKey : CONSTRAINT_POSTFIX.uniqueKey;
+
 	return {
 		keyType,
 		columns: [
@@ -86,7 +91,7 @@ const hydrateKeyOptions = ({ columnName, isActivated, options, keyType }) => {
 				isActivated: isActivated,
 			},
 		],
-		constraintName: options?.constraintName,
+		constraintName: lodash.trim(options?.constraintName) || getDefaultConstraintName({ entityName, postfix }),
 	};
 };
 
@@ -136,10 +141,10 @@ const getKeys = ({ jsonSchema, keys }) => {
 /**
  * Get composite primary key constraints.
  *
- * @param {{ jsonSchema: JsonSchema }} params Schema.
+ * @param {{ jsonSchema: JsonSchema; entityName?: string }} params Schema and table name.
  * @returns {KeyConstraint[]} Primary key constraints.
  */
-const getCompositePrimaryKeys = ({ jsonSchema }) => {
+const getCompositePrimaryKeys = ({ jsonSchema, entityName }) => {
 	if (!Array.isArray(jsonSchema.primaryKey)) {
 		return [];
 	}
@@ -147,7 +152,7 @@ const getCompositePrimaryKeys = ({ jsonSchema }) => {
 	return jsonSchema.primaryKey
 		.filter(primaryKey => !lodash.isEmpty(primaryKey.compositePrimaryKey))
 		.map(primaryKey =>
-			Object.assign(hydrateKeyOptions({ options: primaryKey, keyType: KEY_TYPE.primaryKey }), {
+			Object.assign(hydrateKeyOptions({ options: primaryKey, keyType: KEY_TYPE.primaryKey, entityName }), {
 				columns: getKeys({ keys: primaryKey.compositePrimaryKey, jsonSchema }),
 			}),
 		);
@@ -156,10 +161,10 @@ const getCompositePrimaryKeys = ({ jsonSchema }) => {
 /**
  * Get composite unique key constraints.
  *
- * @param {{ jsonSchema: JsonSchema }} params Schema.
+ * @param {{ jsonSchema: JsonSchema; entityName?: string }} params Schema and table name.
  * @returns {KeyConstraint[]} Unique key constraints.
  */
-const getCompositeUniqueKeys = ({ jsonSchema }) => {
+const getCompositeUniqueKeys = ({ jsonSchema, entityName }) => {
 	if (!Array.isArray(jsonSchema.uniqueKey)) {
 		return [];
 	}
@@ -167,7 +172,7 @@ const getCompositeUniqueKeys = ({ jsonSchema }) => {
 	return jsonSchema.uniqueKey
 		.filter(uniqueKey => !lodash.isEmpty(uniqueKey.compositeUniqueKey))
 		.map(uniqueKey =>
-			Object.assign(hydrateKeyOptions({ options: uniqueKey, keyType: KEY_TYPE.unique }), {
+			Object.assign(hydrateKeyOptions({ options: uniqueKey, keyType: KEY_TYPE.unique, entityName }), {
 				columns: getKeys({ keys: uniqueKey.compositeUniqueKey, jsonSchema }),
 			}),
 		);
@@ -176,10 +181,10 @@ const getCompositeUniqueKeys = ({ jsonSchema }) => {
 /**
  * Collect table-level key constraints.
  *
- * @param {{ jsonSchema: JsonSchema }} params Schema.
+ * @param {{ jsonSchema: JsonSchema; entityName?: string }} params Schema and table name.
  * @returns {KeyConstraint[]} Key constraints.
  */
-const getTableKeyConstraints = ({ jsonSchema }) => {
+const getTableKeyConstraints = ({ jsonSchema, entityName }) => {
 	if (!jsonSchema.properties) {
 		return [];
 	}
@@ -193,6 +198,7 @@ const getTableKeyConstraints = ({ jsonSchema }) => {
 			isActivated: column.isActivated,
 			options: column.uniqueKeyOptions,
 			keyType: KEY_TYPE.unique,
+			entityName,
 		});
 	}).filter(constraint => constraint !== null);
 
@@ -205,14 +211,15 @@ const getTableKeyConstraints = ({ jsonSchema }) => {
 			isActivated: column.isActivated,
 			options: column.primaryKeyOptions,
 			keyType: KEY_TYPE.primaryKey,
+			entityName,
 		});
 	}).filter(constraint => constraint !== null);
 
 	return [
 		...primaryKeyConstraints,
-		...getCompositePrimaryKeys({ jsonSchema }),
+		...getCompositePrimaryKeys({ jsonSchema, entityName }),
 		...uniqueConstraints,
-		...getCompositeUniqueKeys({ jsonSchema }),
+		...getCompositeUniqueKeys({ jsonSchema, entityName }),
 	];
 };
 

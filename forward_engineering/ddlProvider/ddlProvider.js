@@ -186,10 +186,12 @@ const hydrateColumn = ({ columnDefinition, jsonSchema, schemaData, definitionJso
 	const definitionSchema = definitionJsonSchema ?? {};
 	const isUDTRef = !!jsonSchema.$ref;
 	const type = isUDTRef ? (columnDefinition.type ?? '') : lodash.toUpper(jsonSchema.mode ?? jsonSchema.type);
-	const itemsType = lodash.toUpper(jsonSchema.items?.mode ?? jsonSchema.items?.type ?? '');
+	const itemsSchema = Array.isArray(jsonSchema.items) ? jsonSchema.items[0] : jsonSchema.items;
+	const itemsType = lodash.toUpper(itemsSchema?.mode ?? itemsSchema?.type ?? '');
 
 	return {
 		name: columnDefinition.name,
+		entityName: columnDefinition.entityName,
 		type,
 		ofType: jsonSchema.ofType,
 		notPersistable: jsonSchema.notPersistable,
@@ -444,7 +446,7 @@ const hydrateTable = ({ tableData, entityData, jsonSchema }) => {
 	return {
 		...tableData,
 		...auxiliaryTableData,
-		keyConstraints: keyHelper.getTableKeyConstraints({ jsonSchema }),
+		keyConstraints: keyHelper.getTableKeyConstraints({ jsonSchema, entityName: tableData.name }),
 		description: detailsTab.description,
 		tableProperties: detailsTab.tableProperties,
 		inClauseType: detailsTab.inClauseType,
