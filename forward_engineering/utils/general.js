@@ -14,7 +14,9 @@
  * } from '../types/ddlProvider'
  */
 
-const lodash = require('lodash');
+const isEqual = require('lodash/isEqual');
+const omit = require('lodash/omit');
+const toLower = require('lodash/toLower');
 const { INLINE_COMMENT } = require('../../shared/constants/constants');
 
 /**
@@ -39,8 +41,8 @@ const setTab = ({ text, tab }) => {
  */
 const hasType = ({ descriptors, type }) => {
 	return Object.keys(descriptors)
-		.map(key => lodash.toLower(key))
-		.includes(lodash.toLower(type));
+		.map(key => toLower(key))
+		.includes(toLower(type));
 };
 
 /**
@@ -250,7 +252,7 @@ const getFullCollectionName = ({ collectionSchema, preferAlterName = true }) => 
  * @returns {T} Merged schema.
  */
 const getSchemaOfAlterCollection = collection => {
-	return { ...collection, ...lodash.omit(collection?.role, 'properties') };
+	return { ...collection, ...omit(collection?.role, 'properties') };
 };
 
 /**
@@ -297,7 +299,7 @@ const compareProperties = ({ new: newProperty, old: oldProperty }) => {
 	if (!newProperty && !oldProperty) {
 		return false;
 	}
-	return !lodash.isEqual(newProperty, oldProperty);
+	return !isEqual(newProperty, oldProperty);
 };
 
 /**

@@ -20,7 +20,10 @@
  * } from '../../../types/ddlProvider'
  */
 
-const lodash = require('lodash');
+const differenceWith = require('lodash/differenceWith');
+const isEqual = require('lodash/isEqual');
+const orderBy = require('lodash/orderBy');
+const toPairs = require('lodash/toPairs');
 const { createAlterScriptDto } = require('../../dto/alterScriptDto');
 const { createKeyScriptModification, keyTransition, noKeyTransition } = require('../../dto/keyDto');
 const {
@@ -99,7 +102,7 @@ const areKeyOptionsEqual = ({ compositeKeys, columnOptions, keyKind }) =>
 			return false;
 		}
 
-		return lodash.isEqual(extractComparableOptions(compositeKey), columnOptions);
+		return isEqual(extractComparableOptions(compositeKey), columnOptions);
 	});
 
 /**
@@ -165,7 +168,7 @@ const didCompositeKeysChange = ({ oldKeys, newKeys }) => {
 		return true;
 	}
 
-	return lodash.differenceWith(oldKeys, newKeys, (oldKey, newKey) => lodash.isEqual(oldKey, newKey)).length > 0;
+	return differenceWith(oldKeys, newKeys, (oldKey, newKey) => isEqual(oldKey, newKey)).length > 0;
 };
 
 /**
@@ -176,8 +179,7 @@ const didCompositeKeysChange = ({ oldKeys, newKeys }) => {
  * @returns {KeyConstraintColumn[]} Constraint columns.
  */
 const getCompositeKeyColumns = ({ compositeKey, columns, keyKind }) =>
-	lodash
-		.toPairs(columns)
+	toPairs(columns)
 		.filter(([, jsonSchema]) =>
 			compositeKey[keyKind.compositeKeyProperty]?.some(keyRef => keyRef.keyId === jsonSchema.GUID),
 		)
@@ -367,7 +369,7 @@ const wasRegularKeyModified = ({ columnJsonSchema, collection, keyKind }) => {
 		return false;
 	}
 
-	return !lodash.isEqual(
+	return !isEqual(
 		getRegularKeyOptions(oldColumnJsonSchema ?? {}, keyKind),
 		getRegularKeyOptions(columnJsonSchema, keyKind),
 	);
@@ -385,8 +387,7 @@ const getAddRegularKeyScriptModifications = ({ collection, keyKind }) => {
 	const entityName = getEntityName(collectionSchema);
 	const isCollectionActivated = isParentContainerActivated(collection) && isObjectInDeltaModelActivated(collection);
 
-	return lodash
-		.toPairs(collection.properties ?? {})
+	return toPairs(collection.properties ?? {})
 		.filter(([, columnJsonSchema]) => {
 			const oldName = columnJsonSchema.compMod?.oldField?.name ?? '';
 			const oldColumnJsonSchema = collection.role?.properties?.[oldName];
@@ -442,8 +443,7 @@ const getDropRegularKeyScriptModifications = ({ collection, keyKind }) => {
 	const entityName = getEntityName(collectionSchema);
 	const isCollectionActivated = isParentContainerActivated(collection) && isObjectInDeltaModelActivated(collection);
 
-	return lodash
-		.toPairs(collection.properties ?? {})
+	return toPairs(collection.properties ?? {})
 		.filter(([, columnJsonSchema]) => {
 			const oldName = columnJsonSchema.compMod?.oldField?.name ?? '';
 			const oldColumnJsonSchema = collection.role?.properties?.[oldName];
@@ -490,7 +490,7 @@ const getDropRegularKeyScriptModifications = ({ collection, keyKind }) => {
  * @returns {KeyScriptModification[]} Ordered key statements.
  */
 const sortKeyScriptModifications = keyScriptModifications =>
-	lodash.orderBy(
+	orderBy(
 		keyScriptModifications,
 		[modification => modification.fullTableName, modification => !modification.isDropScript],
 		['asc', 'asc'],

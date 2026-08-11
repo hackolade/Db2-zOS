@@ -7,7 +7,7 @@
  * @import {DdlProvider} from '../../../types/ddlProvider'
  */
 
-const lodash = require('lodash');
+const isEqual = require('lodash/isEqual');
 const { createAlterScriptDto } = require('../../dto/alterScriptDto');
 const {
 	getSchemaNameFromCollection,
@@ -62,7 +62,7 @@ const DROP_AND_RECREATE_INDEX_PROPERTIES = [
  * @returns {boolean} Whether the index has to be recreated.
  */
 const shouldDropAndRecreateIndex = ({ oldIndex, newIndex }) =>
-	DROP_AND_RECREATE_INDEX_PROPERTIES.some(property => !lodash.isEqual(oldIndex[property], newIndex[property]));
+	DROP_AND_RECREATE_INDEX_PROPERTIES.some(property => !isEqual(oldIndex[property], newIndex[property]));
 
 /**
  * Check whether two index versions describe the same database index.

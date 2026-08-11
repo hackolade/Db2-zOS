@@ -11,7 +11,8 @@
  * } from '../../../types/ddlProvider'
  */
 
-const lodash = require('lodash');
+const isEmpty = require('lodash/isEmpty');
+const trim = require('lodash/trim');
 const { wrapInQuotes, commentIfDeactivated, checkIsKeyActivated } = require('../../../utils/general');
 const { CONSTRAINT_POSTFIX } = require('../../../../shared/constants/constants');
 const { getDefaultConstraintName } = require('./getDefaultConstraintName');
@@ -50,7 +51,7 @@ const isUniqueKey = ({ column }) => {
  * @returns {boolean} Whether inline unique.
  */
 const isInlineUnique = ({ column }) => {
-	return isUniqueKey({ column }) && !lodash.trim(column.uniqueKeyOptions?.constraintName);
+	return isUniqueKey({ column }) && !trim(column.uniqueKeyOptions?.constraintName);
 };
 
 /**
@@ -70,7 +71,7 @@ const isPrimaryKey = ({ column }) => {
  * @returns {boolean} Whether inline primary key.
  */
 const isInlinePrimaryKey = ({ column }) => {
-	return isPrimaryKey({ column }) && !lodash.trim(column.primaryKeyOptions?.constraintName);
+	return isPrimaryKey({ column }) && !trim(column.primaryKeyOptions?.constraintName);
 };
 
 /**
@@ -91,7 +92,7 @@ const hydrateKeyOptions = ({ columnName, isActivated, options, keyType, entityNa
 				isActivated: isActivated,
 			},
 		],
-		constraintName: lodash.trim(options?.constraintName) || getDefaultConstraintName({ entityName, postfix }),
+		constraintName: trim(options?.constraintName) || getDefaultConstraintName({ entityName, postfix }),
 	};
 };
 
@@ -150,7 +151,7 @@ const getCompositePrimaryKeys = ({ jsonSchema, entityName }) => {
 	}
 
 	return jsonSchema.primaryKey
-		.filter(primaryKey => !lodash.isEmpty(primaryKey.compositePrimaryKey))
+		.filter(primaryKey => !isEmpty(primaryKey.compositePrimaryKey))
 		.map(primaryKey =>
 			Object.assign(hydrateKeyOptions({ options: primaryKey, keyType: KEY_TYPE.primaryKey, entityName }), {
 				columns: getKeys({ keys: primaryKey.compositePrimaryKey, jsonSchema }),
@@ -170,7 +171,7 @@ const getCompositeUniqueKeys = ({ jsonSchema, entityName }) => {
 	}
 
 	return jsonSchema.uniqueKey
-		.filter(uniqueKey => !lodash.isEmpty(uniqueKey.compositeUniqueKey))
+		.filter(uniqueKey => !isEmpty(uniqueKey.compositeUniqueKey))
 		.map(uniqueKey =>
 			Object.assign(hydrateKeyOptions({ options: uniqueKey, keyType: KEY_TYPE.unique, entityName }), {
 				columns: getKeys({ keys: uniqueKey.compositeUniqueKey, jsonSchema }),
@@ -231,12 +232,10 @@ const getTableKeyConstraints = ({ jsonSchema, entityName }) => {
  */
 const foreignKeysToString = ({ keys }) => {
 	if (Array.isArray(keys)) {
-		const activatedKeys = keys
-			.filter(key => checkIsKeyActivated({ key }))
-			.map(key => wrapInQuotes(lodash.trim(key.name)));
+		const activatedKeys = keys.filter(key => checkIsKeyActivated({ key })).map(key => wrapInQuotes(trim(key.name)));
 		const deactivatedKeys = keys
 			.filter(key => !checkIsKeyActivated({ key }))
-			.map(key => wrapInQuotes(lodash.trim(key.name)));
+			.map(key => wrapInQuotes(trim(key.name)));
 		const deactivatedKeysAsString =
 			deactivatedKeys.length > 0
 				? commentIfDeactivated(deactivatedKeys.join(', '), { isActivated: false, isPartOfLine: true })
@@ -254,7 +253,7 @@ const foreignKeysToString = ({ keys }) => {
  * @returns {string} Keys string.
  */
 const foreignActiveKeysToString = ({ keys }) => {
-	return keys.map(key => lodash.trim(key.name)).join(', ');
+	return keys.map(key => trim(key.name)).join(', ');
 };
 
 /**

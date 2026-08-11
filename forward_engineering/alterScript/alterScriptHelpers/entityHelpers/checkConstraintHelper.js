@@ -6,7 +6,7 @@
  * } from '../../../types/alterScript'
  */
 
-const lodash = require('lodash');
+const uniq = require('lodash/uniq');
 const { createAlterScriptDto } = require('../../dto/alterScriptDto');
 const {
 	getFullCollectionName,
@@ -64,9 +64,7 @@ const mapCheckConstraintNamesToChangeHistory = collection => {
 
 	const newConstraints = checkConstraintHistory.new ?? [];
 	const oldConstraints = checkConstraintHistory.old ?? [];
-	const constraintNames = lodash.uniq(
-		[...newConstraints, ...oldConstraints].map(constraint => constraint.chkConstrName),
-	);
+	const constraintNames = uniq([...newConstraints, ...oldConstraints].map(constraint => constraint.chkConstrName));
 
 	return constraintNames.map(chkConstrName => ({
 		old: oldConstraints.find(constraint => constraint.chkConstrName === chkConstrName),

@@ -11,7 +11,7 @@
  * } from '../../types/ddlProvider'
  */
 
-const lodash = require('lodash');
+const toPairs = require('lodash/toPairs');
 const { createAlterScriptDto } = require('../dto/alterScriptDto');
 const { getModifiedCommentOnColumnScriptDtos } = require('./columnHelpers/commentsHelper');
 const { getModifyNonNullColumnsScriptDtos } = require('./columnHelpers/nonNullConstraintHelper');
@@ -81,7 +81,7 @@ const getAddCollectionScriptDto = (ddlProvider, inlineDeltaRelationships) => col
 	const schemaName = getSchemaNameFromCollection({ collection }) ?? '';
 	const schemaData = { schemaName };
 
-	const columnDefinitions = lodash.toPairs(collectionSchema.properties ?? {}).map(([name, column]) =>
+	const columnDefinitions = toPairs(collectionSchema.properties ?? {}).map(([name, column]) =>
 		createColumnDefinitionBySchema({
 			name,
 			jsonSchema: column,
@@ -169,8 +169,7 @@ const getAddColumnScriptDtos = ddlProvider => collection => {
 	const fullTableName = getFullCollectionName({ collectionSchema });
 	const schemaData = { schemaName: getSchemaNameFromCollection({ collection }) ?? '' };
 
-	return lodash
-		.toPairs(collection.properties ?? {})
+	return toPairs(collection.properties ?? {})
 		.filter(([, jsonSchema]) => !jsonSchema.compMod)
 		.map(([name, jsonSchema]) => {
 			const columnDefinition = createColumnDefinitionBySchema({
@@ -200,8 +199,7 @@ const getDeleteColumnScriptDtos = ddlProvider => collection => {
 	const collectionSchema = getSchemaOfAlterCollection(collection);
 	const fullTableName = getFullCollectionName({ collectionSchema, preferAlterName: false });
 
-	return lodash
-		.toPairs(collection.properties ?? {})
+	return toPairs(collection.properties ?? {})
 		.filter(([, jsonSchema]) => !jsonSchema.compMod)
 		.map(([name]) => {
 			const script = ddlProvider.dropColumn({ tableName: fullTableName, columnName: wrapInQuotes(name) });

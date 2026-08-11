@@ -25,7 +25,10 @@
  * } from '../types/ddlProvider'
  */
 
-const lodash = require('lodash');
+const get = require('lodash/get');
+const isEmpty = require('lodash/isEmpty');
+const toUpper = require('lodash/toUpper');
+const trim = require('lodash/trim');
 const templates = require('./templates');
 const defaultTypes = require('../configs/defaultTypes.js');
 const descriptors = require('../configs/descriptors.js');
@@ -185,9 +188,9 @@ const alterSchema = schemaName =>
 const hydrateColumn = ({ columnDefinition, jsonSchema, schemaData, definitionJsonSchema }) => {
 	const definitionSchema = definitionJsonSchema ?? {};
 	const isUDTRef = !!jsonSchema.$ref;
-	const type = isUDTRef ? (columnDefinition.type ?? '') : lodash.toUpper(jsonSchema.mode ?? jsonSchema.type);
+	const type = isUDTRef ? (columnDefinition.type ?? '') : toUpper(jsonSchema.mode ?? jsonSchema.type);
 	const itemsSchema = Array.isArray(jsonSchema.items) ? jsonSchema.items[0] : jsonSchema.items;
-	const itemsType = lodash.toUpper(itemsSchema?.mode ?? itemsSchema?.type ?? '');
+	const itemsType = toUpper(itemsSchema?.mode ?? itemsSchema?.type ?? '');
 
 	return {
 		name: columnDefinition.name,
@@ -231,7 +234,7 @@ const hydrateColumn = ({ columnDefinition, jsonSchema, schemaData, definitionJso
  * @returns {JsonSchemaColumn} Merged schema.
  */
 const hydrateJsonSchemaColumn = (jsonSchema, definitionJsonSchema) => {
-	if (!jsonSchema.$ref || lodash.isEmpty(definitionJsonSchema)) {
+	if (!jsonSchema.$ref || isEmpty(definitionJsonSchema)) {
 		return jsonSchema;
 	}
 	const { $ref: _ref, ...jsonSchemaWithoutRef } = jsonSchema;
@@ -289,7 +292,7 @@ const createCheckConstraint = ({ name, expression, enforced } = {}) => {
 		template: templates.checkConstraint,
 		templateData: {
 			name: name ? `CONSTRAINT ${wrapInQuotes(name)} ` : '',
-			expression: lodash.trim(expression).replace(/^\(([\s\S]*)\)$/u, '$1'),
+			expression: trim(expression).replace(/^\(([\s\S]*)\)$/u, '$1'),
 			enforced: enforced ? ` ${enforced}` : '',
 		},
 	});
@@ -351,7 +354,7 @@ const createForeignKeyConstraint = (constraint, _dbData, schemaData) => {
 	});
 
 	return {
-		statement: lodash.trim(foreignKeyStatement),
+		statement: trim(foreignKeyStatement),
 		isActivated,
 	};
 };
@@ -419,7 +422,7 @@ const createForeignKey = (constraint, _dbData, schemaData) => {
 	});
 
 	return {
-		statement: lodash.trim(foreignKeyStatement) + '\n',
+		statement: trim(foreignKeyStatement) + '\n',
 		isActivated,
 	};
 };
@@ -599,7 +602,7 @@ const dropView = ({ viewName }) => assignTemplates({ template: templates.dropVie
  * @returns {IndexData} Hydrated index.
  */
 const hydrateIndex = (indexData, tableData, schemaData) => {
-	const isParentActivated = lodash.get(tableData, '[0].isActivated', true);
+	const isParentActivated = get(tableData, '[0].isActivated', true);
 
 	return {
 		...indexData,
@@ -629,7 +632,7 @@ const createIndex = (tableName, index) => {
 		templateData: { indexType, indexName, indexOptions, indexTableName },
 	});
 	const commentStatement = getIndexCommentStatement({
-		indexName: lodash.trim(indexName),
+		indexName: trim(indexName),
 		description: index.indxDescription,
 	});
 
@@ -726,8 +729,8 @@ const createView = (viewData, _dbData, isActivated = true) => {
 	const viewColumns = columns.length > 0 ? ` (${columnsAsString}\n\t)` : '';
 
 	const rawSelectStatement = viewData.selectStatement ?? '';
-	const selectStatement = lodash.trim(rawSelectStatement)
-		? lodash.trim(setTab({ text: rawSelectStatement }))
+	const selectStatement = trim(rawSelectStatement)
+		? trim(setTab({ text: rawSelectStatement }))
 		: assignTemplates({
 				template: templates.viewSelectStatement,
 				templateData: {

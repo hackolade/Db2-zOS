@@ -6,7 +6,7 @@
  * } from '../../../types/ddlProvider'
  */
 
-const lodash = require('lodash');
+const trim = require('lodash/trim');
 const templates = require('../../templates');
 const { assignTemplates } = require('../../../utils/assignTemplates');
 const { wrapInQuotes, commentIfDeactivated, wrapInSingleQuotes } = require('../../../utils/general');
@@ -48,7 +48,7 @@ const getCommentStatement = ({ objectName, objectType, description, mode = COMME
 		template: templates.comment,
 		templateData: {
 			objectType,
-			objectName: lodash.trim(objectName),
+			objectName: trim(objectName),
 			comment: wrapInSingleQuotes({ name: escapeSpecialCharacters(description ?? '') }),
 		},
 	});

@@ -5,7 +5,8 @@
  * } from '../../../types/alterScript'
  */
 
-const lodash = require('lodash');
+const difference = require('lodash/difference');
+const toPairs = require('lodash/toPairs');
 const { createAlterScriptDto } = require('../../dto/alterScriptDto');
 const {
 	getFullCollectionName,
@@ -61,16 +62,10 @@ const getModifyNonNullColumnsScriptDtos = collection => {
 	const currentRequiredColumnNames = collection.required ?? [];
 	const previousRequiredColumnNames = collection.role?.required ?? [];
 
-	const columnNamesToAddNotNullConstraint = lodash.difference(
-		currentRequiredColumnNames,
-		previousRequiredColumnNames,
-	);
-	const columnNamesToRemoveNotNullConstraint = lodash.difference(
-		previousRequiredColumnNames,
-		currentRequiredColumnNames,
-	);
+	const columnNamesToAddNotNullConstraint = difference(currentRequiredColumnNames, previousRequiredColumnNames);
+	const columnNamesToRemoveNotNullConstraint = difference(previousRequiredColumnNames, currentRequiredColumnNames);
 
-	const columns = lodash.toPairs(collection.properties ?? {});
+	const columns = toPairs(collection.properties ?? {});
 
 	const addNotNullConstraintScriptDtos = columns
 		.filter(([name, jsonSchema]) => {

@@ -11,7 +11,7 @@
  * } from '../../types/ddlProvider'
  */
 
-const lodash = require('lodash');
+const isNumber = require('lodash/isNumber');
 const { getEntityName } = require('../../utils/general');
 
 /**
@@ -50,11 +50,11 @@ const getDefault = jsonSchema => {
  * @returns {number | undefined} Length.
  */
 const getLength = jsonSchema => {
-	if (lodash.isNumber(jsonSchema.length)) {
+	if (isNumber(jsonSchema.length)) {
 		return jsonSchema.length;
 	}
 
-	if (lodash.isNumber(jsonSchema.maxLength)) {
+	if (isNumber(jsonSchema.maxLength)) {
 		return jsonSchema.maxLength;
 	}
 
@@ -68,11 +68,11 @@ const getLength = jsonSchema => {
  * @returns {number | undefined} Precision.
  */
 const getPrecision = jsonSchema => {
-	if (lodash.isNumber(jsonSchema.precision)) {
+	if (isNumber(jsonSchema.precision)) {
 		return jsonSchema.precision;
 	}
 
-	if (lodash.isNumber(jsonSchema.fractSecPrecision)) {
+	if (isNumber(jsonSchema.fractSecPrecision)) {
 		return jsonSchema.fractSecPrecision;
 	}
 
@@ -115,7 +115,7 @@ const createColumnDefinitionBySchema = ({ name, jsonSchema, parentJsonSchema, dd
 		nullable: isNullable(parentJsonSchema, name),
 		default: getDefault(jsonSchema),
 		length: getLength(jsonSchema),
-		scale: lodash.isNumber(jsonSchema.scale) ? jsonSchema.scale : undefined,
+		scale: isNumber(jsonSchema.scale) ? jsonSchema.scale : undefined,
 		precision: getPrecision(jsonSchema),
 		isActivated: jsonSchema.isActivated,
 	};

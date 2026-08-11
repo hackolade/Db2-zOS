@@ -9,7 +9,8 @@
  * } from '../../../types/ddlProvider'
  */
 
-const lodash = require('lodash');
+const isNumber = require('lodash/isNumber');
+const toUpper = require('lodash/toUpper');
 const { wrapInQuotes, columnMapToStringWithOrder } = require('../../../utils/general');
 const { getOptionsByConfigs, getBasicValue } = require('../options/getOptionsByConfigs');
 
@@ -86,7 +87,7 @@ const getStructuredTableOptions = ({ tableOptions, inClauseType }) => {
 			 * @param {number} value OBID value.
 			 * @returns {string} Option clause.
 			 */
-			getValue: value => (lodash.isNumber(value) ? `OBID ${value}` : ''),
+			getValue: value => (isNumber(value) ? `OBID ${value}` : ''),
 		},
 		{
 			key: 'dataCapture',
@@ -156,7 +157,7 @@ const getStructuredTableOptions = ({ tableOptions, inClauseType }) => {
 			 * @param {number} value Size in G.
 			 * @returns {string} Option clause.
 			 */
-			getValue: value => (isExistingTablespace || !lodash.isNumber(value) ? '' : `DSSIZE ${value} G`),
+			getValue: value => (isExistingTablespace || !isNumber(value) ? '' : `DSSIZE ${value} G`),
 		},
 		{
 			key: 'bufferPool',
@@ -239,7 +240,7 @@ const getPartitioningClause = ({ partitioning }) => {
 	}
 
 	if (partitioning.partitionBy === 'SIZE') {
-		if (!lodash.isNumber(partitioning.everySize)) {
+		if (!isNumber(partitioning.everySize)) {
 			return '';
 		}
 		return `PARTITION BY SIZE EVERY ${partitioning.everySize} G`;
@@ -257,7 +258,7 @@ const getPartitioningClause = ({ partitioning }) => {
 		}
 
 		const partitions = (partitioning.partitions ?? [])
-			.filter(partition => lodash.isNumber(partition.partitionNumber) && partition.endingAt)
+			.filter(partition => isNumber(partition.partitionNumber) && partition.endingAt)
 			.map(partition => {
 				const inclusive = partition.inclusive ? ' INCLUSIVE' : '';
 				return `PARTITION ${partition.partitionNumber} ENDING AT (${partition.endingAt})${inclusive}`;
@@ -288,7 +289,7 @@ const getTemporalPeriodsClause = ({ periodForSystemTime, periodForBusinessTime }
 
 	if (periodForBusinessTime?.startColumn && periodForBusinessTime?.endColumn) {
 		const endInclusive = periodForBusinessTime.endInclusive
-			? ` ${lodash.toUpper(periodForBusinessTime.endInclusive)}`
+			? ` ${toUpper(periodForBusinessTime.endInclusive)}`
 			: '';
 		clauses.push(
 			`PERIOD FOR BUSINESS_TIME (${wrapInQuotes(periodForBusinessTime.startColumn)}, ${wrapInQuotes(periodForBusinessTime.endColumn)}${endInclusive})`,
@@ -326,7 +327,7 @@ const getTableOptions = tableData => {
 					 * @param {string} value Append value.
 					 * @returns {string} Uppercased value.
 					 */
-					modifier: value => lodash.toUpper(value),
+					modifier: value => toUpper(value),
 				}),
 			},
 			{

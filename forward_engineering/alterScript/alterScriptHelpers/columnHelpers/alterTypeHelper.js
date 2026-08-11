@@ -7,7 +7,7 @@
  * @import {DdlProvider} from '../../../types/ddlProvider'
  */
 
-const lodash = require('lodash');
+const toPairs = require('lodash/toPairs');
 const { createAlterScriptDto } = require('../../dto/alterScriptDto');
 const {
 	checkFieldPropertiesChanged,
@@ -69,8 +69,7 @@ const getUpdateTypesScriptDtos = ddlProvider => collection => {
 	const isCollectionActivated = isObjectInDeltaModelActivated(collection);
 	const schemaName = getSchemaNameFromCollection({ collection });
 
-	return lodash
-		.toPairs(collection.properties ?? {})
+	return toPairs(collection.properties ?? {})
 		.filter(([name, jsonSchema]) => {
 			if (!jsonSchema.compMod) {
 				return false;

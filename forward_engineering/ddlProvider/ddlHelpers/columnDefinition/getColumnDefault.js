@@ -5,7 +5,7 @@
  * } from '../../../types/ddlProvider'
  */
 
-const lodash = require('lodash');
+const toUpper = require('lodash/toUpper');
 const { DATA_TYPES_WITH_IDENTITY, DATA_TYPE } = require('../../../../shared/constants/types');
 
 /**
@@ -15,7 +15,7 @@ const { DATA_TYPES_WITH_IDENTITY, DATA_TYPE } = require('../../../../shared/cons
  * @returns {boolean} Whether identity is allowed.
  */
 const canHaveIdentity = ({ type }) => {
-	return DATA_TYPES_WITH_IDENTITY.includes(lodash.toUpper(type));
+	return DATA_TYPES_WITH_IDENTITY.includes(toUpper(type));
 };
 
 /**
@@ -34,7 +34,7 @@ const isGeneratedAsIdentity = ({ identity, type }) => {
  * @param {{ type: string }} params Column type.
  * @returns {boolean} Whether type is ROWID.
  */
-const isRowid = ({ type }) => lodash.toUpper(type) === DATA_TYPE.rowid;
+const isRowid = ({ type }) => toUpper(type) === DATA_TYPE.rowid;
 
 /**
  * Build identity options clause.

@@ -5,7 +5,7 @@
  * } from '../../../types/alterScript'
  */
 
-const lodash = require('lodash');
+const toPairs = require('lodash/toPairs');
 const {
 	getSchemaOfAlterCollection,
 	getFullCollectionName,
@@ -48,8 +48,7 @@ const getRenameColumnScriptDtos = collection => {
 	const isContainerActivated = isParentContainerActivated(collection);
 	const isCollectionActivated = isObjectInDeltaModelActivated(collection);
 
-	return lodash
-		.toPairs(collection.properties ?? {})
+	return toPairs(collection.properties ?? {})
 		.map(([, jsonSchema]) => {
 			const oldName = jsonSchema.compMod?.oldField?.name;
 			const newName = jsonSchema.compMod?.newField?.name;

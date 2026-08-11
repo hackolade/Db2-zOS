@@ -5,7 +5,7 @@
  * } from '../../../types/ddlProvider'
  */
 
-const lodash = require('lodash');
+const trim = require('lodash/trim');
 const { getOptionsString } = require('../constraint/getOptionsString');
 const { getDefaultConstraintName } = require('../key/getDefaultConstraintName');
 const { CONSTRAINT_POSTFIX } = require('../../../../shared/constants/constants');
@@ -43,7 +43,7 @@ const getConstraintName = ({ unique, primaryKey, primaryKeyOptions, uniqueKeyOpt
 	const options = getOptions({ primaryKey, unique, primaryKeyOptions, uniqueKeyOptions });
 	const postfix = primaryKey ? CONSTRAINT_POSTFIX.primaryKey : CONSTRAINT_POSTFIX.uniqueKey;
 
-	return lodash.trim(options.constraintName) || getDefaultConstraintName({ entityName, postfix });
+	return trim(options.constraintName) || getDefaultConstraintName({ entityName, postfix });
 };
 
 /**

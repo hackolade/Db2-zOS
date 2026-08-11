@@ -6,7 +6,7 @@
  * } from '../../../types/alterScript'
  */
 
-const lodash = require('lodash');
+const toPairs = require('lodash/toPairs');
 const { getSchemaNameFromCollection } = require('../../../utils/general');
 
 /**
@@ -18,7 +18,7 @@ const { getSchemaNameFromCollection } = require('../../../utils/general');
  */
 const getColumnNameById = ({ columnId, collection }) => {
 	const columns = collection.role?.properties ?? collection.properties ?? {};
-	const namedColumn = lodash.toPairs(columns).find(([, jsonSchema]) => jsonSchema.GUID === columnId);
+	const namedColumn = toPairs(columns).find(([, jsonSchema]) => jsonSchema.GUID === columnId);
 
 	if (namedColumn) {
 		return namedColumn[0];

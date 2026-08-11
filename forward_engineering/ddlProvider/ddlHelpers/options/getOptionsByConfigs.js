@@ -5,7 +5,8 @@
  * } from '../../../types/ddlProvider'
  */
 
-const lodash = require('lodash');
+const get = require('lodash/get');
+const trim = require('lodash/trim');
 
 /**
  * Check whether an option carries a value worth rendering. Zero is a meaningful setting for Db2 options such as
@@ -47,7 +48,7 @@ const getBasicValue = ({ prefix = '', postfix = '', modifier }) => {
 		hasOptionValue(value)
 			? [prefix, String(resolveModifier(value)), postfix]
 					.filter(Boolean)
-					.map(part => lodash.trim(part))
+					.map(part => trim(part))
 					.join(' ')
 			: '';
 };
@@ -58,8 +59,8 @@ const getBasicValue = ({ prefix = '', postfix = '', modifier }) => {
  */
 const getOptionsByConfigs = ({ configs, data }) => {
 	const statements = configs
-		.filter(({ key }) => hasOptionValue(lodash.get(data, key)))
-		.map(({ key, getValue }) => getValue(lodash.get(data, key), data))
+		.filter(({ key }) => hasOptionValue(get(data, key)))
+		.map(({ key, getValue }) => getValue(get(data, key), data))
 		.filter(Boolean)
 		.join('\n\t');
 

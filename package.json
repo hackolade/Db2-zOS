@@ -83,6 +83,7 @@
 		"esbuild": "0.28.1",
 		"esbuild-node-externals": "1.23.1",
 		"esbuild-plugin-clean": "1.0.1",
+		"esbuild-plugin-copy": "2.1.1",
 		"eslint-plugin-jsdoc": "63.3.2",
 		"lint-staged": "17.2.0",
 		"oxfmt": "0.61.0",

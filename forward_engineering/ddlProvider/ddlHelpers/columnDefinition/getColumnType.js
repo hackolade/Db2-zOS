@@ -6,7 +6,8 @@
  * } from '../../../types/ddlProvider'
  */
 
-const lodash = require('lodash');
+const isNumber = require('lodash/isNumber');
+const toUpper = require('lodash/toUpper');
 const {
 	DATA_TYPES_WITH_LENGTH_MULTIPLIER,
 	DATA_TYPES_WITH_LENGTH,
@@ -24,7 +25,7 @@ const {
  * @returns {string} Type clause.
  */
 const addLengthWithMultiplier = ({ type, length, lengthSemantics }) => {
-	return ` ${type}(${length}${lodash.toUpper(lengthSemantics)})`;
+	return ` ${type}(${length}${toUpper(lengthSemantics)})`;
 };
 
 /**
@@ -44,11 +45,11 @@ const addLength = ({ type, length }) => {
  * @returns {string} Type clause.
  */
 const addScalePrecision = ({ type, precision, scale }) => {
-	if (lodash.isNumber(scale)) {
+	if (isNumber(scale)) {
 		return ` ${type}(${precision ?? '*'},${scale})`;
 	}
 
-	if (lodash.isNumber(precision)) {
+	if (isNumber(precision)) {
 		return ` ${type}(${precision})`;
 	}
 
@@ -62,7 +63,7 @@ const addScalePrecision = ({ type, precision, scale }) => {
  * @returns {string} Type clause.
  */
 const addPrecision = ({ type, precision }) => {
-	if (lodash.isNumber(precision)) {
+	if (isNumber(precision)) {
 		return ` ${type}(${precision})`;
 	}
 	return ` ${type}`;
@@ -75,7 +76,7 @@ const addPrecision = ({ type, precision }) => {
  * @returns {string} Type clause.
  */
 const getTimestampType = ({ fractSecPrecision, withTimeZone }) => {
-	const fractSecPrecisionString = lodash.isNumber(fractSecPrecision) ? `(${fractSecPrecision})` : '';
+	const fractSecPrecisionString = isNumber(fractSecPrecision) ? `(${fractSecPrecision})` : '';
 	const timeZoneString = withTimeZone ? ' WITH TIME ZONE' : '';
 
 	return ` TIMESTAMP${fractSecPrecisionString}${timeZoneString}`;
@@ -92,7 +93,7 @@ const getCharacterSubtypeClause = ({ characterSubtype }) => {
 		return '';
 	}
 
-	return ` FOR ${lodash.toUpper(characterSubtype)} DATA`;
+	return ` FOR ${toUpper(characterSubtype)} DATA`;
 };
 
 /**
@@ -102,7 +103,7 @@ const getCharacterSubtypeClause = ({ characterSubtype }) => {
  * @returns {string} CCSID clause.
  */
 const getCcsidClause = ({ ccsid }) => {
-	if (!lodash.isNumber(ccsid)) {
+	if (!isNumber(ccsid)) {
 		return '';
 	}
 
@@ -116,7 +117,7 @@ const getCcsidClause = ({ ccsid }) => {
  * @returns {string} Inline length clause.
  */
 const getInlineLengthClause = ({ inlineLength }) => {
-	if (!lodash.isNumber(inlineLength)) {
+	if (!isNumber(inlineLength)) {
 		return '';
 	}
 
@@ -215,7 +216,7 @@ const getColumnType = ({
 	ccsid,
 	inlineLength,
 }) => {
-	const hasLength = lodash.isNumber(length);
+	const hasLength = isNumber(length);
 	let typeStatement = '';
 
 	if (isRowid({ type })) {
@@ -226,7 +227,7 @@ const getColumnType = ({
 		typeStatement = addLength({ type, length });
 	} else if (canHavePrecision({ type }) && canHaveScale({ type })) {
 		typeStatement = addScalePrecision({ type, precision, scale });
-	} else if (canHavePrecision({ type }) && lodash.isNumber(precision)) {
+	} else if (canHavePrecision({ type }) && isNumber(precision)) {
 		typeStatement = addPrecision({ type, precision });
 	} else if (isTimestamp({ type })) {
 		typeStatement = getTimestampType({ fractSecPrecision, withTimeZone });

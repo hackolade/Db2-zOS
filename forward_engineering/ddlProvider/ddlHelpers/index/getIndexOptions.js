@@ -5,7 +5,9 @@
  * } from '../../../types/ddlProvider'
  */
 
-const lodash = require('lodash');
+const isNumber = require('lodash/isNumber');
+const toUpper = require('lodash/toUpper');
+const trim = require('lodash/trim');
 const { getBasicValue, getOptionsByConfigs } = require('../options/getOptionsByConfigs');
 const { wrapInQuotes, columnMapToStringWithOrder } = require('../../../utils/general');
 
@@ -15,7 +17,7 @@ const { wrapInQuotes, columnMapToStringWithOrder } = require('../../../utils/gen
  * @param {string} value Value to convert.
  * @returns {string} Upper-case value.
  */
-const toUpperCase = value => lodash.toUpper(value);
+const toUpperCase = value => toUpper(value);
 
 /**
  * Format a value in upper case, with an optional prefix.
@@ -71,10 +73,10 @@ const getIncludeIndexKeys = (keys, index) => {
 const getUsingClause = (_value, index) => {
 	if (index.indxUsingType === 'STOGROUP' && index.indxStogroup) {
 		const parts = [`USING STOGROUP ${index.indxStogroup}`];
-		if (lodash.isNumber(index.indxPriQty)) {
+		if (isNumber(index.indxPriQty)) {
 			parts.push(`PRIQTY ${index.indxPriQty}`);
 		}
-		if (lodash.isNumber(index.indxSecQty)) {
+		if (isNumber(index.indxSecQty)) {
 			parts.push(`SECQTY ${index.indxSecQty}`);
 		}
 		if (index.indxErase) {
@@ -116,7 +118,7 @@ const getNullKeysClause = value => {
  * @returns {string} PIECESIZE clause.
  */
 const getPiecesizeClause = (value, index) => {
-	if (!lodash.isNumber(value)) {
+	if (!isNumber(value)) {
 		return '';
 	}
 
@@ -139,7 +141,7 @@ const getPartitionedClause = value => (value ? 'PARTITIONED' : '');
  * @param {string | undefined} value Raw DDL fragment.
  * @returns {string} Trimmed properties.
  */
-const getIndexProperties = value => lodash.trim(value);
+const getIndexProperties = value => trim(value);
 
 /**
  * Build index options clause for CREATE INDEX.

@@ -13,6 +13,9 @@ const esbuild = require('esbuild');
 /** @type {typeof import('esbuild-plugin-clean')} */
 const { clean } = require('esbuild-plugin-clean');
 
+/** @type {typeof import('esbuild-plugin-copy')} */
+const { copy } = require('esbuild-plugin-copy');
+
 /** @type {typeof import('./buildConstants')} */
 const { EXCLUDED_EXTENSIONS, EXCLUDED_FILES, DEFAULT_RELEASE_FOLDER_PATH } = require('./buildConstants');
 
@@ -48,12 +51,8 @@ async function packagePlugin() {
 		path.resolve(__dirname, 'forward_engineering', 'api.js'),
 		path.resolve(__dirname, 'api', 'fe.js'),
 		path.resolve(__dirname, 'forward_engineering', 'ddlProvider.js'),
-		// path.resolve(__dirname, 'reverse_engineering', 'api.js'),
+		path.resolve(__dirname, 'reverse_engineering', 'api.js'),
 	].filter(entryPoint => entryPointExists(entryPoint));
-
-	// if (entryPoints.length === 0) {
-	// 	throw new Error('No packaging entry points found.');
-	// }
 
 	await esbuild.build({
 		entryPoints,
@@ -69,6 +68,12 @@ async function packagePlugin() {
 			? [
 					clean({
 						patterns: [DEFAULT_RELEASE_FOLDER_PATH],
+					}),
+					copy({
+						assets: {
+							from: [path.join('node_modules', 'lodash', '**', '*')],
+							to: [path.join('node_modules', 'lodash')],
+						},
 					}),
 					copyFolderFiles({
 						fromPath: __dirname,

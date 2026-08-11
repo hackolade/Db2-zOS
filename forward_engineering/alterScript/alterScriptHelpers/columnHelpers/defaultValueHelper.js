@@ -5,7 +5,7 @@
  * } from '../../../types/alterScript'
  */
 
-const lodash = require('lodash');
+const toPairs = require('lodash/toPairs');
 const { createAlterScriptDto } = require('../../dto/alterScriptDto');
 const {
 	getFullCollectionName,
@@ -54,8 +54,7 @@ const getUpdatedDefaultColumnValueScriptDtos = ({ collection }) => {
 	const isCollectionActivated = isObjectInDeltaModelActivated(collection);
 	const collectionSchema = getSchemaOfAlterCollection(collection);
 
-	return lodash
-		.toPairs(collection.properties ?? {})
+	return toPairs(collection.properties ?? {})
 		.filter(([name, jsonSchema]) => {
 			const oldName = jsonSchema.compMod?.oldField?.name ?? name;
 			const oldDefault = collection.role?.properties?.[oldName]?.default;
@@ -85,8 +84,7 @@ const getDeletedDefaultColumnValueScriptDtos = ({ collection }) => {
 	const isCollectionActivated = isObjectInDeltaModelActivated(collection);
 	const collectionSchema = getSchemaOfAlterCollection(collection);
 
-	return lodash
-		.toPairs(collection.properties ?? {})
+	return toPairs(collection.properties ?? {})
 		.filter(([name, jsonSchema]) => {
 			const oldName = jsonSchema.compMod?.oldField?.name ?? name;
 			const oldDefault = collection.role?.properties?.[oldName]?.default;
