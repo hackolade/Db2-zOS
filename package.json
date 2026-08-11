@@ -13,7 +13,6 @@
 			"applicationTarget": "Db2-zOS",
 			"title": "Db2 for z/OS",
 			"versions": [
-				"v12",
 				"v13"
 			]
 		},
