@@ -1,12 +1,3 @@
-// const { identity } = require('lodash');
-// const { mapSeries } = require('async');
-// const { connectionHelper } = require('../shared/helpers/connectionHelper');
-// const { instanceHelper } = require('../shared/helpers/instanceHelper');
-// const { logHelper } = require('../shared/helpers/logHelper');
-// const { OBJECT_TYPE } = require('../shared/constants/constants');
-// const { nameHelper } = require('../shared/helpers/nameHelper');
-// const { testConnection } = require('../shared/api/testConnection');
-
 /** @typedef {(error?: unknown, result?: unknown, info?: unknown) => void} Callback */
 
 /**
