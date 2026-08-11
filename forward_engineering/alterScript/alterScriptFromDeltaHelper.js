@@ -12,6 +12,7 @@
  */
 
 const { getContainersScripts } = require('./alterScriptHelpers/alterContainerHelper');
+const { getModelDefinitionsScripts } = require('./alterScriptHelpers/alterModelDefinitionHelper');
 const { getEntitiesScripts } = require('./alterScriptHelpers/alterEntityHelper');
 const {
 	getDeleteForeignKeyScriptDtos,
@@ -70,6 +71,29 @@ const getAlterContainersScriptDtos = ({ collection, app }) => {
 		upsertedContainersScriptDtos: [
 			...added.map(container => getAddContainerScriptDto(container)),
 			...modified.flatMap(container => getModifyContainerScriptDto(container)),
+		].filter(scriptDto => scriptDto !== undefined),
+	};
+};
+
+/**
+ * Build the distinct type statements. Types are created before tables and reported separately when deleted so their
+ * drop statements can run after every dependent table and view has been removed.
+ *
+ * @param {{ collection: DeltaModel; app: App }} params Delta model and app instance.
+ * @returns {{ deletedTypesScriptDtos: AlterScriptDto[]; upsertedTypesScriptDtos: AlterScriptDto[] }} Type alter script
+ *   DTOs.
+ */
+const getAlterTypesScriptDtos = ({ collection, app }) => {
+	const { added, deleted, modified } = getSectionItems(collection.properties?.modelDefinitions);
+	const { getAddTypeScriptDto, getDeleteTypeScriptDto, getModifyTypeScriptDtos } = getModelDefinitionsScripts(app);
+
+	return {
+		deletedTypesScriptDtos: deleted
+			.map(definition => getDeleteTypeScriptDto(definition))
+			.filter(scriptDto => scriptDto !== undefined),
+		upsertedTypesScriptDtos: [
+			...added.map(definition => getAddTypeScriptDto(definition)),
+			...modified.flatMap(definition => getModifyTypeScriptDtos(definition)),
 		].filter(scriptDto => scriptDto !== undefined),
 	};
 };
@@ -292,13 +316,16 @@ const getAlterScriptDtos = (data, app) => {
 		collection,
 		app,
 	});
+	const { deletedTypesScriptDtos, upsertedTypesScriptDtos } = getAlterTypesScriptDtos({ collection, app });
 
 	return [
 		...upsertedContainersScriptDtos,
+		...upsertedTypesScriptDtos,
 		...getAlterCollectionScriptDtos({ collection, app, inlineDeltaRelationships, relatedSchemas }),
 		...getAlterVersioningScriptDtos({ collection, relatedSchemas }),
 		...getAlterRelationshipsScriptDtos({ collection, ignoreRelationshipIDs }),
 		...getAlterViewScriptDtos({ collection, app }),
+		...deletedTypesScriptDtos,
 		...deletedContainersScriptDtos,
 	]
 		.map(dto => prettifyAlterScriptDto(dto))

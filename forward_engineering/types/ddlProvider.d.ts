@@ -722,6 +722,7 @@ export type DdlProvider = {
 	createSchema(params: CreateSchemaParams): string;
 	dropSchema(params: DropSchemaParams): string;
 	alterSchema(schemaName: string, data?: unknown): string;
+	createUdt(udt: HydratedColumn, dbData?: unknown): string;
 
 	hydrateColumn(params: HydrateColumnParams): HydratedColumn;
 	hydrateJsonSchemaColumn(jsonSchema: JsonSchemaColumn, definitionJsonSchema: JsonSchemaColumn): JsonSchemaColumn;

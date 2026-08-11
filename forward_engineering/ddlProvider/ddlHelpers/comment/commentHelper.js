@@ -17,6 +17,7 @@ const OBJECT_TYPE = {
 	column: 'COLUMN',
 	table: 'TABLE',
 	index: 'INDEX',
+	type: 'TYPE',
 };
 
 /** @enum {string} */
@@ -116,6 +117,36 @@ const dropIndexCommentStatement = ({ indexName }) => {
 };
 
 /**
+ * Build a distinct type comment statement.
+ *
+ * @param {{ typeName: string; description?: string }} params Type comment params.
+ * @returns {string} Comment statement.
+ */
+const getTypeCommentStatement = ({ typeName, description }) => {
+	return getCommentStatement({
+		objectName: typeName,
+		objectType: OBJECT_TYPE.type,
+		description,
+		mode: COMMENT_MODE.set,
+	});
+};
+
+/**
+ * Build a statement that removes a distinct type comment.
+ *
+ * @param {{ typeName: string }} params Type name.
+ * @returns {string} Comment statement.
+ */
+const dropTypeCommentStatement = ({ typeName }) => {
+	return getCommentStatement({
+		objectName: typeName,
+		objectType: OBJECT_TYPE.type,
+		description: '',
+		mode: COMMENT_MODE.remove,
+	});
+};
+
+/**
  * Build a schema comment statement.
  *
  * @param {{ schemaName: string; description?: string }} params Schema comment params.
@@ -200,6 +231,8 @@ module.exports = {
 	getTableCommentStatement,
 	getIndexCommentStatement,
 	dropIndexCommentStatement,
+	getTypeCommentStatement,
+	dropTypeCommentStatement,
 	getColumnComments,
 	dropSchemaCommentStatement,
 	dropTableCommentStatement,

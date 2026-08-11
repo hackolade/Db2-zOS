@@ -5,6 +5,10 @@ module.exports = {
 
 	alterSchema: 'ALTER SCHEMA ${schemaName};',
 
+	createType: 'CREATE TYPE ${name} AS ${sourceType};',
+
+	dropType: 'DROP TYPE ${name};',
+
 	createTable: 'CREATE${tableType} TABLE ${name}${tableProps}${tableOptions};',
 
 	dropTable: 'DROP TABLE ${tableName};',

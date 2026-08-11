@@ -50,6 +50,7 @@ const {
 	getColumnComments,
 	getSchemaCommentStatement,
 	getIndexCommentStatement,
+	getTypeCommentStatement,
 } = require('./ddlHelpers/comment/commentHelper.js');
 const { getTableProps } = require('./ddlHelpers/table/getTableProps.js');
 const { getTableOptions } = require('./ddlHelpers/table/getTableOptions.js');
@@ -179,6 +180,31 @@ const alterSchema = schemaName =>
 			schemaName: wrapInQuotes(schemaName),
 		},
 	});
+
+/**
+ * Create distinct type DDL.
+ *
+ * @param {HydratedColumn} udt User-defined type data.
+ * @returns {string} Type DDL.
+ */
+const createUdt = ({ name, schemaName, comment, isActivated = true, ...sourceTypeParams }) => {
+	const wrappedName = getNamePrefixedWithSchemaName({ name, schemaName });
+	const sourceType = getColumnType({
+		...sourceTypeParams,
+		name,
+		primaryKey: false,
+		unique: false,
+		isUDTRef: false,
+	}).trim();
+	const typeStatement = assignTemplates({
+		template: templates.createType,
+		templateData: { name: wrappedName, sourceType },
+	});
+	const commentStatement = getTypeCommentStatement({ typeName: wrappedName, description: comment });
+	const commentDdl = commentStatement ? '\n' + commentStatement + '\n' : '\n';
+
+	return commentDeactivatedStatement(typeStatement + commentDdl, { isActivated });
+};
 
 /**
  * Hydrate column definition.
@@ -852,6 +878,7 @@ module.exports = (_baseProvider, _options, _app) => ({
 	createSchema,
 	dropSchema,
 	alterSchema,
+	createUdt,
 	hydrateColumn,
 	hydrateJsonSchemaColumn,
 	convertColumnDefinition,

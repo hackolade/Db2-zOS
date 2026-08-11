@@ -137,6 +137,45 @@ export type AlterContainer = {
 	isActivated?: boolean;
 };
 
+export type AlterModelDefinitionCompMod = CompMod &
+	Partial<AlterColumnCompMod> & {
+		created?: boolean;
+		deleted?: boolean;
+		modified?: boolean;
+		name?: PropertyPair<string>;
+		description?: PropertyPair<string>;
+		mode?: PropertyPair<string>;
+		type?: PropertyPair<string>;
+		length?: PropertyPair<number>;
+		lengthSemantics?: PropertyPair<string>;
+		precision?: PropertyPair<number>;
+		scale?: PropertyPair<number>;
+		fractSecPrecision?: PropertyPair<number>;
+		withTimeZone?: PropertyPair<boolean>;
+		characterSubtype?: PropertyPair<string>;
+		ccsid?: PropertyPair<number>;
+		inlineLength?: PropertyPair<number>;
+	};
+
+export type AlterModelDefinitionRole = {
+	name: string;
+	description?: string;
+	isActivated?: boolean;
+	compMod?: AlterModelDefinitionCompMod;
+};
+
+export type AlterModelDefinition = JsonSchemaColumn & {
+	name?: string;
+	length?: number;
+	lengthSemantics?: string;
+	precision?: number;
+	scale?: number;
+	description?: string;
+	isActivated?: boolean;
+	compMod?: AlterModelDefinitionCompMod;
+	role: AlterModelDefinitionRole;
+};
+
 export type ViewDefinitionRef = {
 	name?: string;
 	definition?: JsonSchemaColumn;
@@ -242,6 +281,7 @@ export type DeltaModel = {
 		entities?: DeltaSection<AlterTable>;
 		views?: DeltaSection<AlterView>;
 		relationships?: DeltaSection<AlterRelationship>;
+		modelDefinitions?: DeltaSection<AlterModelDefinition>;
 	};
 };
 
