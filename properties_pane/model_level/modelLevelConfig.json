@@ -102,7 +102,7 @@ making sure that you maintain a proper JSON format.
 						}
 					},
 					{
-						"propertyName": "Before each CREATE SCHEMA",
+						"propertyName": "Before each SET SCHEMA",
 						"propertyKeyword": "beforeCreateContainer",
 						"propertyType": "details",
 						"markdown": false,
@@ -113,7 +113,7 @@ making sure that you maintain a proper JSON format.
 						}
 					},
 					{
-						"propertyName": "After each CREATE SCHEMA",
+						"propertyName": "After each SET SCHEMA",
 						"propertyKeyword": "afterCreateContainer",
 						"propertyType": "details",
 						"markdown": false,

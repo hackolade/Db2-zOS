@@ -52,27 +52,17 @@ const getSectionItems = section => ({
 });
 
 /**
- * Build the container statements. Schemas can only be dropped once every table they hold is gone, so the deleted
- * containers are reported separately and applied last.
+ * Build SET SCHEMA statements for added containers. Deleted and modified schemas do not produce schema-level DDL in Db2
+ * for z/OS.
  *
  * @param {{ collection: DeltaModel; app: App }} params Delta model and app instance.
- * @returns {{ deletedContainersScriptDtos: AlterScriptDto[]; upsertedContainersScriptDtos: AlterScriptDto[] }}
- *   Container alter script DTOs.
+ * @returns {AlterScriptDto[]} Container alter script DTOs.
  */
 const getAlterContainersScriptDtos = ({ collection, app }) => {
-	const { added, deleted, modified } = getSectionItems(collection.properties?.containers);
-	const { getAddContainerScriptDto, getDeleteContainerScriptDto, getModifyContainerScriptDto } =
-		getContainersScripts(app);
+	const { added } = getSectionItems(collection.properties?.containers);
+	const { getAddContainerScriptDto } = getContainersScripts(app);
 
-	return {
-		deletedContainersScriptDtos: deleted
-			.map(container => getDeleteContainerScriptDto(container))
-			.filter(scriptDto => scriptDto !== undefined),
-		upsertedContainersScriptDtos: [
-			...added.map(container => getAddContainerScriptDto(container)),
-			...modified.flatMap(container => getModifyContainerScriptDto(container)),
-		].filter(scriptDto => scriptDto !== undefined),
-	};
+	return added.map(container => getAddContainerScriptDto(container)).filter(scriptDto => scriptDto !== undefined);
 };
 
 /**
@@ -312,21 +302,20 @@ const getAlterScriptDtos = (data, app) => {
 		.filter(id => id !== undefined);
 	const relatedSchemas = buildRelatedSchemas(getSectionItems(collection.properties?.entities));
 
-	const { deletedContainersScriptDtos, upsertedContainersScriptDtos } = getAlterContainersScriptDtos({
+	const containerScriptDtos = getAlterContainersScriptDtos({
 		collection,
 		app,
 	});
 	const { deletedTypesScriptDtos, upsertedTypesScriptDtos } = getAlterTypesScriptDtos({ collection, app });
 
 	return [
-		...upsertedContainersScriptDtos,
+		...containerScriptDtos,
 		...upsertedTypesScriptDtos,
 		...getAlterCollectionScriptDtos({ collection, app, inlineDeltaRelationships, relatedSchemas }),
 		...getAlterVersioningScriptDtos({ collection, relatedSchemas }),
 		...getAlterRelationshipsScriptDtos({ collection, ignoreRelationshipIDs }),
 		...getAlterViewScriptDtos({ collection, app }),
 		...deletedTypesScriptDtos,
-		...deletedContainersScriptDtos,
 	]
 		.map(dto => prettifyAlterScriptDto(dto))
 		.filter(dto => dto !== undefined);

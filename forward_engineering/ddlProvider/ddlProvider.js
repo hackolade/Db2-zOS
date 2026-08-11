@@ -5,7 +5,6 @@
  *   CreateSchemaParams,
  *   CreateTableParams,
  *   DdlProvider,
- *   DropSchemaParams,
  *   ForeignKeyInput,
  *   ForeignKeyStatement,
  *   HydrateColumnParams,
@@ -48,7 +47,6 @@ const { getColumnConstraints } = require('./ddlHelpers/columnDefinition/getColum
 const {
 	getTableCommentStatement,
 	getColumnComments,
-	getSchemaCommentStatement,
 	getIndexCommentStatement,
 	getTypeCommentStatement,
 } = require('./ddlHelpers/comment/commentHelper.js');
@@ -130,56 +128,38 @@ const hydrateSchema = containerData => ({
 });
 
 /**
- * Create schema DDL.
+ * Set the current schema.
  *
  * @param {CreateSchemaParams} params Schema params.
- * @returns {string} Schema DDL.
+ * @returns {string} SET SCHEMA DDL.
  */
-const createSchema = ({ schemaName, description, isActivated = true }) => {
+const createSchema = ({ schemaName, isActivated = true }) => {
 	const wrappedSchemaName = wrapInQuotes(schemaName);
-	const schemaStatement = assignTemplates({
-		template: templates.createSchema,
+	const setSchemaStatement = assignTemplates({
+		template: templates.setSchema,
 		templateData: {
 			schemaName: wrappedSchemaName,
 		},
 	});
 
-	const comment = getSchemaCommentStatement({ schemaName: wrappedSchemaName, description });
-	const commentStatement = comment ? '\n' + comment + '\n' : '\n';
-
-	return commentDeactivatedStatement(schemaStatement + commentStatement, { isActivated });
+	return commentDeactivatedStatement(setSchemaStatement + '\n', { isActivated });
 };
 
 /**
- * Drop schema DDL.
+ * Return no DDL for dropping a schema. Db2 for z/OS schemas are qualifiers rather than standalone objects that can be
+ * dropped. This method remains in the provider for framework compatibility.
  *
- * @param {DropSchemaParams} params Schema params.
- * @returns {string} Drop schema DDL.
+ * @returns {string} Empty DDL.
  */
-const dropSchema = ({ name, isActivated = true }) => {
-	const dropSchemaStatement = assignTemplates({
-		template: templates.dropSchema,
-		templateData: {
-			schemaName: wrapInQuotes(name),
-		},
-	});
-
-	return commentDeactivatedStatement(dropSchemaStatement, { isActivated });
-};
+const dropSchema = () => '';
 
 /**
- * Alter schema DDL.
+ * Return no DDL for altering a schema. Db2 for z/OS does not support ALTER SCHEMA. This method remains in the provider
+ * for framework compatibility.
  *
- * @param {string} schemaName Schema name.
- * @returns {string} Alter schema DDL.
+ * @returns {string} Empty DDL.
  */
-const alterSchema = schemaName =>
-	assignTemplates({
-		template: templates.alterSchema,
-		templateData: {
-			schemaName: wrapInQuotes(schemaName),
-		},
-	});
+const alterSchema = () => '';
 
 /**
  * Create distinct type DDL.

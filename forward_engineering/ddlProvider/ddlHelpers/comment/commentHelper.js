@@ -13,7 +13,6 @@ const { wrapInQuotes, commentIfDeactivated, wrapInSingleQuotes } = require('../.
 
 /** @enum {string} */
 const OBJECT_TYPE = {
-	schema: 'SCHEMA',
 	column: 'COLUMN',
 	table: 'TABLE',
 	index: 'INDEX',
@@ -147,21 +146,6 @@ const dropTypeCommentStatement = ({ typeName }) => {
 };
 
 /**
- * Build a schema comment statement.
- *
- * @param {{ schemaName: string; description?: string }} params Schema comment params.
- * @returns {string} Comment statement.
- */
-const getSchemaCommentStatement = ({ schemaName, description }) => {
-	return getCommentStatement({
-		objectName: schemaName,
-		objectType: OBJECT_TYPE.schema,
-		description,
-		mode: COMMENT_MODE.set,
-	});
-};
-
-/**
  * Build column comments for a table.
  *
  * @param {{ tableName: string; columnDefinitions?: HydratedColumn[] }} params Column definitions.
@@ -182,20 +166,6 @@ const getColumnComments = ({ tableName, columnDefinitions }) => {
 		})
 		.join('\n');
 };
-
-/**
- * Build the statement removing a schema comment.
- *
- * @param {{ schemaName: string }} params Schema name.
- * @returns {string} Comment statement.
- */
-const dropSchemaCommentStatement = ({ schemaName }) =>
-	getCommentStatement({
-		objectName: schemaName,
-		objectType: OBJECT_TYPE.schema,
-		description: '',
-		mode: COMMENT_MODE.remove,
-	});
 
 /**
  * Build the statement removing a table comment.
@@ -227,14 +197,12 @@ const dropTableColumnCommentStatement = ({ tableName, columnName }) =>
 
 module.exports = {
 	getColumnCommentStatement,
-	getSchemaCommentStatement,
 	getTableCommentStatement,
 	getIndexCommentStatement,
 	dropIndexCommentStatement,
 	getTypeCommentStatement,
 	dropTypeCommentStatement,
 	getColumnComments,
-	dropSchemaCommentStatement,
 	dropTableCommentStatement,
 	dropTableColumnCommentStatement,
 };
