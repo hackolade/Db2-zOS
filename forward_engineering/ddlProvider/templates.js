@@ -1,9 +1,5 @@
 module.exports = {
-	createSchema: 'CREATE SCHEMA ${schemaName};',
-
-	dropSchema: 'DROP SCHEMA ${schemaName} RESTRICT;',
-
-	alterSchema: 'ALTER SCHEMA ${schemaName};',
+	setSchema: 'SET SCHEMA = ${schemaName};',
 
 	createType: 'CREATE TYPE ${name} AS ${sourceType};',
 
