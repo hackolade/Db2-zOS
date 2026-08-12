@@ -23,6 +23,7 @@ const EXCLUDED_FILES = [
 	'node_modules',
 	'lint-staged.config.js',
 	'scripts',
+	'test',
 ];
 
 module.exports = {

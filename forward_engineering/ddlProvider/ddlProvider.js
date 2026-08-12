@@ -43,7 +43,7 @@ const { assignTemplates } = require('../utils/assignTemplates');
 const keyHelper = require('./ddlHelpers/key/keyHelper.js');
 const { getColumnType } = require('./ddlHelpers/columnDefinition/getColumnType.js');
 const { getColumnDefault } = require('./ddlHelpers/columnDefinition/getColumnDefault.js');
-const { getColumnConstraints } = require('./ddlHelpers/columnDefinition/getColumnConstraints.js');
+const { getColumnNullability, getColumnConstraints } = require('./ddlHelpers/columnDefinition/getColumnConstraints.js');
 const {
 	getTableCommentStatement,
 	getColumnComments,
@@ -262,6 +262,7 @@ const convertColumnDefinition = (columnDefinition, template = templates.columnDe
 		templateData: {
 			name: wrapInQuotes(columnDefinition.name),
 			type: getColumnType(columnDefinition),
+			nullability: getColumnNullability(columnDefinition),
 			default: getColumnDefault(columnDefinition),
 			constraints: getColumnConstraints(columnDefinition),
 		},

@@ -47,22 +47,30 @@ const getConstraintName = ({ unique, primaryKey, primaryKeyOptions, uniqueKeyOpt
 };
 
 /**
+ * Build the column nullability clause.
+ *
+ * @param {{ nullable?: boolean }} params Column nullability.
+ * @returns {string} Nullability DDL fragment.
+ */
+const getColumnNullability = ({ nullable }) => (nullable ? '' : ' NOT NULL');
+
+/**
  * Build column constraint clauses.
  *
  * @param {ColumnConstraintParams} params Column constraint flags.
  * @returns {string} Constraints DDL fragment.
  */
-const getColumnConstraints = ({ nullable, unique, primaryKey, primaryKeyOptions, uniqueKeyOptions, entityName }) => {
+const getColumnConstraints = ({ unique, primaryKey, primaryKeyOptions, uniqueKeyOptions, entityName }) => {
 	const { constraintString, statement } = getOptionsString({
 		...getOptions({ primaryKey, unique, primaryKeyOptions, uniqueKeyOptions }),
 		constraintName: getConstraintName({ unique, primaryKey, primaryKeyOptions, uniqueKeyOptions, entityName }),
 	});
 	const primaryKeyString = primaryKey ? ` PRIMARY KEY` : '';
 	const uniqueKeyString = unique ? ` UNIQUE` : '';
-	const nullableString = nullable ? '' : ' NOT NULL';
-	return `${nullableString}${constraintString}${primaryKeyString}${uniqueKeyString}${statement}`;
+	return `${constraintString}${primaryKeyString}${uniqueKeyString}${statement}`;
 };
 
 module.exports = {
+	getColumnNullability,
 	getColumnConstraints,
 };
