@@ -61,6 +61,7 @@ const { joinActivatedAndDeactivatedStatements } = require('../utils/joinActivate
 const { getIndexName } = require('./ddlHelpers/index/getIndexName.js');
 const { getIndexType } = require('./ddlHelpers/index/getIndexType.js');
 const { getIndexOptions } = require('./ddlHelpers/index/getIndexOptions.js');
+const { getNumericValue } = require('../utils/general.js');
 
 /**
  * Format view columns as a string.
@@ -214,8 +215,8 @@ const hydrateColumn = ({ columnDefinition, jsonSchema, schemaData, definitionJso
 		default: columnDefinition.default,
 		comment: jsonSchema.refDescription ?? jsonSchema.description ?? definitionSchema.description,
 		isActivated: columnDefinition.isActivated,
-		scale: columnDefinition.scale,
-		precision: columnDefinition.precision,
+		scale: getNumericValue(columnDefinition.scale || jsonSchema.scale),
+		precision: getNumericValue(columnDefinition.precision || jsonSchema.precision),
 		length: columnDefinition.length,
 		schemaName: schemaData.schemaName,
 		fractSecPrecision: jsonSchema.fractSecPrecision,

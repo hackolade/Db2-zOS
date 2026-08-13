@@ -321,6 +321,14 @@ const getUpdatedProperties = (compMod, properties) => {
 	return updatedProperties;
 };
 
+/**
+ * Converts input into a number, if it's not valid - returns undefined.
+ *
+ * @param {unknown} prop Unknown input value
+ * @returns {number | undefined} .
+ */
+const getNumericValue = prop => (prop && !Number.isNaN(Number(prop)) ? Number(prop) : undefined);
+
 module.exports = {
 	setTab,
 	hasType,
@@ -343,4 +351,5 @@ module.exports = {
 	getSchemaNameFromCollection,
 	getUpdatedProperties,
 	checkFieldPropertiesChanged,
+	getNumericValue,
 };

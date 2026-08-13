@@ -90,6 +90,9 @@ export type JsonSchemaColumn = {
 	collectionName?: string;
 	bucketName?: string;
 	properties?: Record<string, JsonSchemaColumn>;
+	scale?: number;
+	precision?: number;
+	length?: number;
 };
 
 export type CompositeKeyGroup = {
