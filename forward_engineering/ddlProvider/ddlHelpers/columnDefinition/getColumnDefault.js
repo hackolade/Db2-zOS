@@ -42,11 +42,22 @@ const isRowid = ({ type }) => toUpper(type) === DATA_TYPE.rowid;
  * @param {IdentityOptions} params Identity options.
  * @returns {string} Identity options clause.
  */
-const getIdentityOptions = ({ start, increment, minValue, maxValue, cycle, cache, cacheValue, order }) => {
+const getIdentityOptions = ({
+	start,
+	increment,
+	minValue,
+	maxValue,
+	noMinValue,
+	noMaxValue,
+	cycle,
+	cache,
+	cacheValue,
+	order,
+}) => {
 	const startWith = start ? `START WITH ${start}` : '';
 	const incrementBy = increment ? `INCREMENT BY ${increment}` : '';
-	const minimumValue = minValue ? `MINVALUE ${minValue}` : '';
-	const maximumValue = maxValue ? `MAXVALUE ${maxValue}` : '';
+	const minimumValue = noMinValue ? 'NO MINVALUE' : minValue ? `MINVALUE ${minValue}` : '';
+	const maximumValue = noMaxValue ? 'NO MAXVALUE' : maxValue ? `MAXVALUE ${maxValue}` : '';
 	const cacheOption = cacheValue ? `CACHE ${cacheValue}` : cache;
 
 	return [startWith, incrementBy, cycle, minimumValue, maximumValue, cacheOption, order].filter(Boolean).join(', ');
@@ -65,10 +76,18 @@ const getColumnDefault = ({
 	generated,
 	generatedColumn,
 	generatedColumnType,
+	generatedColumnGenerated,
 	columnGenerationExpression,
+	implicitlyHidden,
 }) => {
+	const hiddenClause = implicitlyHidden ? ' IMPLICITLY HIDDEN' : '';
+
 	if (isRowid({ type }) && generated) {
-		return ` GENERATED ${generated}`;
+		return ` GENERATED ${generated}${hiddenClause}`;
+	}
+
+	if (generatedColumn && generatedColumnType === 'ROW CHANGE TIMESTAMP') {
+		return ` GENERATED ${generatedColumnGenerated ?? 'ALWAYS'} FOR EACH ROW ON UPDATE AS ROW CHANGE TIMESTAMP${hiddenClause}`;
 	}
 
 	if (
@@ -76,7 +95,7 @@ const getColumnDefault = ({
 		generatedColumnType &&
 		['ROW BEGIN', 'ROW END', 'TRANSACTION START ID'].includes(generatedColumnType)
 	) {
-		return ` GENERATED ALWAYS AS ${generatedColumnType}`;
+		return ` GENERATED ALWAYS AS ${generatedColumnType}${hiddenClause}`;
 	}
 
 	if (generatedColumn && columnGenerationExpression) {
@@ -89,7 +108,7 @@ const getColumnDefault = ({
 		const identityOptions = getIdentityOptions(identity);
 		const identityOptionsClause = identityOptions ? ` (${identityOptions})` : '';
 
-		return ` GENERATED ${identity.generated} AS IDENTITY${identityOptionsClause}`;
+		return ` GENERATED ${identity.generated} AS IDENTITY${identityOptionsClause}${hiddenClause}`;
 	}
 
 	if (defaultValue || defaultValue === 0) {

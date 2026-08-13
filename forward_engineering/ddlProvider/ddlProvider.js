@@ -231,8 +231,10 @@ const hydrateColumn = ({ columnDefinition, jsonSchema, schemaData, definitionJso
 		inlineLength: jsonSchema.inlineLength,
 		generatedColumn: jsonSchema.generatedColumn,
 		generatedColumnType: jsonSchema.generatedColumnType,
+		generatedColumnGenerated: jsonSchema.generatedColumnGenerated,
 		columnGenerationExpression: jsonSchema.columnGenerationExpression,
 		generated: jsonSchema.generated,
+		implicitlyHidden: jsonSchema.implicitlyHidden,
 		isUDTRef,
 		itemsType,
 	};

@@ -401,6 +401,27 @@ making sure that you maintain a proper JSON format.
 				"template": "textarea"
 			},
 			{
+				"propertyName": "Generated column",
+				"propertyKeyword": "generatedColumn",
+				"propertyTooltip": "A generated column is always computed by Db2 from an expression.",
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Generation expression",
+				"propertyKeyword": "columnGenerationExpression",
+				"propertyTooltip": "An SQL statement for computing values for this column",
+				"propertyType": "details",
+				"template": "codeEditor",
+				"templateOptions": {
+					"editorDialect": "pgsql"
+				},
+				"markdown": false,
+				"dependency": {
+					"key": "generatedColumn",
+					"value": true
+				}
+			},
+			{
 				"propertyName": "Not null",
 				"propertyKeyword": "required",
 				"enableForReference": true,
@@ -979,6 +1000,27 @@ making sure that you maintain a proper JSON format.
 				"template": "textarea"
 			},
 			{
+				"propertyName": "Generated column",
+				"propertyKeyword": "generatedColumn",
+				"propertyTooltip": "A generated column is always computed by Db2 from an expression.",
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Generation expression",
+				"propertyKeyword": "columnGenerationExpression",
+				"propertyTooltip": "An SQL statement for computing values for this column",
+				"propertyType": "details",
+				"template": "codeEditor",
+				"templateOptions": {
+					"editorDialect": "pgsql"
+				},
+				"markdown": false,
+				"dependency": {
+					"key": "generatedColumn",
+					"value": true
+				}
+			},
+			{
 				"propertyName": "Not null",
 				"propertyKeyword": "required",
 				"enableForReference": true,
@@ -1034,7 +1076,7 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Identity",
 				"propertyType": "block",
 				"propertyKeyword": "identity",
-				"propertyTooltip": "Creates an identity column in a table",
+				"propertyTooltip": "Creates an identity column in a table. Cannot be combined with the column's Generated column/expression option.",
 				"structure": [
 					{
 						"propertyName": "Generated",
@@ -1222,6 +1264,50 @@ making sure that you maintain a proper JSON format.
 								]
 							}
 						}
+					},
+					{
+						"propertyName": "No min value",
+						"propertyKeyword": "noMinValue",
+						"propertyTooltip": "Emits NO MINVALUE instead of a numeric Min value. Mutually exclusive with Min value.",
+						"propertyType": "checkbox",
+						"dependency": {
+							"type": "not",
+							"values": {
+								"type": "or",
+								"values": [
+									{
+										"key": "generated",
+										"exist": false
+									},
+									{
+										"key": "generated",
+										"value": ""
+									}
+								]
+							}
+						}
+					},
+					{
+						"propertyName": "No max value",
+						"propertyKeyword": "noMaxValue",
+						"propertyTooltip": "Emits NO MAXVALUE instead of a numeric Max value. Mutually exclusive with Max value.",
+						"propertyType": "checkbox",
+						"dependency": {
+							"type": "not",
+							"values": {
+								"type": "or",
+								"values": [
+									{
+										"key": "generated",
+										"exist": false
+									},
+									{
+										"key": "generated",
+										"value": ""
+									}
+								]
+							}
+						}
 					}
 				],
 				"dependency": {
@@ -1244,6 +1330,28 @@ making sure that you maintain a proper JSON format.
 							"value": "decimal"
 						}
 					]
+				}
+			},
+			{
+				"propertyName": "Implicitly hidden",
+				"propertyKeyword": "implicitlyHidden",
+				"propertyTooltip": "Excludes this column from SELECT * results unless explicitly named (IMPLICITLY HIDDEN)",
+				"propertyType": "checkbox",
+				"dependency": {
+					"type": "not",
+					"values": {
+						"type": "or",
+						"values": [
+							{
+								"key": "identity.generated",
+								"exist": false
+							},
+							{
+								"key": "identity.generated",
+								"value": ""
+							}
+						]
+					}
 				}
 			},
 			{
@@ -1737,18 +1845,39 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Generated column",
 				"propertyKeyword": "generatedColumn",
-				"propertyTooltip": "A generated column is always computed by Db2 - either from an expression, or as one of the system-period/transaction-timestamp keyword forms used by temporal tables.",
+				"propertyTooltip": "A generated column is always computed by Db2 - either from an expression, or as one of the system-period/transaction-timestamp/row-change-timestamp keyword forms used by temporal tables and optimistic locking.",
 				"propertyType": "checkbox"
 			},
 			{
 				"propertyName": "Generation kind",
 				"propertyKeyword": "generatedColumnType",
-				"propertyTooltip": "Expression uses GENERATED ALWAYS AS (expression). The other options emit the Db2 for z/OS keyword forms used by system-period temporal tables: GENERATED ALWAYS AS ROW BEGIN / ROW END / TRANSACTION START ID.",
+				"propertyTooltip": "Expression uses GENERATED ALWAYS AS (expression). The other options emit the Db2 for z/OS keyword forms used by system-period temporal tables (GENERATED ALWAYS AS ROW BEGIN / ROW END / TRANSACTION START ID) or row-change timestamps for optimistic locking (GENERATED ALWAYS FOR EACH ROW ON UPDATE AS ROW CHANGE TIMESTAMP).",
 				"propertyType": "select",
-				"options": ["", "ROW BEGIN", "ROW END", "TRANSACTION START ID"],
+				"options": ["", "ROW BEGIN", "ROW END", "TRANSACTION START ID", "ROW CHANGE TIMESTAMP"],
 				"dependency": {
 					"key": "generatedColumn",
 					"value": true
+				}
+			},
+			{
+				"propertyName": "Generated",
+				"propertyKeyword": "generatedColumnGenerated",
+				"propertyTooltip": "ROW CHANGE TIMESTAMP columns may be GENERATED ALWAYS or GENERATED BY DEFAULT",
+				"propertyType": "select",
+				"options": ["ALWAYS", "BY DEFAULT"],
+				"defaultValue": "ALWAYS",
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"key": "generatedColumn",
+							"value": true
+						},
+						{
+							"key": "generatedColumnType",
+							"value": "ROW CHANGE TIMESTAMP"
+						}
+					]
 				}
 			},
 			{
@@ -1771,6 +1900,25 @@ making sure that you maintain a proper JSON format.
 						{
 							"key": "generatedColumnType",
 							"value": ""
+						}
+					]
+				}
+			},
+			{
+				"propertyName": "Implicitly hidden",
+				"propertyKeyword": "implicitlyHidden",
+				"propertyTooltip": "Excludes this column from SELECT * results unless explicitly named (IMPLICITLY HIDDEN)",
+				"propertyType": "checkbox",
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"key": "generatedColumn",
+							"value": true
+						},
+						{
+							"key": "generatedColumnType",
+							"value": ["ROW BEGIN", "ROW END", "TRANSACTION START ID", "ROW CHANGE TIMESTAMP"]
 						}
 					]
 				}
@@ -2338,6 +2486,27 @@ making sure that you maintain a proper JSON format.
 				"template": "textarea"
 			},
 			{
+				"propertyName": "Generated column",
+				"propertyKeyword": "generatedColumn",
+				"propertyTooltip": "A generated column is always computed by Db2 from an expression.",
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Generation expression",
+				"propertyKeyword": "columnGenerationExpression",
+				"propertyTooltip": "An SQL statement for computing values for this column",
+				"propertyType": "details",
+				"template": "codeEditor",
+				"templateOptions": {
+					"editorDialect": "pgsql"
+				},
+				"markdown": false,
+				"dependency": {
+					"key": "generatedColumn",
+					"value": true
+				}
+			},
+			{
 				"propertyName": "Not null",
 				"propertyKeyword": "required",
 				"enableForReference": true,
@@ -2892,6 +3061,12 @@ making sure that you maintain a proper JSON format.
 				"defaultValue": "ALWAYS"
 			},
 			{
+				"propertyName": "Implicitly hidden",
+				"propertyKeyword": "implicitlyHidden",
+				"propertyTooltip": "Excludes this column from SELECT * results unless explicitly named (IMPLICITLY HIDDEN)",
+				"propertyType": "checkbox"
+			},
+			{
 				"propertyName": "Comments",
 				"propertyKeyword": "description",
 				"propertyTooltip": "comments",
@@ -3394,6 +3569,27 @@ making sure that you maintain a proper JSON format.
 				"template": "codeEditor",
 				"templateOptions": {
 					"editorDialect": "markdown"
+				}
+			},
+			{
+				"propertyName": "Generated column",
+				"propertyKeyword": "generatedColumn",
+				"propertyTooltip": "A generated column is always computed by Db2 from an expression.",
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Generation expression",
+				"propertyKeyword": "columnGenerationExpression",
+				"propertyTooltip": "An SQL statement for computing values for this column",
+				"propertyType": "details",
+				"template": "codeEditor",
+				"templateOptions": {
+					"editorDialect": "pgsql"
+				},
+				"markdown": false,
+				"dependency": {
+					"key": "generatedColumn",
+					"value": true
 				}
 			},
 			"minProperties",

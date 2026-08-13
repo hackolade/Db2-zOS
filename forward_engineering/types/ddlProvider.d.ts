@@ -34,6 +34,8 @@ export type IdentityOptions = {
 	cycle?: string;
 	minValue?: number;
 	maxValue?: number;
+	noMinValue?: boolean;
+	noMaxValue?: boolean;
 	cache?: string;
 	cacheValue?: number;
 	order?: string;
@@ -77,8 +79,10 @@ export type JsonSchemaColumn = {
 	inlineLength?: number;
 	generatedColumn?: boolean;
 	generatedColumnType?: string;
+	generatedColumnGenerated?: string;
 	columnGenerationExpression?: string;
 	generated?: string;
+	implicitlyHidden?: boolean;
 	items?: JsonSchemaColumn | JsonSchemaColumn[];
 	ofType?: string;
 	notPersistable?: boolean;
@@ -135,8 +139,10 @@ export type HydratedColumn = {
 	inlineLength?: number;
 	generatedColumn?: boolean;
 	generatedColumnType?: string;
+	generatedColumnGenerated?: string;
 	columnGenerationExpression?: string;
 	generated?: string;
+	implicitlyHidden?: boolean;
 	isUDTRef?: boolean;
 	itemsType?: string;
 };
@@ -518,7 +524,9 @@ export type ColumnDefaultParams = {
 	generated?: string;
 	generatedColumn?: boolean;
 	generatedColumnType?: string;
+	generatedColumnGenerated?: string;
 	columnGenerationExpression?: string;
+	implicitlyHidden?: boolean;
 };
 
 export type HydratePartitioningParams = {
