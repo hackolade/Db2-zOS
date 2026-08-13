@@ -1,7 +1,7 @@
 module.exports = {
 	setSchema: 'SET SCHEMA = ${schemaName};',
 
-	createType: 'CREATE TYPE ${name} AS ${sourceType};',
+	createType: 'CREATE DISTINCT TYPE ${name} AS ${sourceType};',
 
 	dropType: 'DROP TYPE ${name};',
 
@@ -21,7 +21,7 @@ module.exports = {
 
 	comment: '\nCOMMENT ON ${objectType} ${objectName} IS ${comment};\n',
 
-	createTableProps: '${columns}${keyConstraints}${checkConstraints}${foreignKeyConstraints}',
+	createTableProps: '${columns}${keyConstraints}${checkConstraints}${foreignKeyConstraints}${temporalPeriods}',
 
 	columnDefinition: '${name}${type}${nullability}${default}${constraints}',
 
