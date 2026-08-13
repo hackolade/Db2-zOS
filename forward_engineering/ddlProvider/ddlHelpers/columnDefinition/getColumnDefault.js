@@ -64,10 +64,19 @@ const getColumnDefault = ({
 	type,
 	generated,
 	generatedColumn,
+	generatedColumnType,
 	columnGenerationExpression,
 }) => {
 	if (isRowid({ type }) && generated) {
 		return ` GENERATED ${generated}`;
+	}
+
+	if (
+		generatedColumn &&
+		generatedColumnType &&
+		['ROW BEGIN', 'ROW END', 'TRANSACTION START ID'].includes(generatedColumnType)
+	) {
+		return ` GENERATED ALWAYS AS ${generatedColumnType}`;
 	}
 
 	if (generatedColumn && columnGenerationExpression) {

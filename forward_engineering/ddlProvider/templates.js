@@ -21,7 +21,7 @@ module.exports = {
 
 	comment: '\nCOMMENT ON ${objectType} ${objectName} IS ${comment};\n',
 
-	createTableProps: '${columns}${keyConstraints}${checkConstraints}${foreignKeyConstraints}',
+	createTableProps: '${columns}${keyConstraints}${checkConstraints}${foreignKeyConstraints}${temporalPeriods}',
 
 	columnDefinition: '${name}${type}${nullability}${default}${constraints}',
 

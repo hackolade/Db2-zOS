@@ -11,6 +11,7 @@
  *   HydratedCheckConstraint,
  *   HydratedColumn,
  *   HydratedTable,
+ *   HydratedTemporalPeriod,
  *   HydratedView,
  *   HydratedViewColumn,
  *   HydrateTableParams,
@@ -134,6 +135,9 @@ const hydrateSchema = containerData => ({
  * @returns {string} SET SCHEMA DDL.
  */
 const createSchema = ({ schemaName, isActivated = true }) => {
+	// Studio always calls createSchema once at the start of a generation run, before any createTable call - the
+	// natural place to reset cross-table ADD VERSIONING/ENABLE ARCHIVE ordering state for this run.
+	resetVersioningTracking();
 	const wrappedSchemaName = wrapInQuotes(schemaName);
 	const setSchemaStatement = assignTemplates({
 		template: templates.setSchema,
@@ -226,6 +230,7 @@ const hydrateColumn = ({ columnDefinition, jsonSchema, schemaData, definitionJso
 		ccsid: jsonSchema.ccsid,
 		inlineLength: jsonSchema.inlineLength,
 		generatedColumn: jsonSchema.generatedColumn,
+		generatedColumnType: jsonSchema.generatedColumnType,
 		columnGenerationExpression: jsonSchema.columnGenerationExpression,
 		generated: jsonSchema.generated,
 		isUDTRef,
@@ -470,6 +475,8 @@ const hydrateTable = ({ tableData, entityData, jsonSchema }) => {
 		partitioning: partitioning ?? undefined,
 		periodForSystemTime: periodForSystemTime ?? undefined,
 		periodForBusinessTime: periodForBusinessTime ?? undefined,
+		archiveEnabled: detailsTab.archiveEnabled,
+		archiveTable: detailsTab.archiveTable,
 		tableKind: detailsTab.tableKind,
 		gttCcsid: detailsTab.gttCcsid,
 		mqtQuery: detailsTab.mqtQuery,
@@ -478,6 +485,100 @@ const hydrateTable = ({ tableData, entityData, jsonSchema }) => {
 		mqtMaintainedBy: detailsTab.mqtMaintainedBy,
 		mqtQueryOptimization: detailsTab.mqtQueryOptimization,
 	};
+};
+
+/**
+ * Tracks table names already rendered in the current generation run (unquoted `schema.table`, upper-cased), and any ADD
+ * VERSIONING/ENABLE ARCHIVE statements still waiting on their target table to be rendered. Db2 requires both tables to
+ * exist before the ALTER can run, but `historyTable`/`archiveTable` are plain text properties, invisible to Studio's
+ * relationship-based entity ordering - so a statement can't always be attached to its owning table's own CREATE TABLE
+ * safely. Reset per `createSchema` call, which Studio always calls once at the start of a generation run (container- or
+ * entity-level) before any `createTable` call.
+ *
+ * @type {Set<string>}
+ */
+let renderedTableNames = new Set();
+/** @type {{ targetTableName: string; statement: string }[]} */
+let pendingVersioningStatements = [];
+
+/**
+ * Reset cross-table ADD VERSIONING/ENABLE ARCHIVE ordering state for a new generation run.
+ *
+ * @returns {void}
+ */
+const resetVersioningTracking = () => {
+	renderedTableNames = new Set();
+	pendingVersioningStatements = [];
+};
+
+/**
+ * Build the ALTER TABLE ... ADD VERSIONING / ENABLE ARCHIVE statements that must follow a table's own CREATE TABLE,
+ * deferring any whose target table hasn't been rendered yet and flushing them once that table comes up - regardless of
+ * which of the two tables that turns out to be, so the statement always lands after both tables exist.
+ *
+ * @param {{
+ * 	tableName: string;
+ * 	canonicalTableName: string;
+ * 	periodForSystemTime?: HydratedTemporalPeriod;
+ * 	archiveEnabled?: boolean;
+ * 	archiveTable?: string;
+ * }} params
+ *   Quoted table name (for the ALTER statement text), unquoted `schema.table` key (for matching against
+ *   `historyTable`/`archiveTable` text values), and temporal/archive linkage data.
+ * @returns {string} Statements ready to attach to this table's own CREATE TABLE, or an empty string.
+ */
+const getVersioningStatementsForTable = ({
+	tableName,
+	canonicalTableName,
+	periodForSystemTime,
+	archiveEnabled,
+	archiveTable,
+}) => {
+	/** @type {string[]} */
+	const readyStatements = [];
+
+	pendingVersioningStatements = pendingVersioningStatements.filter(pending => {
+		if (pending.targetTableName !== canonicalTableName) {
+			return true;
+		}
+		readyStatements.push(pending.statement);
+		return false;
+	});
+
+	/** @type {{ targetTableName: string; statement: string }[]} */
+	const candidates = [];
+
+	if (periodForSystemTime?.historyTable) {
+		candidates.push({
+			targetTableName: toUpper(periodForSystemTime.historyTable),
+			statement: assignTemplates({
+				template: templates.addVersioning,
+				templateData: { tableName, historyTableName: periodForSystemTime.historyTable },
+			}),
+		});
+	}
+
+	if (archiveEnabled && archiveTable) {
+		candidates.push({
+			targetTableName: toUpper(archiveTable),
+			statement: assignTemplates({
+				template: templates.enableArchive,
+				templateData: { tableName, archiveTableName: archiveTable },
+			}),
+		});
+	}
+
+	candidates.forEach(candidate => {
+		if (renderedTableNames.has(candidate.targetTableName)) {
+			readyStatements.push(candidate.statement);
+		} else {
+			pendingVersioningStatements.push(candidate);
+		}
+	});
+
+	renderedTableNames.add(canonicalTableName);
+
+	return readyStatements.length > 0 ? '\n\n' + readyStatements.join('\n\n') : '';
 };
 
 /**
@@ -517,6 +618,8 @@ const createTable = (tableData, isActivated = true) => {
 		partitioning,
 		periodForSystemTime,
 		periodForBusinessTime,
+		archiveEnabled,
+		archiveTable,
 		description,
 		tableProperties,
 	} = tableData;
@@ -574,6 +677,8 @@ const createTable = (tableData, isActivated = true) => {
 	}
 
 	const isMaterializedQuery = tableKind === 'materializedQuery';
+	// PERIOD SYSTEM_TIME/BUSINESS_TIME must not be specified with IN ACCELERATOR.
+	const canHaveTemporalPeriods = inClauseType !== 'accelerator';
 	const tableProps = isMaterializedQuery
 		? ''
 		: getTableProps({
@@ -581,6 +686,8 @@ const createTable = (tableData, isActivated = true) => {
 				foreignKeyConstraints: foreignKeyConstraints ?? [],
 				keyConstraints: keyConstraints ?? [],
 				checkConstraints: checkConstraints ?? [],
+				periodForSystemTime: canHaveTemporalPeriods ? periodForSystemTime : undefined,
+				periodForBusinessTime: canHaveTemporalPeriods ? periodForBusinessTime : undefined,
 				isActivated,
 			});
 	const renderedTableOptions = getTableOptions({
@@ -596,8 +703,6 @@ const createTable = (tableData, isActivated = true) => {
 		acceleratorName,
 		tableOptions,
 		partitioning,
-		periodForSystemTime,
-		periodForBusinessTime,
 		tableProperties,
 	});
 
@@ -613,8 +718,15 @@ const createTable = (tableData, isActivated = true) => {
 			tableOptions: renderedTableOptions,
 		},
 	});
+	const versioningStatements = getVersioningStatementsForTable({
+		tableName,
+		canonicalTableName: toUpper(`${schemaData.schemaName}.${name}`),
+		periodForSystemTime: canHaveTemporalPeriods ? periodForSystemTime : undefined,
+		archiveEnabled,
+		archiveTable,
+	});
 
-	return commentDeactivatedStatement(createTableDdl + commentStatements, {
+	return commentDeactivatedStatement(createTableDdl + commentStatements + versioningStatements, {
 		isActivated,
 	});
 };

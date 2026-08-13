@@ -1735,6 +1735,47 @@ making sure that you maintain a proper JSON format.
 				}
 			},
 			{
+				"propertyName": "Generated column",
+				"propertyKeyword": "generatedColumn",
+				"propertyTooltip": "A generated column is always computed by Db2 - either from an expression, or as one of the system-period/transaction-timestamp keyword forms used by temporal tables.",
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Generation kind",
+				"propertyKeyword": "generatedColumnType",
+				"propertyTooltip": "Expression uses GENERATED ALWAYS AS (expression). The other options emit the Db2 for z/OS keyword forms used by system-period temporal tables: GENERATED ALWAYS AS ROW BEGIN / ROW END / TRANSACTION START ID.",
+				"propertyType": "select",
+				"options": ["", "ROW BEGIN", "ROW END", "TRANSACTION START ID"],
+				"dependency": {
+					"key": "generatedColumn",
+					"value": true
+				}
+			},
+			{
+				"propertyName": "Generation expression",
+				"propertyKeyword": "columnGenerationExpression",
+				"propertyTooltip": "An SQL statement for computing values for this column",
+				"propertyType": "details",
+				"template": "codeEditor",
+				"templateOptions": {
+					"editorDialect": "pgsql"
+				},
+				"markdown": false,
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"key": "generatedColumn",
+							"value": true
+						},
+						{
+							"key": "generatedColumnType",
+							"value": ""
+						}
+					]
+				}
+			},
+			{
 				"propertyName": "Not null",
 				"propertyKeyword": "required",
 				"enableForReference": true,

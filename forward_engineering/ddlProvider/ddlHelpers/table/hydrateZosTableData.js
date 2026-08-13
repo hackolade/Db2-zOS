@@ -72,6 +72,7 @@ const hydrateTemporalPeriod = ({ jsonSchema, period }) => {
 		startColumn,
 		endColumn,
 		endInclusive: periodConfig.endInclusive,
+		historyTable: periodConfig.historyTable,
 	};
 };
 
