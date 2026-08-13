@@ -59,7 +59,6 @@ const getDbCollectionsData = (_connectionInfo, _appLogger, callback, _app) => {
 
 module.exports = {
 	disconnect,
-	// testConnection,
 	getSchemaNames,
 	getDbCollectionsNames,
 	getDbCollectionsData,
