@@ -680,8 +680,17 @@ const createTable = (tableData, isActivated = true) => {
 	const isMaterializedQuery = tableKind === 'materializedQuery';
 	// PERIOD SYSTEM_TIME/BUSINESS_TIME must not be specified with IN ACCELERATOR.
 	const canHaveTemporalPeriods = inClauseType !== 'accelerator';
+	// The optional CREATE TABLE tableName (col1, col2, ...) AS (fullselect) result-column list is derived
+	// from the modeled columns (rather than re-parsed from the fullselect), so it always reflects any
+	// renames made in Studio after reverse engineering.
+	const mqtResultColumns = (columnDefinitions ?? [])
+		.filter(columnDefinition => columnDefinition.isActivated ?? true)
+		.map(columnDefinition => wrapInQuotes(columnDefinition.name))
+		.join(', ');
 	const tableProps = isMaterializedQuery
-		? ''
+		? mqtResultColumns
+			? `\n(${mqtResultColumns})`
+			: ''
 		: getTableProps({
 				columns: columns ?? [],
 				foreignKeyConstraints: foreignKeyConstraints ?? [],
