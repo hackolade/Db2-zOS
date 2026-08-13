@@ -11,6 +11,7 @@
 	"hasUpdateScript": false,
 	"applyScriptToInstance": false,
 	"combinedContainers": true,
+	"useAlterTableForSelfReferencingForeignKeys": true,
 	"feLevelSelector": {
 		"container": true,
 		"model": true
