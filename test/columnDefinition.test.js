@@ -52,3 +52,19 @@ void test('keeps inline key constraints after identity generation', () => {
 		'"id" INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) CONSTRAINT "sample_pk" PRIMARY KEY',
 	);
 });
+
+void test('omits the empty parentheses when identity has no options', () => {
+	const columnDefinition = ddlProvider.convertColumnDefinition({
+		name: 'id',
+		type: 'BIGINT',
+		primaryKey: false,
+		unique: false,
+		nullable: false,
+		isActivated: true,
+		identity: {
+			generated: 'ALWAYS',
+		},
+	});
+
+	assert.equal(columnDefinition, '"id" BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY');
+});

@@ -87,8 +87,9 @@ const getColumnDefault = ({
 
 	if (isGeneratedIdentity && identity) {
 		const identityOptions = getIdentityOptions(identity);
+		const identityOptionsClause = identityOptions ? ` (${identityOptions})` : '';
 
-		return ` GENERATED ${identity.generated} AS IDENTITY (${identityOptions})`;
+		return ` GENERATED ${identity.generated} AS IDENTITY${identityOptionsClause}`;
 	}
 
 	if (defaultValue || defaultValue === 0) {
