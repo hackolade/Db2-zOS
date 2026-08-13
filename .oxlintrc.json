@@ -47,7 +47,7 @@
 		"jsdoc/require-param-type": "error",
 		"jsdoc/require-returns": "error",
 		"jsdoc/require-returns-type": "error",
-		"typescript/prefer-nullish-coalescing": "warn"
+		"typescript/prefer-nullish-coalescing": "off"
 	},
 	"ignorePatterns": [
 		"**/*.config.*",
