@@ -181,3 +181,30 @@ void test('does not emit IMPLICITLY HIDDEN for a plain expression-generated colu
 
 	assert.ok(!columnDefinition.includes('IMPLICITLY HIDDEN'));
 });
+
+void test('uses a schema-qualified UDT name for a column that references a model definition', () => {
+	const jsonSchema = ddlProvider.hydrateJsonSchemaColumn(
+		{
+			$ref: '#model/definitions/MONEY',
+			isActivated: true,
+		},
+		{
+			type: 'numeric',
+			mode: 'integer',
+		},
+	);
+	const hydratedColumn = ddlProvider.hydrateColumn({
+		columnDefinition: {
+			name: 'price',
+			type: 'MONEY',
+			nullable: true,
+			isActivated: true,
+		},
+		jsonSchema,
+		schemaData: { schemaName: 'new_schema' },
+	});
+
+	assert.equal(jsonSchema.$ref, '#model/definitions/MONEY');
+	assert.equal(hydratedColumn.isUDTRef, true);
+	assert.equal(ddlProvider.convertColumnDefinition(hydratedColumn), '"price" "new_schema"."MONEY"');
+});

@@ -251,9 +251,8 @@ const hydrateJsonSchemaColumn = (jsonSchema, definitionJsonSchema) => {
 	if (!jsonSchema.$ref || isEmpty(definitionJsonSchema)) {
 		return jsonSchema;
 	}
-	const { $ref: _ref, ...jsonSchemaWithoutRef } = jsonSchema;
 
-	return { ...definitionJsonSchema, ...jsonSchemaWithoutRef };
+	return { ...definitionJsonSchema, ...jsonSchema };
 };
 
 /**

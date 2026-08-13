@@ -1,7 +1,7 @@
 module.exports = {
 	setSchema: 'SET SCHEMA = ${schemaName};',
 
-	createType: 'CREATE TYPE ${name} AS ${sourceType};',
+	createType: 'CREATE DISTINCT TYPE ${name} AS ${sourceType};',
 
 	dropType: 'DROP TYPE ${name};',
 
