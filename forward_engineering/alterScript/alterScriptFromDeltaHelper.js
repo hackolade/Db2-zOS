@@ -20,7 +20,6 @@ const {
 	getModifyForeignKeyScriptDtos,
 } = require('./alterScriptHelpers/alterForeignKeyHelper');
 const { getViewsScripts } = require('./alterScriptHelpers/alterViewHelper');
-const { getAddVersioningScriptDto, getEnableArchiveScriptDto } = require('./alterScriptHelpers/alterVersioningHelper');
 const { getSchemaOfAlterCollection, getSchemaNameFromCollection } = require('../utils/general');
 
 /**
@@ -152,27 +151,6 @@ const getAlterCollectionScriptDtos = ({ collection, app, inlineDeltaRelationship
 		...modified.flatMap(item => getModifyColumnScriptDtos(item)),
 		...modified.flatMap(item => getModifyCollectionKeysScriptDtos(item)),
 	];
-};
-
-/**
- * Build the ALTER TABLE ... ADD VERSIONING and ALTER TABLE ... ENABLE ARCHIVE statements linking a table to its history
- * table or archive table, for every added or modified entity. Runs after all entities in the batch are created, so the
- * referenced tables already exist by the time it runs.
- *
- * @param {{ collection: DeltaModel; relatedSchemas: Record<string, AlterTable> }} params Delta model and sibling
- *   entities keyed by GUID.
- * @returns {AlterScriptDto[]} Alter script DTOs.
- */
-const getAlterVersioningScriptDtos = ({ collection, relatedSchemas }) => {
-	const { added, modified } = getSectionItems(collection.properties?.entities);
-	const entities = [...added, ...modified];
-	const addVersioningScriptDto = getAddVersioningScriptDto(relatedSchemas);
-	const enableArchiveScriptDto = getEnableArchiveScriptDto(relatedSchemas);
-
-	return [
-		...entities.map(item => addVersioningScriptDto(item)),
-		...entities.map(item => enableArchiveScriptDto(item)),
-	].filter(dto => dto !== undefined);
 };
 
 /**
@@ -312,7 +290,6 @@ const getAlterScriptDtos = (data, app) => {
 		...containerScriptDtos,
 		...upsertedTypesScriptDtos,
 		...getAlterCollectionScriptDtos({ collection, app, inlineDeltaRelationships, relatedSchemas }),
-		...getAlterVersioningScriptDtos({ collection, relatedSchemas }),
 		...getAlterRelationshipsScriptDtos({ collection, ignoreRelationshipIDs }),
 		...getAlterViewScriptDtos({ collection, app }),
 		...deletedTypesScriptDtos,

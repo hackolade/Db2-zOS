@@ -4,8 +4,7 @@
  *   HydratedPartitioning,
  *   InClauseParams,
  *   OptionConfig,
- *   TableOptionsBlock,
- *   TemporalPeriodsParams
+ *   TableOptionsBlock
  * } from '../../../types/ddlProvider'
  */
 
@@ -273,33 +272,6 @@ const getPartitioningClause = ({ partitioning }) => {
 };
 
 /**
- * Build temporal period clauses.
- *
- * @param {TemporalPeriodsParams} params Period data.
- * @returns {string} Period clauses.
- */
-const getTemporalPeriodsClause = ({ periodForSystemTime, periodForBusinessTime }) => {
-	const clauses = [];
-
-	if (periodForSystemTime?.startColumn && periodForSystemTime?.endColumn) {
-		clauses.push(
-			`PERIOD FOR SYSTEM_TIME (${wrapInQuotes(periodForSystemTime.startColumn)}, ${wrapInQuotes(periodForSystemTime.endColumn)})`,
-		);
-	}
-
-	if (periodForBusinessTime?.startColumn && periodForBusinessTime?.endColumn) {
-		const endInclusive = periodForBusinessTime.endInclusive
-			? ` ${toUpper(periodForBusinessTime.endInclusive)}`
-			: '';
-		clauses.push(
-			`PERIOD FOR BUSINESS_TIME (${wrapInQuotes(periodForBusinessTime.startColumn)}, ${wrapInQuotes(periodForBusinessTime.endColumn)}${endInclusive})`,
-		);
-	}
-
-	return clauses.join('\n\t');
-};
-
-/**
  * Build the AS (fullselect) clause and refresh/maintenance options of a materialized query table.
  *
  * @param {Partial<CreateTableParams>} tableData Table data.
@@ -362,16 +334,9 @@ const getTableOptions = tableData => {
 	const inClause = getInClause(tableData);
 	const structuredOptions = getStructuredTableOptions(tableData);
 	const partitioning = tableData.inClauseType === 'accelerator' ? '' : getPartitioningClause(tableData);
-	const temporal =
-		tableData.inClauseType === 'accelerator'
-			? ''
-			: getTemporalPeriodsClause({
-					periodForSystemTime: tableData.periodForSystemTime,
-					periodForBusinessTime: tableData.periodForBusinessTime,
-				});
 	const tableProperties = tableData.tableProperties ?? '';
 
-	const statements = [mqtClause, inClause, structuredOptions.trim(), partitioning, temporal, tableProperties]
+	const statements = [mqtClause, inClause, structuredOptions.trim(), partitioning, tableProperties]
 		.filter(Boolean)
 		.join('\n\t');
 
@@ -382,6 +347,5 @@ module.exports = {
 	getTableOptions,
 	getInClause,
 	getPartitioningClause,
-	getTemporalPeriodsClause,
 	getMqtClause,
 };

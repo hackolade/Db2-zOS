@@ -3,10 +3,12 @@
  *   DividedConstraints,
  *   ForeignKeyStatement,
  *   KeyConstraint,
- *   TablePropsParams
+ *   TablePropsParams,
+ *   TemporalPeriodsParams
  * } from '../../../types/ddlProvider'
  */
 
+const toUpper = require('lodash/toUpper');
 const templates = require('../../templates');
 const { assignTemplates } = require('../../../utils/assignTemplates');
 const {
@@ -18,6 +20,34 @@ const {
 } = require('../../../utils/general');
 const { getOptionsString } = require('../constraint/getOptionsString');
 const { joinActivatedAndDeactivatedStatements } = require('../../../utils/joinActivatedAndDeactivatedStatements');
+
+/**
+ * Build PERIOD SYSTEM_TIME / PERIOD BUSINESS_TIME table elements. Db2 for z/OS places these inline in the table-element
+ * list (no FOR keyword) - not as a trailing clause after the closing parenthesis.
+ *
+ * @param {TemporalPeriodsParams} params Period data.
+ * @returns {string[]} Period table elements.
+ */
+const getTemporalPeriodTableElements = ({ periodForSystemTime, periodForBusinessTime }) => {
+	const clauses = [];
+
+	if (periodForSystemTime?.startColumn && periodForSystemTime?.endColumn) {
+		clauses.push(
+			`PERIOD SYSTEM_TIME (${wrapInQuotes(periodForSystemTime.startColumn)}, ${wrapInQuotes(periodForSystemTime.endColumn)})`,
+		);
+	}
+
+	if (periodForBusinessTime?.startColumn && periodForBusinessTime?.endColumn) {
+		const endInclusive = periodForBusinessTime.endInclusive
+			? ` ${toUpper(periodForBusinessTime.endInclusive)}`
+			: '';
+		clauses.push(
+			`PERIOD BUSINESS_TIME (${wrapInQuotes(periodForBusinessTime.startColumn)}, ${wrapInQuotes(periodForBusinessTime.endColumn)}${endInclusive})`,
+		);
+	}
+
+	return clauses;
+};
 
 /**
  * Extract constraint statement text.
@@ -101,7 +131,15 @@ const getDividedForeignKeyConstraints = ({ foreignKeyConstraints }) => {
  * @param {TablePropsParams} params Table props input.
  * @returns {string} Table props DDL.
  */
-const getTableProps = ({ columns, foreignKeyConstraints, keyConstraints, checkConstraints, isActivated }) => {
+const getTableProps = ({
+	columns,
+	foreignKeyConstraints,
+	keyConstraints,
+	checkConstraints,
+	periodForSystemTime,
+	periodForBusinessTime,
+	isActivated,
+}) => {
 	const dividedKeysConstraints = getDividedKeysConstraints({ keyConstraints, isActivated });
 	const dividedForeignKeyConstraints = getDividedForeignKeyConstraints({ foreignKeyConstraints });
 	const keyConstraintsString = generateConstraintsString({
@@ -116,6 +154,13 @@ const getTableProps = ({ columns, foreignKeyConstraints, keyConstraints, checkCo
 		dividedConstraints: { activatedItems: checkConstraints ?? [], deactivatedItems: [] },
 		isParentActivated: isActivated,
 	});
+	const temporalPeriodsString = generateConstraintsString({
+		dividedConstraints: {
+			activatedItems: getTemporalPeriodTableElements({ periodForSystemTime, periodForBusinessTime }),
+			deactivatedItems: [],
+		},
+		isParentActivated: isActivated,
+	});
 	const columnsString = joinActivatedAndDeactivatedStatements({ statements: columns, indent: '\n\t' });
 
 	const tableProps = assignTemplates({
@@ -125,6 +170,7 @@ const getTableProps = ({ columns, foreignKeyConstraints, keyConstraints, checkCo
 			foreignKeyConstraints: foreignKeyConstraintsString,
 			keyConstraints: keyConstraintsString,
 			checkConstraints: checkConstraintsString,
+			temporalPeriods: temporalPeriodsString,
 		},
 	});
 

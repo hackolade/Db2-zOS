@@ -299,11 +299,8 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Archive table",
 				"propertyKeyword": "archiveTable",
-				"propertyTooltip": "Table that stores rows deleted from this table. Generates an ALTER TABLE ... ENABLE ARCHIVE USE ARCHIVE TABLE statement once both tables exist.",
-				"propertyType": "selecthashed",
-				"template": "entities",
-				"withEmptyOption": true,
-				"excludeCurrent": true,
+				"propertyTooltip": "Schema-qualified table (schema.table) that stores rows deleted from this table. Generates an ALTER TABLE ... ENABLE ARCHIVE USE ARCHIVE TABLE statement once both tables exist.",
+				"propertyType": "text",
 				"dependency": {
 					"key": "archiveEnabled",
 					"value": true
@@ -683,11 +680,8 @@ making sure that you maintain a proper JSON format.
 					{
 						"propertyName": "History table",
 						"propertyKeyword": "historyTable",
-						"propertyTooltip": "Optional table that stores prior row versions. When set, an ALTER TABLE ... ADD VERSIONING USE HISTORY TABLE statement is generated once both tables exist.",
-						"propertyType": "selecthashed",
-						"template": "entities",
-						"withEmptyOption": true,
-						"excludeCurrent": true
+						"propertyTooltip": "Optional schema-qualified table that stores prior row versions (schema.table). When set, an ALTER TABLE ... ADD VERSIONING USE HISTORY TABLE statement is generated once both tables exist.",
+						"propertyType": "text"
 					}
 				]
 			},

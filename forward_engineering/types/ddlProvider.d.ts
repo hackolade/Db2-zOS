@@ -34,6 +34,8 @@ export type IdentityOptions = {
 	cycle?: string;
 	minValue?: number;
 	maxValue?: number;
+	noMinValue?: boolean;
+	noMaxValue?: boolean;
 	cache?: string;
 	cacheValue?: number;
 	order?: string;
@@ -76,8 +78,11 @@ export type JsonSchemaColumn = {
 	ccsid?: number;
 	inlineLength?: number;
 	generatedColumn?: boolean;
+	generatedColumnType?: string;
+	generatedColumnGenerated?: string;
 	columnGenerationExpression?: string;
 	generated?: string;
+	implicitlyHidden?: boolean;
 	items?: JsonSchemaColumn | JsonSchemaColumn[];
 	ofType?: string;
 	notPersistable?: boolean;
@@ -90,6 +95,9 @@ export type JsonSchemaColumn = {
 	collectionName?: string;
 	bucketName?: string;
 	properties?: Record<string, JsonSchemaColumn>;
+	scale?: number;
+	precision?: number;
+	length?: number;
 };
 
 export type CompositeKeyGroup = {
@@ -133,8 +141,11 @@ export type HydratedColumn = {
 	ccsid?: number;
 	inlineLength?: number;
 	generatedColumn?: boolean;
+	generatedColumnType?: string;
+	generatedColumnGenerated?: string;
 	columnGenerationExpression?: string;
 	generated?: string;
+	implicitlyHidden?: boolean;
 	isUDTRef?: boolean;
 	itemsType?: string;
 };
@@ -209,6 +220,7 @@ export type HydratedTemporalPeriod = {
 	startColumn?: string;
 	endColumn?: string;
 	endInclusive?: string;
+	historyTable?: string;
 };
 
 export type HydratedPartitionKey = {
@@ -330,6 +342,8 @@ export type HydratedTable = {
 	partitioning?: HydratedPartitioning;
 	periodForSystemTime?: HydratedTemporalPeriod;
 	periodForBusinessTime?: HydratedTemporalPeriod;
+	archiveEnabled?: boolean;
+	archiveTable?: string;
 	columnDefinitions?: HydratedColumn[];
 	columns?: string[];
 	foreignKeyConstraints?: ForeignKeyStatement[];
@@ -366,6 +380,8 @@ export type CreateTableParams = {
 	partitioning?: HydratedPartitioning;
 	periodForSystemTime?: HydratedTemporalPeriod;
 	periodForBusinessTime?: HydratedTemporalPeriod;
+	archiveEnabled?: boolean;
+	archiveTable?: string;
 };
 
 export type HydratedViewColumn = {
@@ -510,7 +526,10 @@ export type ColumnDefaultParams = {
 	type: string;
 	generated?: string;
 	generatedColumn?: boolean;
+	generatedColumnType?: string;
+	generatedColumnGenerated?: string;
 	columnGenerationExpression?: string;
+	implicitlyHidden?: boolean;
 };
 
 export type HydratePartitioningParams = {
@@ -561,6 +580,8 @@ export type TablePropsParams = {
 	foreignKeyConstraints: ForeignKeyStatement[];
 	keyConstraints: KeyConstraint[];
 	checkConstraints?: string[];
+	periodForSystemTime?: HydratedTemporalPeriod;
+	periodForBusinessTime?: HydratedTemporalPeriod;
 	isActivated: boolean;
 };
 
