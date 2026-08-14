@@ -128,7 +128,7 @@
 	"TOOLTIPS___MAX_VARIABLE": "max variable",
 	"TOOLTIPS___BACKWARDS": "Backwards",
 	"TOOLTIPS___NORMALIZATION": "Normalization",
-	"MAIN_MENU___FORWARD_DB_BUCKETS": "Db2 DDL...",
+	"MAIN_MENU___FORWARD_DB_BUCKETS": "Db2 for z/OS DDL...",
 	"NEW___MODEL_NAME": "New model",
 	"NEW___BUCKET_NAME": "New schema",
 	"NEW___COLLECTION_NAME": "New table",
