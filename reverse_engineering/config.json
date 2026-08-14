@@ -1,4 +1,4 @@
 {
-	"defaultDdlType": "db2",
+	"defaultDdlType": "db2-zos",
 	"excludeDocKind": ["id"]
 }
