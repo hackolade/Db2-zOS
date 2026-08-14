@@ -1,101 +1,101 @@
 {
-	"name": "Db2-zOS",
-	"version": "0.2.0",
-	"type": "commonjs",
-	"author": "hackolade",
-	"engines": {
-		"hackolade": "7.7.10",
-		"hackoladePlugin": "1.2.0",
-		"node": ">=24.0.0"
-	},
-	"contributes": {
-		"target": {
-			"applicationTarget": "Db2-zOS",
-			"title": "Db2 for z/OS",
-			"versions": [
-				"v13"
-			]
-		},
-		"features": {
-			"nestedCollections": false,
-			"disablePatternField": true,
-			"disableMultipleTypes": true,
-			"enableForwardEngineering": true,
-			"enableReverseEngineering": {
-				"jsonDocument": true,
-				"jsonSchema": true,
-				"ddl": true,
-				"xsd": true,
-				"excel": true,
-				"plugin": false
-			},
-			"disableChoices": true,
-			"enableJsonType": true,
-			"useJsonTypesWithComplexTypes": true,
-			"reverseSchemaIntoOneColumn": true,
-			"disableDenormalization": true,
-			"enableComplexTypesNormalization": true,
-			"generateAssociativeEntitiesForManyToManyRelationships": true,
-			"restrictNestedFieldsAsPrimaryKey": false,
-			"views": {
-				"enabled": true,
-				"viewLevel": "model",
-				"disablePipelines": true,
-				"includeViews": true
-			},
-			"relationships": {
-				"compositeRelationships": {
-					"allowRelationshipsByProperties": [
-						"primaryKey",
-						"unique",
-						"compositeUniqueKey",
-						"compositePrimaryKey"
-					]
-				}
-			},
-			"FEScriptCommentsSupported": true,
-			"enableFetchSystemEntitiesCheckbox": true,
-			"discoverRelationships": true,
-			"enableKeysMultipleAbrr": true
-		}
-	},
-	"description": "Hackolade plugin for IBM Db2 for z/OS",
-	"disabled": false,
-	"simple-git-hooks": {
-		"pre-commit": "npx lint-staged --config lint-staged.config.js",
-		"pre-push": "npm run check"
-	},
-	"scripts": {
-		"check": "npm run format:check && npm run lint && npm run types:check && npm test && npm run bundle:check",
-		"test": "node --test test/*.test.js",
-		"types:check": "tsc --noEmit",
-		"lint": "oxlint --type-aware --deny-warnings .",
-		"bundle:check": "node esbuild.package.js --write=false",
-		"package": "node esbuild.package.js",
-		"format": "oxfmt",
-		"format:check": "oxfmt --check",
-		"prepare": "simple-git-hooks"
-	},
-	"devDependencies": {
-		"@hackolade/hck-esbuild-plugins-pack": "0.0.1",
-		"@types/lodash": "4.17.16",
-		"@types/node": "24.13.3",
-		"esbuild": "0.28.1",
-		"esbuild-node-externals": "1.23.1",
-		"esbuild-plugin-clean": "1.0.1",
-		"esbuild-plugin-copy": "2.1.1",
-		"eslint-plugin-jsdoc": "63.3.2",
-		"lint-staged": "17.2.0",
-		"oxfmt": "0.61.0",
-		"oxlint": "1.76.0",
-		"oxlint-tsgolint": "7.0.2001",
-		"simple-git-hooks": "2.13.1",
-		"typescript": "7.0.2"
-	},
-	"overrides": {
-		"minimatch": "10.2.6"
-	},
-	"dependencies": {
-		"lodash": "4.18.1"
-	}
+    "name": "Db2-zOS",
+    "version": "0.2.1",
+    "type": "commonjs",
+    "author": "hackolade",
+    "engines": {
+        "hackolade": "7.7.10",
+        "hackoladePlugin": "1.2.0",
+        "node": ">=24.0.0"
+    },
+    "contributes": {
+        "target": {
+            "applicationTarget": "Db2-zOS",
+            "title": "Db2 for z/OS",
+            "versions": [
+                "v13"
+            ]
+        },
+        "features": {
+            "nestedCollections": false,
+            "disablePatternField": true,
+            "disableMultipleTypes": true,
+            "enableForwardEngineering": true,
+            "enableReverseEngineering": {
+                "jsonDocument": true,
+                "jsonSchema": true,
+                "ddl": true,
+                "xsd": true,
+                "excel": true,
+                "plugin": false
+            },
+            "disableChoices": true,
+            "enableJsonType": true,
+            "useJsonTypesWithComplexTypes": true,
+            "reverseSchemaIntoOneColumn": true,
+            "disableDenormalization": true,
+            "enableComplexTypesNormalization": true,
+            "generateAssociativeEntitiesForManyToManyRelationships": true,
+            "restrictNestedFieldsAsPrimaryKey": false,
+            "views": {
+                "enabled": true,
+                "viewLevel": "model",
+                "disablePipelines": true,
+                "includeViews": true
+            },
+            "relationships": {
+                "compositeRelationships": {
+                    "allowRelationshipsByProperties": [
+                        "primaryKey",
+                        "unique",
+                        "compositeUniqueKey",
+                        "compositePrimaryKey"
+                    ]
+                }
+            },
+            "FEScriptCommentsSupported": true,
+            "enableFetchSystemEntitiesCheckbox": true,
+            "discoverRelationships": true,
+            "enableKeysMultipleAbrr": true
+        }
+    },
+    "description": "Hackolade plugin for IBM Db2 for z/OS",
+    "disabled": false,
+    "simple-git-hooks": {
+        "pre-commit": "npx lint-staged --config lint-staged.config.js",
+        "pre-push": "npm run check"
+    },
+    "scripts": {
+        "check": "npm run format:check && npm run lint && npm run types:check && npm test && npm run bundle:check",
+        "test": "node --test test/*.test.js",
+        "types:check": "tsc --noEmit",
+        "lint": "oxlint --type-aware --deny-warnings .",
+        "bundle:check": "node esbuild.package.js --write=false",
+        "package": "node esbuild.package.js",
+        "format": "oxfmt",
+        "format:check": "oxfmt --check",
+        "prepare": "simple-git-hooks"
+    },
+    "devDependencies": {
+        "@hackolade/hck-esbuild-plugins-pack": "0.0.1",
+        "@types/lodash": "4.17.16",
+        "@types/node": "24.13.3",
+        "esbuild": "0.28.1",
+        "esbuild-node-externals": "1.23.1",
+        "esbuild-plugin-clean": "1.0.1",
+        "esbuild-plugin-copy": "2.1.1",
+        "eslint-plugin-jsdoc": "63.3.2",
+        "lint-staged": "17.2.0",
+        "oxfmt": "0.61.0",
+        "oxlint": "1.76.0",
+        "oxlint-tsgolint": "7.0.2001",
+        "simple-git-hooks": "2.13.1",
+        "typescript": "7.0.2"
+    },
+    "overrides": {
+        "minimatch": "10.2.6"
+    },
+    "dependencies": {
+        "lodash": "4.18.1"
+    }
 }
