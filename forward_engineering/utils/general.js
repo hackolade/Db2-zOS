@@ -159,8 +159,7 @@ const columnMapToString = ({ name }) => wrapInQuotes(name ?? '');
  * @returns {string} Column expression.
  */
 const columnMapToStringWithOrder = ({ name, type }) => {
-	const order = type === 'descending' ? ' DESC' : type === 'ascending' ? ' ASC' : '';
-	return wrapInQuotes(name) + order;
+	return [wrapInQuotes(name), type].filter(Boolean).join(' ');
 };
 
 /**

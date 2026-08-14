@@ -1001,7 +1001,7 @@ making sure that you maintain a proper JSON format.
 						"propertyTooltip": "Index key columns with ASC, DESC, or RANDOM ordering.",
 						"propertyType": "fieldList",
 						"template": "orderedList",
-						"attributeList": ["asc", "desc", "random"],
+						"attributeList": ["", "ASC", "DESC", "RANDOM"],
 						"validation": {
 							"minLength": 1,
 							"required": true

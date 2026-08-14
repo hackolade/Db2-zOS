@@ -28,8 +28,7 @@ const toUpperCase = value => toUpper(value);
 const getUpperCaseValue = prefix => getBasicValue({ prefix, modifier: toUpperCase });
 
 /**
- * Build index key list clause. The model stores the order as `ascending`/`descending`, which Db2 for z/OS spells
- * `ASC`/`DESC`.
+ * Build index key list clause.
  *
  * @param {IndexKeyRef[]} [keys] Index keys.
  * @returns {string} Keys clause.
