@@ -2,6 +2,7 @@
  * @import {
  *   CheckConstraintInput,
  *   ContainerData,
+ *   ContainerLevelPreparedData,
  *   CreateSchemaParams,
  *   CreateTableParams,
  *   DdlProvider,
@@ -62,6 +63,7 @@ const { joinActivatedAndDeactivatedStatements } = require('../utils/joinActivate
 const { getIndexName } = require('./ddlHelpers/index/getIndexName.js');
 const { getIndexType } = require('./ddlHelpers/index/getIndexType.js');
 const { getIndexOptions } = require('./ddlHelpers/index/getIndexOptions.js');
+const { getSequencesScript } = require('./ddlHelpers/sequence/getSequencesScript.js');
 const { getNumericValue } = require('../utils/general.js');
 
 /**
@@ -121,12 +123,14 @@ const providerHasType = type => hasType({ descriptors, type });
  * Hydrate schema data.
  *
  * @param {ContainerData} containerData Container data.
+ * @param {ContainerLevelPreparedData} [data] Prepared container-level data from Studio.
  * @returns {SchemaData} Hydrated schema.
  */
-const hydrateSchema = containerData => ({
+const hydrateSchema = (containerData, data) => ({
 	schemaName: containerData.name,
 	isActivated: containerData.isActivated,
 	description: containerData.description,
+	sequences: data?.sequences,
 });
 
 /**
@@ -148,6 +152,21 @@ const createSchema = ({ schemaName, isActivated = true }) => {
 	});
 
 	return commentDeactivatedStatement(setSchemaStatement + '\n', { isActivated });
+};
+
+/**
+ * Create schema-level CREATE SEQUENCE statements.
+ *
+ * @param {SchemaData} schemaData Hydrated schema.
+ * @returns {string} CREATE SEQUENCE DDL, or empty.
+ */
+const createSchemaSequences = ({ schemaName, sequences, isActivated = true }) => {
+	const script = getSequencesScript({ schemaName, sequences });
+	if (!script) {
+		return '';
+	}
+
+	return commentDeactivatedStatement(script, { isActivated, isPartOfLine: false });
 };
 
 /**
@@ -980,6 +999,7 @@ module.exports = (_baseProvider, _options, _app) => ({
 	hasType: providerHasType,
 	hydrateSchema,
 	createSchema,
+	createSchemaSequences,
 	dropSchema,
 	alterSchema,
 	createUdt,

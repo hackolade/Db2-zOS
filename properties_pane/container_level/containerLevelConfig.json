@@ -206,5 +206,149 @@ making sure that you maintain a proper JSON format.
 			}
 		],
 		"containerLevelKeys": []
+	},
+	{
+		"lowerTab": "Sequences",
+		"structure": [
+			{
+				"propertyName": "Sequences",
+				"propertyType": "group",
+				"propertyKeyword": "sequences",
+				"propertyTooltip": "CREATE SEQUENCE objects in this schema.",
+				"structure": [
+					{
+						"propertyName": "Sequence name",
+						"propertyKeyword": "sequenceName",
+						"propertyTooltip": "Unqualified name in this schema. Must not identify an existing sequence at the current server, including Db2-generated names.",
+						"propertyType": "text",
+						"validation": {
+							"required": true
+						}
+					},
+					{
+						"propertyName": "Data type",
+						"propertyKeyword": "dataType",
+						"propertyTooltip": "Exact numeric type with scale 0. Default INTEGER.",
+						"propertyType": "select",
+						"defaultValue": "INTEGER",
+						"options": ["SMALLINT", "INTEGER", "BIGINT", "DECIMAL"]
+					},
+					{
+						"propertyName": "Precision",
+						"propertyKeyword": "precision",
+						"propertyTooltip": "DECIMAL precision (1–31). Scale is always 0. Default 5 when DECIMAL is specified without precision.",
+						"propertyType": "numeric",
+						"valueType": "integer",
+						"allowNegative": false,
+						"minValue": 1,
+						"maxValue": 31,
+						"defaultValue": 5,
+						"step": 1,
+						"dependency": {
+							"key": "dataType",
+							"value": "DECIMAL"
+						}
+					},
+					{
+						"propertyName": "Start",
+						"propertyKeyword": "start",
+						"propertyTooltip": "Specifies the first value for the sequence. If the START WITH clause is not specified, the default is the MINVALUE for ascending sequences and the MAXVALUE for descending sequences. This value is not necessarily the value a sequence would cycle to; the cycle range is MINVALUE and MAXVALUE, and START WITH may lie outside that range. If MINVALUE and MAXVALUE are also omitted, the effective start is 1 (ascending) or -1 (descending).",
+						"propertyType": "numeric",
+						"valueType": "integer",
+						"allowNegative": true,
+						"step": 1
+					},
+					{
+						"propertyName": "Increment",
+						"propertyKeyword": "increment",
+						"propertyTooltip": "Interval between values. Positive = ascending, negative = descending, 0 = treated as ascending. Default 1.",
+						"propertyType": "numeric",
+						"valueType": "integer",
+						"allowNegative": true,
+						"step": 1
+					},
+					{
+						"propertyName": "No min value",
+						"propertyKeyword": "noMinValue",
+						"propertyTooltip": "Emits NO MINVALUE. Default is the START WITH value, or 1 if START WITH is omitted (ascending); the minimum value of the data type (descending).",
+						"propertyType": "checkbox"
+					},
+					{
+						"propertyName": "Min value",
+						"propertyKeyword": "minValue",
+						"propertyTooltip": "Minimum of the cycle range. Must be ≤ Max value. Setting Min = Max = Start together with CYCLE is one way to define a constant sequence; INCREMENT 0 is the other and is usually preferred.",
+						"propertyType": "numeric",
+						"valueType": "integer",
+						"allowNegative": true,
+						"step": 1,
+						"dependency": {
+							"type": "not",
+							"values": {
+								"key": "noMinValue",
+								"value": true
+							}
+						}
+					},
+					{
+						"propertyName": "No max value",
+						"propertyKeyword": "noMaxValue",
+						"propertyTooltip": "Emits NO MAXVALUE. Default is the maximum value of the data type (ascending); the START WITH value, or -1 if START WITH is omitted (descending).",
+						"propertyType": "checkbox"
+					},
+					{
+						"propertyName": "Max value",
+						"propertyKeyword": "maxValue",
+						"propertyTooltip": "Maximum of the cycle range. Must be ≥ Min value.",
+						"propertyType": "numeric",
+						"valueType": "integer",
+						"allowNegative": true,
+						"step": 1,
+						"dependency": {
+							"type": "not",
+							"values": {
+								"key": "noMaxValue",
+								"value": true
+							}
+						}
+					},
+					{
+						"propertyName": "Cycle",
+						"propertyKeyword": "cycle",
+						"propertyTooltip": "CYCLE wraps using Min/Max. NO CYCLE errors at the bound. Default NO CYCLE. CYCLE can generate duplicates.",
+						"propertyType": "select",
+						"options": ["", "CYCLE", "NO CYCLE"]
+					},
+					{
+						"propertyName": "Cache",
+						"propertyKeyword": "cache",
+						"propertyTooltip": "CACHE n preallocates values (min 2, default 20). NO CACHE does not. Empty omits the clause (Db2 uses CACHE 20).",
+						"propertyType": "select",
+						"options": ["", "CACHE", "NO CACHE"]
+					},
+					{
+						"propertyName": "Cache value",
+						"propertyKeyword": "cacheValue",
+						"propertyTooltip": "Upper bound on preallocated values. Minimum 2. Default 20.",
+						"propertyType": "numeric",
+						"valueType": "integer",
+						"allowNegative": false,
+						"minValue": 2,
+						"defaultValue": 20,
+						"step": 1,
+						"dependency": {
+							"key": "cache",
+							"value": "CACHE"
+						}
+					},
+					{
+						"propertyName": "Order",
+						"propertyKeyword": "order",
+						"propertyTooltip": "ORDER assigns in request order. In data sharing, ORDER implies NO CACHE even if CACHE n is specified. Default NO ORDER.",
+						"propertyType": "select",
+						"options": ["", "ORDER", "NO ORDER"]
+					}
+				]
+			}
+		]
 	}
 ]
