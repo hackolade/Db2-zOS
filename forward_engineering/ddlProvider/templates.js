@@ -1,6 +1,8 @@
 module.exports = {
 	setSchema: 'SET SCHEMA = ${schemaName};',
 
+	createSequence: 'CREATE SEQUENCE ${name}${clauses};',
+
 	createType: 'CREATE DISTINCT TYPE ${name} AS ${sourceType};',
 
 	dropType: 'DROP TYPE ${name};',

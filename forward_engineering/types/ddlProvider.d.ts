@@ -150,10 +150,31 @@ export type HydratedColumn = {
 	itemsType?: string;
 };
 
+export type SchemaSequence = {
+	sequenceName?: string;
+	dataType?: string;
+	precision?: number;
+	start?: number;
+	increment?: number;
+	noMinValue?: boolean;
+	minValue?: number;
+	noMaxValue?: boolean;
+	maxValue?: number;
+	cycle?: string;
+	cache?: string;
+	cacheValue?: number;
+	order?: string;
+};
+
+export type ContainerLevelPreparedData = {
+	sequences?: SchemaSequence[];
+};
+
 export type SchemaData = {
 	schemaName: string;
 	isActivated?: boolean;
 	description?: string;
+	sequences?: SchemaSequence[];
 };
 
 export type ContainerData = {
@@ -739,8 +760,9 @@ export type DdlProvider = {
 	getTypesDescriptors(): TypeDescriptors;
 	hasType(type: string): boolean;
 
-	hydrateSchema(containerData: ContainerData, data?: unknown): SchemaData;
+	hydrateSchema(containerData: ContainerData, data?: ContainerLevelPreparedData): SchemaData;
 	createSchema(params: CreateSchemaParams): string;
+	createSchemaSequences(schemaData: SchemaData): string;
 	dropSchema(params: DropSchemaParams): string;
 	alterSchema(schemaName: string, data?: unknown): string;
 	createUdt(udt: HydratedColumn, dbData?: unknown): string;
