@@ -85,7 +85,7 @@ const generateSequences = ({
  */
 const liveSql = (script) => script.replaceAll(/\/\*[\s\S]*?\*\//gu, "");
 
-test("hydration forwards sequences from the second argument when they are present", () => {
+void test("hydration forwards sequences from the second argument when they are present", () => {
 	const sequences = [NEAR_EMPTY_SEQ_3];
 	const schemaData = ddlProvider.hydrateSchema(
 		{ name: "new_schema", isActivated: true },
@@ -95,7 +95,7 @@ test("hydration forwards sequences from the second argument when they are presen
 	assert.equal(schemaData.sequences, sequences);
 });
 
-test("hydration preserves isActivated", () => {
+void test("hydration preserves isActivated", () => {
 	const deactivated = ddlProvider.hydrateSchema(
 		{ name: "new_schema", isActivated: false },
 		{},
@@ -109,7 +109,7 @@ test("hydration preserves isActivated", () => {
 	assert.equal(activated.isActivated, true);
 });
 
-test("hydration does not throw when sequences are absent", () => {
+void test("hydration does not throw when sequences are absent", () => {
 	assert.doesNotThrow(() =>
 		ddlProvider.hydrateSchema({ name: "new_schema", isActivated: true }),
 	);
@@ -121,21 +121,21 @@ test("hydration does not throw when sequences are absent", () => {
 	);
 });
 
-test("filled some_seq fixture shape emits the CREATE contract", () => {
+void test("filled some_seq fixture shape emits the CREATE contract", () => {
 	assert.equal(
 		generateSequences({ sequences: [FILLED_SOME_SEQ] }),
 		FILLED_SOME_SEQ_SCRIPT,
 	);
 });
 
-test("near-empty seq_3 fixture shape emits the CREATE contract", () => {
+void test("near-empty seq_3 fixture shape emits the CREATE contract", () => {
 	assert.equal(
 		generateSequences({ sequences: [NEAR_EMPTY_SEQ_3] }),
 		NEAR_EMPTY_SEQ_3_SCRIPT,
 	);
 });
 
-test("CACHE with no cacheValue emits CACHE 20, never bare CACHE", () => {
+void test("CACHE with no cacheValue emits CACHE 20, never bare CACHE", () => {
 	const script = generateSequences({
 		sequences: [
 			{
@@ -151,7 +151,7 @@ test("CACHE with no cacheValue emits CACHE 20, never bare CACHE", () => {
 	assert.doesNotMatch(script, /\tCACHE\n/u);
 });
 
-test("start 0 and increment 0 emit START WITH 0 and INCREMENT BY 0", () => {
+void test("start 0 and increment 0 emit START WITH 0 and INCREMENT BY 0", () => {
 	const script = generateSequences({
 		sequences: [
 			{
@@ -167,7 +167,7 @@ test("start 0 and increment 0 emit START WITH 0 and INCREMENT BY 0", () => {
 	assert.match(script, /INCREMENT BY 0/u);
 });
 
-test("noMinValue true with a leftover minValue emits NO MINVALUE and ignores the number", () => {
+void test("noMinValue true with a leftover minValue emits NO MINVALUE and ignores the number", () => {
 	const script = generateSequences({
 		sequences: [
 			{
@@ -183,7 +183,7 @@ test("noMinValue true with a leftover minValue emits NO MINVALUE and ignores the
 	assert.doesNotMatch(script, /MINVALUE 42/u);
 });
 
-test("DECIMAL with no precision emits AS DECIMAL", () => {
+void test("DECIMAL with no precision emits AS DECIMAL", () => {
 	const script = generateSequences({
 		sequences: [{ sequenceName: "dec_seq", dataType: "DECIMAL" }],
 	});
@@ -192,7 +192,7 @@ test("DECIMAL with no precision emits AS DECIMAL", () => {
 	assert.doesNotMatch(script, /AS DECIMAL\(/u);
 });
 
-test("DECIMAL with precision 10 emits AS DECIMAL(10,0)", () => {
+void test("DECIMAL with precision 10 emits AS DECIMAL(10,0)", () => {
 	const script = generateSequences({
 		sequences: [
 			{ sequenceName: "dec_p_seq", dataType: "DECIMAL", precision: 10 },
@@ -202,7 +202,7 @@ test("DECIMAL with precision 10 emits AS DECIMAL(10,0)", () => {
 	assert.match(script, /AS DECIMAL\(10,0\)/u);
 });
 
-test("deactivated schema comments every CREATE SEQUENCE line, not only the first", () => {
+void test("deactivated schema comments every CREATE SEQUENCE line, not only the first", () => {
 	const script = generateSequences({
 		sequences: [FILLED_SOME_SEQ],
 		isActivated: false,
@@ -220,7 +220,7 @@ test("deactivated schema comments every CREATE SEQUENCE line, not only the first
 	assert.doesNotMatch(uncommented, /INCREMENT BY/u);
 });
 
-test("a blank sequenceName produces no statement for that row", () => {
+void test("a blank sequenceName produces no statement for that row", () => {
 	assert.equal(
 		generateSequences({
 			sequences: [{ sequenceName: "", dataType: "INTEGER" }],
@@ -248,7 +248,7 @@ test("a blank sequenceName produces no statement for that row", () => {
 	);
 });
 
-test("full-clause row plus seq_3 emits clause order and a blank line between statements", () => {
+void test("full-clause row plus seq_3 emits clause order and a blank line between statements", () => {
 	assert.equal(
 		generateSequences({ sequences: [FULL_CLAUSE_SEQ, NEAR_EMPTY_SEQ_3] }),
 		FULL_CLAUSE_AND_SEQ_3_SCRIPT,
