@@ -1,16 +1,16 @@
 name: notify-push
 
 on:
-  push:
-    branches:
-      - develop
+    push:
+        branches:
+            - develop
 
 permissions:
-  contents: read
+    contents: read
 
 jobs:
-  notify:
-    uses: hackolade/plugin-workflows/.github/workflows/notify-direct-push.yml@v1
-    secrets:
-      slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
-      commit-push-source: ${{ secrets.COMMIT_PUSH_SOURCE }}
+    notify:
+        uses: hackolade/plugin-workflows/.github/workflows/notify-direct-push.yml@v1
+        secrets:
+            slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
+            commit-push-source: ${{ secrets.COMMIT_PUSH_SOURCE }}
