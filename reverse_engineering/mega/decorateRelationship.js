@@ -1,8 +1,9 @@
-/** @typedef {{ id: string; name: string; keyType?: string; onDelete?: string }} MegaForeignKey */
-
-/** @typedef {{ megaForeignKey?: MegaForeignKey }} DecorateRelationshipOptions */
-
-/** @typedef {Readonly<Record<string, Record<string, string | undefined> | string | undefined>>} MegaTargetProperties */
+/**
+ * @import {
+ *   MegaForeignKey,
+ *   RelationshipProperties
+ * } from '../types/megaProvider'
+ */
 
 /**
  * MEGA states Cascade and Restrict. The internal codes are kept for an export whose value has no display text. The
@@ -20,8 +21,9 @@ const RELATIONSHIP_ON_DELETE_BY_MEGA_ON_DELETE = {
 };
 
 /**
- * @param {DecorateRelationshipOptions} options Foreign key of the MEGA export.
- * @returns {MegaTargetProperties} Relationship properties.
+ * @param {object} [params] - Params.
+ * @param {MegaForeignKey} [params.megaForeignKey] - Foreign key of the MEGA export.
+ * @returns {RelationshipProperties} - Relationship properties.
  */
 const decorateRelationship = ({ megaForeignKey } = {}) => {
 	if (!megaForeignKey) {
@@ -40,8 +42,9 @@ const decorateRelationship = ({ megaForeignKey } = {}) => {
 };
 
 /**
- * @param {{ onDelete: string | undefined }} options MEGA OnDelete value.
- * @returns {string | undefined} Db2 ON DELETE rule.
+ * @param {object} params - Params.
+ * @param {string | undefined} params.onDelete - MEGA OnDelete value.
+ * @returns {string | undefined} - Db2 ON DELETE rule.
  */
 const relationshipOnDeleteOf = ({ onDelete }) => {
 	const value = onDelete?.trim().toUpperCase() ?? '';

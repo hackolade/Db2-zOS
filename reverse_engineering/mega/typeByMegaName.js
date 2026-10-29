@@ -1,6 +1,6 @@
-/** @typedef {{ type: string; mode?: string }} Db2MegaFieldType */
+/** @import {FieldTypeProperties} from '../types/megaProvider' */
 
-/** @type {Readonly<Record<string, Db2MegaFieldType>>} */
+/** @type {Readonly<Record<string, FieldTypeProperties>>} */
 const TYPE_BY_MEGA_NAME = {
 	'P-Character': { type: 'char', mode: 'char' },
 	'P-Variable Character': { type: 'char', mode: 'varchar' },
