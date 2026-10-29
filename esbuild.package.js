@@ -52,6 +52,7 @@ async function packagePlugin() {
 		path.resolve(__dirname, 'api', 'fe.js'),
 		path.resolve(__dirname, 'forward_engineering', 'ddlProvider.js'),
 		path.resolve(__dirname, 'reverse_engineering', 'api.js'),
+		path.resolve(__dirname, 'reverse_engineering', 'megaProvider.js'),
 	].filter(entryPoint => entryPointExists(entryPoint));
 
 	await esbuild.build({
