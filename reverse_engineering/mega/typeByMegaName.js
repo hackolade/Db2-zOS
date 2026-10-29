@@ -1,6 +1,6 @@
-/** @import {FieldTypeProperties} from '../types/megaProvider' */
+/** @import {AttributeTypeProperties} from '../types/megaProvider' */
 
-/** @type {Readonly<Record<string, FieldTypeProperties>>} */
+/** @type {Readonly<Record<string, AttributeTypeProperties>>} */
 const TYPE_BY_MEGA_NAME = {
 	'P-Character': { type: 'char', mode: 'char' },
 	'P-Variable Character': { type: 'char', mode: 'varchar' },

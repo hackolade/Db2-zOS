@@ -1,4 +1,4 @@
-export type FieldTypeProperties = { type: string; mode?: string };
+export type AttributeTypeProperties = { type: string; mode?: string };
 
 export type MegaType = {
 	name: string;

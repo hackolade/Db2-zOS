@@ -1,7 +1,7 @@
 /**
  * @import {
  *   AttributeProperties,
- *   FieldTypeProperties,
+ *   AttributeTypeProperties,
  *   MegaAttribute,
  *   MegaColumn,
  *   MegaKeyMembership,
@@ -107,7 +107,7 @@ const mapType = ({ megaType }) => {
 /**
  * @param {object} params - Params.
  * @param {MegaType} params.megaType - MEGA type.
- * @returns {FieldTypeProperties | undefined} - Mapped field type.
+ * @returns {AttributeTypeProperties | undefined} - Mapped field type.
  */
 const fieldTypeOf = ({ megaType }) => {
 	const fromPivot = megaType.pivot ? lookupType({ name: megaType.pivot }) : undefined;
@@ -119,7 +119,7 @@ const fieldTypeOf = ({ megaType }) => {
 /**
  * @param {object} params - Params.
  * @param {string} params.name - MEGA type name.
- * @returns {FieldTypeProperties | undefined} - Mapped field type.
+ * @returns {AttributeTypeProperties | undefined} - Mapped field type.
  */
 const lookupType = ({ name }) => {
 	const typeName = name.replace(/\s*\([^)]*\)\s*$/u, '');
@@ -129,7 +129,7 @@ const lookupType = ({ name }) => {
 
 /**
  * @param {object} params - Params.
- * @param {FieldTypeProperties} params.fieldType - Mapped type.
+ * @param {AttributeTypeProperties} params.fieldType - Mapped type.
  * @param {MegaType} params.megaType - Size MEGA stated.
  * @returns {AttributeProperties} - Type properties with length, precision, or scale when MEGA stated them.
  */
@@ -161,7 +161,7 @@ const withSize = ({ fieldType, megaType }) => {
 
 /**
  * @param {object} params - Params.
- * @param {FieldTypeProperties} params.fieldType - Decimal type.
+ * @param {AttributeTypeProperties} params.fieldType - Decimal type.
  * @param {MegaType} params.megaType - Size of the decimal type.
  * @returns {AttributeProperties} - Decimal properties. MEGA length is the precision and MEGA decimal is the scale.
  */
