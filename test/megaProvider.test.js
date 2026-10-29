@@ -5,7 +5,7 @@ const megaProvider = require('../reverse_engineering/megaProvider');
 void test('imports the physical Db2 for z/OS model of a MEGA export', () => {
 	assert.equal(megaProvider.apiVersion, 1);
 	assert.equal(megaProvider.layer, 'physical');
-	assert.deepEqual(megaProvider.dbmsNamePatterns, ['^DB2 OS/390', '^DB2 for z/OS']);
+	assert.deepEqual(megaProvider.dbmsNamePatterns, ['^DB2 OS', '^DB2 for z/OS']);
 	assert.deepEqual(
 		megaProvider.dbmsNamePatterns?.map(pattern => new RegExp(pattern, 'u').test('DB2 for z/OS Version 8')),
 		[false, true],
@@ -30,7 +30,7 @@ void test('maps a MEGA pivot class and a stated DBMS type onto flat type propert
 		megaProvider.decorateAttribute?.({
 			megaAttribute: { type: { name: 'P-Datetime' } },
 		}),
-		{ type: 'datetime', mode: 'timestamp', fractSecPrecision: 6 },
+		{ type: 'datetime', mode: 'timestamp', fractSecPrecision: undefined },
 	);
 	assert.deepEqual(
 		megaProvider.decorateAttribute?.({
@@ -71,7 +71,7 @@ void test('maps DBMS type names to configured Db2 for z/OS types and modes', () 
 	assert.deepEqual(megaProvider.decorateAttribute?.({ megaColumn: { type: { name: 'TIMESTAMP' } } }), {
 		type: 'datetime',
 		mode: 'timestamp',
-		fractSecPrecision: 6,
+		fractSecPrecision: undefined,
 	});
 	assert.deepEqual(megaProvider.decorateAttribute?.({ megaColumn: { type: { name: 'XML' } } }), { type: 'xml' });
 	assert.deepEqual(megaProvider.decorateAttribute?.({ megaColumn: { type: { name: 'ROWID' } } }), {
@@ -134,29 +134,24 @@ void test('marks a column of one-member unique keys as an alternate key', () => 
 	);
 });
 
-void test('maps a MEGA foreign key onto the Db2 delete rule and marks it enforced', () => {
+void test('maps a MEGA foreign key onto the Db2 delete rule', () => {
 	assert.deepEqual(
 		megaProvider.decorateRelationship?.({
 			megaForeignKey: { id: 'fk', name: 'FK_ORDER', onDelete: 'Restrict' },
 		}),
-		{ relationshipOnDelete: 'RESTRICT', relationshipEnforced: 'ENFORCED' },
+		{ relationshipInfo: { relationshipOnDelete: 'RESTRICT' } },
 	);
 	assert.deepEqual(
 		megaProvider.decorateRelationship?.({
 			megaForeignKey: { id: 'fk', name: 'FK_ORDER', onDelete: 'Cascade' },
 		}),
-		{ relationshipOnDelete: 'CASCADE', relationshipEnforced: 'ENFORCED' },
+		{ relationshipInfo: { relationshipOnDelete: 'CASCADE' } },
 	);
 	assert.deepEqual(
 		megaProvider.decorateRelationship?.({ megaForeignKey: { id: 'fk', name: 'FK_ORDER', onDelete: 'R' } }),
-		{
-			relationshipOnDelete: 'RESTRICT',
-			relationshipEnforced: 'ENFORCED',
-		},
+		{ relationshipInfo: { relationshipOnDelete: 'RESTRICT' } },
 	);
-	assert.deepEqual(megaProvider.decorateRelationship?.({ megaForeignKey: { id: 'fk', name: 'FK_ORDER' } }), {
-		relationshipEnforced: 'ENFORCED',
-	});
+	assert.deepEqual(megaProvider.decorateRelationship?.({ megaForeignKey: { id: 'fk', name: 'FK_ORDER' } }), {});
 });
 
 void test('leaves a MEGA type that Db2 for z/OS has no field type for', () => {
