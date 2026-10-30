@@ -2,6 +2,27 @@ const assert = require('node:assert/strict');
 const { test } = require('node:test');
 const megaProvider = require('../reverse_engineering/megaProvider');
 
+const KEY_OPTION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
+
+/**
+ * @param {unknown} options - Key options from a decorated attribute.
+ * @returns {{ constraintName: string; id: string } | null} - Named key options.
+ */
+const namedKeyOptions = options => {
+	if (
+		!options ||
+		typeof options !== 'object' ||
+		!('constraintName' in options) ||
+		typeof options.constraintName !== 'string' ||
+		!('id' in options) ||
+		typeof options.id !== 'string'
+	) {
+		return null;
+	}
+
+	return { constraintName: options.constraintName, id: options.id };
+};
+
 void test('imports the physical Db2 for z/OS model of a MEGA export', () => {
 	assert.equal(megaProvider.apiVersion, 1);
 	assert.equal(megaProvider.layer, 'physical');
@@ -102,36 +123,42 @@ void test('adds length, fractional-seconds precision, and DECFLOAT precision fro
 });
 
 void test('marks a column of a one-member primary key as primary, not also unique', () => {
-	assert.deepEqual(
+	const { primaryKeyOptions, ...field } =
 		megaProvider.decorateAttribute?.({
 			megaColumn: { type: { name: 'INTEGER' } },
 			megaKeys: [
 				{ megaKey: { name: 'PK_ID', keyType: 'primary' } },
 				{ megaKey: { name: 'UK_CODE', keyType: 'unique' } },
 			],
-		}),
-		{
-			type: 'number',
-			mode: 'integer',
-			primaryKey: true,
-			required: true,
-			primaryKeyOptions: { constraintName: 'PK_ID' },
-		},
-	);
+		}) ?? {};
+
+	const keyOptions = namedKeyOptions(primaryKeyOptions);
+
+	assert.deepEqual(field, {
+		type: 'number',
+		mode: 'integer',
+		primaryKey: true,
+		required: true,
+	});
+	assert.equal(keyOptions?.constraintName, 'PK_ID');
+	assert.match(keyOptions?.id ?? '', KEY_OPTION_ID);
 });
 
 void test('marks a column of one-member unique keys as an alternate key', () => {
-	assert.deepEqual(
+	const { uniqueKeyOptions, ...field } =
 		megaProvider.decorateAttribute?.({
 			megaColumn: { type: { name: 'CODE-2' } },
 			megaKeys: [{ megaKey: { name: 'UK_CODE', keyType: 'unique' } }, { megaKey: { keyType: 'unique' } }],
-		}),
-		{
-			unique: true,
-			alternateKey: true,
-			uniqueKeyOptions: { constraintName: 'UK_CODE' },
-		},
-	);
+		}) ?? {};
+
+	const keyOptions = namedKeyOptions(uniqueKeyOptions);
+
+	assert.deepEqual(field, {
+		unique: true,
+		alternateKey: true,
+	});
+	assert.equal(keyOptions?.constraintName, 'UK_CODE');
+	assert.match(keyOptions?.id ?? '', KEY_OPTION_ID);
 });
 
 void test('maps a MEGA foreign key onto the Db2 delete rule', () => {
