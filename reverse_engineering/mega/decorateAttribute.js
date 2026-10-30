@@ -9,7 +9,7 @@
  * } from '../types/megaProvider'
  */
 
-const { randomUUID } = require('node:crypto');
+const uuid = require('uuid');
 const { TYPE_BY_MEGA_NAME } = require('./typeByMegaName');
 
 const MODES_WITH_LENGTH = new Set([
@@ -87,7 +87,7 @@ const namedKeyOptions = ({ keyName, optionsKeyword }) => {
 		return {};
 	}
 
-	return { [optionsKeyword]: { id: randomUUID(), constraintName: keyName } };
+	return { [optionsKeyword]: { id: uuid.v4(), constraintName: keyName } };
 };
 
 /**
