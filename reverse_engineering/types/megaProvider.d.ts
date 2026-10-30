@@ -16,7 +16,7 @@ export type MegaColumn = { type: MegaType };
 export type MegaAttribute = { type: MegaType };
 
 export type AttributeProperties = Readonly<
-	Record<string, string | number | boolean | { readonly constraintName: string } | undefined>
+	Record<string, string | number | boolean | { readonly constraintName: string; readonly id: string } | undefined>
 >;
 
 export type DecorateAttributeOptions = {
