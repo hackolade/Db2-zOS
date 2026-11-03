@@ -373,6 +373,7 @@ const createForeignKeyConstraint = (constraint, _dbData, schemaData) => {
 		foreignTableActivated,
 		primarySchemaName,
 		customProperties,
+		isActivated: isRelationshipActivated,
 	} = constraint;
 	const isAllPrimaryKeysDeactivated = checkAllKeysDeactivated({
 		keys: primaryKey,
@@ -418,7 +419,7 @@ const createForeignKeyConstraint = (constraint, _dbData, schemaData) => {
 
 	return {
 		statement: trim(foreignKeyStatement),
-		isActivated,
+		isActivated: isActivated && isRelationshipActivated !== false,
 	};
 };
 
@@ -442,6 +443,7 @@ const createForeignKey = (constraint, _dbData, schemaData) => {
 		foreignSchemaName,
 		primarySchemaName,
 		customProperties,
+		isActivated: isRelationshipActivated,
 	} = constraint;
 	const isAllPrimaryKeysDeactivated = checkAllKeysDeactivated({
 		keys: primaryKey,
@@ -492,7 +494,7 @@ const createForeignKey = (constraint, _dbData, schemaData) => {
 
 	return {
 		statement: trim(foreignKeyStatement) + '\n',
-		isActivated,
+		isActivated: isActivated && isRelationshipActivated !== false,
 	};
 };
 
