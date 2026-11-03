@@ -331,6 +331,7 @@ export type ForeignKeyInput = {
 	primarySchemaName?: string;
 	foreignSchemaName?: string;
 	foreignTable?: string;
+	isActivated?: boolean;
 	customProperties?: {
 		relationshipOnDelete?: string;
 		relationshipEnforced?: string;
