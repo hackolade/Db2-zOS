@@ -33,6 +33,21 @@ void test('places NOT NULL before WITH DEFAULT when a value is set', () => {
 	assert.equal(columnDefinition, '"count" INTEGER NOT NULL WITH DEFAULT 1');
 });
 
+void test('places NOT NULL before WITH DEFAULT when the value is zero', () => {
+	const columnDefinition = ddlProvider.convertColumnDefinition({
+		name: 'count',
+		type: 'INTEGER',
+		primaryKey: false,
+		unique: false,
+		nullable: false,
+		withDefault: true,
+		default: 0,
+		isActivated: true,
+	});
+
+	assert.equal(columnDefinition, '"count" INTEGER NOT NULL WITH DEFAULT 0');
+});
+
 void test('places NOT NULL before WITH DEFAULT when no value is set', () => {
 	const columnDefinition = ddlProvider.convertColumnDefinition({
 		name: 'count',

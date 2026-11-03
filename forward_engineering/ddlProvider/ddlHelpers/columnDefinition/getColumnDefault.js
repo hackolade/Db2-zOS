@@ -113,8 +113,8 @@ const getColumnDefault = ({
 	}
 
 	if (withDefault) {
-		const value = defaultValue || defaultValue === 0 ? defaultValue : '';
-		const valueClause = value ? ` ${value}` : '';
+		const hasValue = defaultValue !== undefined && defaultValue !== null && defaultValue !== '';
+		const valueClause = hasValue ? ` ${defaultValue}` : '';
 
 		return ` WITH DEFAULT${valueClause}`;
 	}
