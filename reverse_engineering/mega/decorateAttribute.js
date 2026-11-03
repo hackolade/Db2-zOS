@@ -193,8 +193,8 @@ const getDefaultProperties = ({ megaColumn }) => {
 		return { required: true, withDefault: true };
 	}
 
-	if (initialValue) {
-		return { withDefault: true };
+	if (initialValue !== undefined) {
+		return { withDefault: true, default: initialValue };
 	}
 
 	return {};
