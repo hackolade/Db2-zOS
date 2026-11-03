@@ -190,7 +190,11 @@ const getDefaultProperties = ({ megaColumn }) => {
 	const { notNull, initialValue } = megaColumn ?? {};
 
 	if (notNull === 'W') {
-		return { required: true, withDefault: true };
+		return {
+			required: true,
+			withDefault: true,
+			...(initialValue !== undefined && { default: initialValue }),
+		};
 	}
 
 	if (initialValue !== undefined) {
