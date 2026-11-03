@@ -161,6 +161,45 @@ void test('marks a column of one-member unique keys as an alternate key', () => 
 	assert.match(keyOptions?.id ?? '', KEY_OPTION_ID);
 });
 
+void test('marks a MEGA column that is not null with default as required and with default', () => {
+	assert.deepEqual(
+		megaProvider.decorateAttribute?.({
+			megaColumn: { type: { name: 'INTEGER' }, notNull: 'W' },
+		}),
+		{ type: 'number', mode: 'integer', required: true, withDefault: true },
+	);
+	assert.deepEqual(
+		megaProvider.decorateAttribute?.({
+			megaColumn: { type: { name: 'INTEGER' }, notNull: 'W', initialValue: '0' },
+		}),
+		{ type: 'number', mode: 'integer', required: true, withDefault: true, default: '0' },
+	);
+});
+
+void test('marks a MEGA column that states an initial value as with default', () => {
+	assert.deepEqual(
+		megaProvider.decorateAttribute?.({
+			megaColumn: { type: { name: 'INTEGER' }, initialValue: '0' },
+		}),
+		{ type: 'number', mode: 'integer', withDefault: true, default: '0' },
+	);
+	assert.deepEqual(
+		megaProvider.decorateAttribute?.({
+			megaColumn: { type: { name: 'INTEGER' }, initialValue: '' },
+		}),
+		{ type: 'number', mode: 'integer', withDefault: true, default: '' },
+	);
+});
+
+void test('does not mark a mandatory MEGA column as with default', () => {
+	assert.deepEqual(
+		megaProvider.decorateAttribute?.({
+			megaColumn: { type: { name: 'INTEGER' }, notNull: 'M' },
+		}),
+		{ type: 'number', mode: 'integer' },
+	);
+});
+
 void test('maps a MEGA foreign key onto the Db2 delete rule', () => {
 	assert.deepEqual(
 		megaProvider.decorateRelationship?.({

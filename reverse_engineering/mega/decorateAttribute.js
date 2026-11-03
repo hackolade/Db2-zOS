@@ -37,8 +37,9 @@ const decorateAttribute = ({ megaAttribute, megaColumn, megaKeys }) => {
 	const megaType = megaAttribute?.type ?? megaColumn?.type;
 	const typeProperties = megaType ? mapType({ megaType }) : {};
 	const keyProperties = singleKeyProperties({ megaKeys: megaKeys ?? [] });
+	const defaultProperties = getDefaultProperties({ megaColumn });
 
-	return { ...typeProperties, ...keyProperties };
+	return { ...typeProperties, ...keyProperties, ...defaultProperties };
 };
 
 /**
@@ -178,6 +179,29 @@ const withPrecisionAndScale = ({ fieldType, megaType }) => {
 		...(length !== undefined && { precision: length }),
 		...(decimal !== undefined && { scale: decimal }),
 	};
+};
+
+/**
+ * @param {object} params - Params.
+ * @param {MegaColumn} [params.megaColumn] - MEGA column.
+ * @returns {AttributeProperties} - Default properties.
+ */
+const getDefaultProperties = ({ megaColumn }) => {
+	const { notNull, initialValue } = megaColumn ?? {};
+
+	if (notNull === 'W') {
+		return {
+			required: true,
+			withDefault: true,
+			...(initialValue !== undefined && { default: initialValue }),
+		};
+	}
+
+	if (initialValue !== undefined) {
+		return { withDefault: true, default: initialValue };
+	}
+
+	return {};
 };
 
 module.exports = {

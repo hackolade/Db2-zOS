@@ -11,7 +11,7 @@ export type MegaKey = { name?: string; keyType: 'primary' | 'unique' };
 
 export type MegaKeyMembership = { megaKey: MegaKey };
 
-export type MegaColumn = { type: MegaType };
+export type MegaColumn = { type: MegaType; notNull?: string; initialValue?: string };
 
 export type MegaAttribute = { type: MegaType };
 
