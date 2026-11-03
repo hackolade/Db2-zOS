@@ -18,18 +18,33 @@ void test('places NOT NULL before the ROWID generated clause', () => {
 	assert.equal(columnDefinition, '"row_id" ROWID NOT NULL GENERATED ALWAYS');
 });
 
-void test('places NOT NULL before a column default', () => {
+void test('places NOT NULL before WITH DEFAULT when a value is set', () => {
 	const columnDefinition = ddlProvider.convertColumnDefinition({
 		name: 'count',
 		type: 'INTEGER',
 		primaryKey: false,
 		unique: false,
 		nullable: false,
-		default: 0,
+		withDefault: true,
+		default: 1,
 		isActivated: true,
 	});
 
-	assert.equal(columnDefinition, '"count" INTEGER NOT NULL WITH DEFAULT 0');
+	assert.equal(columnDefinition, '"count" INTEGER NOT NULL WITH DEFAULT 1');
+});
+
+void test('places NOT NULL before WITH DEFAULT when no value is set', () => {
+	const columnDefinition = ddlProvider.convertColumnDefinition({
+		name: 'count',
+		type: 'INTEGER',
+		primaryKey: false,
+		unique: false,
+		nullable: false,
+		withDefault: true,
+		isActivated: true,
+	});
+
+	assert.equal(columnDefinition, '"count" INTEGER NOT NULL WITH DEFAULT');
 });
 
 void test('keeps inline key constraints after identity generation', () => {
