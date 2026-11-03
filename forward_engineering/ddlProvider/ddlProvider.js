@@ -75,10 +75,20 @@ const { getNumericValue } = require('../utils/general.js');
 const getViewColumnsAsString = ({ columns }) => {
 	const indent = '\n\t\t';
 	const statements = columns.map(({ statement, isActivated }) => {
-		return commentDeactivatedStatement(statement, { isActivated, isPartOfLine: false });
+		return commentDeactivatedStatement(statement, {
+			isActivated,
+			isPartOfLine: false,
+		});
 	});
 
-	return indent + joinActivatedAndDeactivatedStatements({ statements, delimiter: ',', indent });
+	return (
+		indent +
+		joinActivatedAndDeactivatedStatements({
+			statements,
+			delimiter: ',',
+			indent,
+		})
+	);
 };
 
 /**
@@ -151,7 +161,9 @@ const createSchema = ({ schemaName, isActivated = true }) => {
 		},
 	});
 
-	return commentDeactivatedStatement(setSchemaStatement + '\n', { isActivated });
+	return commentDeactivatedStatement(setSchemaStatement + '\n', {
+		isActivated,
+	});
 };
 
 /**
@@ -166,7 +178,10 @@ const createSchemaSequences = ({ schemaName, sequences, isActivated = true }) =>
 		return '';
 	}
 
-	return commentDeactivatedStatement(script, { isActivated, isPartOfLine: false });
+	return commentDeactivatedStatement(script, {
+		isActivated,
+		isPartOfLine: false,
+	});
 };
 
 /**
@@ -204,10 +219,15 @@ const createUdt = ({ name, schemaName, comment, isActivated = true, ...sourceTyp
 		template: templates.createType,
 		templateData: { name: wrappedName, sourceType },
 	});
-	const commentStatement = getTypeCommentStatement({ typeName: wrappedName, description: comment });
+	const commentStatement = getTypeCommentStatement({
+		typeName: wrappedName,
+		description: comment,
+	});
 	const commentDdl = commentStatement ? '\n' + commentStatement + '\n' : '\n';
 
-	return commentDeactivatedStatement(typeStatement + commentDdl, { isActivated });
+	return commentDeactivatedStatement(typeStatement + commentDdl, {
+		isActivated,
+	});
 };
 
 /**
@@ -236,6 +256,7 @@ const hydrateColumn = ({ columnDefinition, jsonSchema, schemaData, definitionJso
 		uniqueKeyOptions: jsonSchema.uniqueKeyOptions,
 		nullable: columnDefinition.nullable,
 		default: columnDefinition.default,
+		withDefault: jsonSchema.withDefault,
 		comment: jsonSchema.refDescription ?? jsonSchema.description ?? definitionSchema.description,
 		isActivated: columnDefinition.isActivated,
 		scale: getNumericValue(columnDefinition.scale || jsonSchema.scale),
@@ -294,7 +315,9 @@ const convertColumnDefinition = (columnDefinition, template = templates.columnDe
 		},
 	});
 
-	return commentDeactivatedStatement(statement, { isActivated: columnDefinition.isActivated });
+	return commentDeactivatedStatement(statement, {
+		isActivated: columnDefinition.isActivated,
+	});
 };
 
 /**
@@ -351,13 +374,19 @@ const createForeignKeyConstraint = (constraint, _dbData, schemaData) => {
 		primarySchemaName,
 		customProperties,
 	} = constraint;
-	const isAllPrimaryKeysDeactivated = checkAllKeysDeactivated({ keys: primaryKey });
-	const isAllForeignKeysDeactivated = checkAllKeysDeactivated({ keys: foreignKey });
+	const isAllPrimaryKeysDeactivated = checkAllKeysDeactivated({
+		keys: primaryKey,
+	});
+	const isAllForeignKeysDeactivated = checkAllKeysDeactivated({
+		keys: foreignKey,
+	});
 	const isActivated = Boolean(
 		!isAllPrimaryKeysDeactivated && !isAllForeignKeysDeactivated && primaryTableActivated && foreignTableActivated,
 	);
 
-	const onDelete = keyHelper.customPropertiesForForeignKey({ customProperties });
+	const onDelete = keyHelper.customPropertiesForForeignKey({
+		customProperties,
+	});
 	const primaryTableName = getNamePrefixedWithSchemaName({
 		name: primaryTable,
 		schemaName: primarySchemaName ?? schemaData?.schemaName,
@@ -414,13 +443,19 @@ const createForeignKey = (constraint, _dbData, schemaData) => {
 		primarySchemaName,
 		customProperties,
 	} = constraint;
-	const isAllPrimaryKeysDeactivated = checkAllKeysDeactivated({ keys: primaryKey });
-	const isAllForeignKeysDeactivated = checkAllKeysDeactivated({ keys: foreignKey });
+	const isAllPrimaryKeysDeactivated = checkAllKeysDeactivated({
+		keys: primaryKey,
+	});
+	const isAllForeignKeysDeactivated = checkAllKeysDeactivated({
+		keys: foreignKey,
+	});
 	const isActivated = Boolean(
 		!isAllPrimaryKeysDeactivated && !isAllForeignKeysDeactivated && primaryTableActivated && foreignTableActivated,
 	);
 
-	const onDelete = keyHelper.customPropertiesForForeignKey({ customProperties });
+	const onDelete = keyHelper.customPropertiesForForeignKey({
+		customProperties,
+	});
 	const primaryTableName = getNamePrefixedWithSchemaName({
 		name: primaryTable,
 		schemaName: primarySchemaName ?? schemaData?.schemaName,
@@ -469,9 +504,18 @@ const createForeignKey = (constraint, _dbData, schemaData) => {
  */
 const hydrateTable = ({ tableData, entityData, jsonSchema }) => {
 	const detailsTab = entityData[0] ?? {};
-	const auxiliaryTableData = hydrateAuxiliaryTableData({ tableData, detailsTab });
-	const globalTemporaryTableData = hydrateGlobalTemporaryTableData({ tableData, detailsTab });
-	const partitioning = hydratePartitioning({ jsonSchema, partitioning: detailsTab.partitioning });
+	const auxiliaryTableData = hydrateAuxiliaryTableData({
+		tableData,
+		detailsTab,
+	});
+	const globalTemporaryTableData = hydrateGlobalTemporaryTableData({
+		tableData,
+		detailsTab,
+	});
+	const partitioning = hydratePartitioning({
+		jsonSchema,
+		partitioning: detailsTab.partitioning,
+	});
 	const periodForSystemTime = hydrateTemporalPeriod({
 		jsonSchema,
 		period: detailsTab.periodForSystemTime,
@@ -485,7 +529,10 @@ const hydrateTable = ({ tableData, entityData, jsonSchema }) => {
 		...tableData,
 		...auxiliaryTableData,
 		...globalTemporaryTableData,
-		keyConstraints: keyHelper.getTableKeyConstraints({ jsonSchema, entityName: tableData.name }),
+		keyConstraints: keyHelper.getTableKeyConstraints({
+			jsonSchema,
+			entityName: tableData.name,
+		}),
 		description: detailsTab.description,
 		tableProperties: detailsTab.tableProperties,
 		inClauseType: detailsTab.inClauseType,
@@ -574,7 +621,10 @@ const getVersioningStatementsForTable = ({
 			targetTableName: toUpper(periodForSystemTime.historyTable),
 			statement: assignTemplates({
 				template: templates.addVersioning,
-				templateData: { tableName, historyTableName: periodForSystemTime.historyTable },
+				templateData: {
+					tableName,
+					historyTableName: periodForSystemTime.historyTable,
+				},
 			}),
 		});
 	}
@@ -645,7 +695,10 @@ const createTable = (tableData, isActivated = true) => {
 		tableProperties,
 	} = tableData;
 	const tableType = getTableType({ auxiliary, tableKind });
-	const tableName = getNamePrefixedWithSchemaName({ name, schemaName: schemaData.schemaName });
+	const tableName = getNamePrefixedWithSchemaName({
+		name,
+		schemaName: schemaData.schemaName,
+	});
 	const comment = getTableCommentStatement({ tableName, description });
 
 	if (auxiliary) {
@@ -767,7 +820,11 @@ const createTable = (tableData, isActivated = true) => {
  * @param {{ tableName: string }} params Table name.
  * @returns {string} Drop table DDL.
  */
-const dropTable = ({ tableName }) => assignTemplates({ template: templates.dropTable, templateData: { tableName } });
+const dropTable = ({ tableName }) =>
+	assignTemplates({
+		template: templates.dropTable,
+		templateData: { tableName },
+	});
 
 /**
  * Add column DDL.
@@ -776,7 +833,10 @@ const dropTable = ({ tableName }) => assignTemplates({ template: templates.dropT
  * @returns {string} Add column DDL.
  */
 const addColumn = ({ tableName, columnDefinition }) =>
-	assignTemplates({ template: templates.addColumn, templateData: { tableName, columnDefinition } });
+	assignTemplates({
+		template: templates.addColumn,
+		templateData: { tableName, columnDefinition },
+	});
 
 /**
  * Drop column DDL.
@@ -785,7 +845,10 @@ const addColumn = ({ tableName, columnDefinition }) =>
  * @returns {string} Drop column DDL.
  */
 const dropColumn = ({ tableName, columnName }) =>
-	assignTemplates({ template: templates.dropColumn, templateData: { tableName, columnName } });
+	assignTemplates({
+		template: templates.dropColumn,
+		templateData: { tableName, columnName },
+	});
 
 /**
  * Drop view DDL.
@@ -793,7 +856,11 @@ const dropColumn = ({ tableName, columnName }) =>
  * @param {{ viewName: string }} params View name.
  * @returns {string} Drop view DDL.
  */
-const dropView = ({ viewName }) => assignTemplates({ template: templates.dropView, templateData: { viewName } });
+const dropView = ({ viewName }) =>
+	assignTemplates({
+		template: templates.dropView,
+		templateData: { viewName },
+	});
 
 /**
  * Hydrate index data.
@@ -828,7 +895,10 @@ const createIndex = (tableName, index) => {
 	const indexName = getIndexName({ index });
 	const indexType = getIndexType({ index });
 	const indexOptions = getIndexOptions({ index });
-	const indexTableName = getNamePrefixedWithSchemaName({ name: tableName, schemaName: index.schemaName });
+	const indexTableName = getNamePrefixedWithSchemaName({
+		name: tableName,
+		schemaName: index.schemaName,
+	});
 	const statement = assignTemplates({
 		template: templates.createIndex,
 		templateData: { indexType, indexName, indexOptions, indexTableName },
@@ -866,7 +936,10 @@ const dropIndex = name => {
 		return '';
 	}
 
-	return assignTemplates({ template: templates.dropIndex, templateData: { name } });
+	return assignTemplates({
+		template: templates.dropIndex,
+		templateData: { name },
+	});
 };
 
 /**
@@ -914,7 +987,10 @@ const hydrateView = ({ viewData, entityData }) => {
  * @returns {string} View DDL.
  */
 const createView = (viewData, _dbData, isActivated = true) => {
-	const viewName = getNamePrefixedWithSchemaName({ name: viewData.name, schemaName: viewData.schemaName });
+	const viewName = getNamePrefixedWithSchemaName({
+		name: viewData.name,
+		schemaName: viewData.schemaName,
+	});
 
 	const { columns, tables } = getViewData({ keys: viewData.keys });
 	const columnsAsString = getViewColumnsAsString({ columns });

@@ -83,6 +83,17 @@
 				"to": {
 					"length": 32704
 				}
+			},
+			{
+				"from": {
+					"default": {
+						"type": "RegExp",
+						"value": ".*"
+					}
+				},
+				"to": {
+					"withDefault": true
+				}
 			}
 		]
 	}

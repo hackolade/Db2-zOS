@@ -79,6 +79,7 @@ const getColumnDefault = ({
 	generatedColumnGenerated,
 	columnGenerationExpression,
 	implicitlyHidden,
+	withDefault,
 }) => {
 	const hiddenClause = implicitlyHidden ? ' IMPLICITLY HIDDEN' : '';
 
@@ -111,8 +112,11 @@ const getColumnDefault = ({
 		return ` GENERATED ${identity.generated} AS IDENTITY${identityOptionsClause}${hiddenClause}`;
 	}
 
-	if (defaultValue || defaultValue === 0) {
-		return ` WITH DEFAULT ${defaultValue}`;
+	if (withDefault) {
+		const hasValue = defaultValue !== undefined && defaultValue !== null && defaultValue !== '';
+		const valueClause = hasValue ? ` ${defaultValue}` : '';
+
+		return ` WITH DEFAULT${valueClause}`;
 	}
 
 	return '';

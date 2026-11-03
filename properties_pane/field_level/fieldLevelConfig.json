@@ -366,6 +366,19 @@ making sure that you maintain a proper JSON format.
 				"defaultValue": "string"
 			},
 			{
+				"propertyName": "Comments",
+				"propertyKeyword": "description",
+				"propertyTooltip": "comments",
+				"addTimestampButton": false,
+				"propertyType": "details",
+				"template": "textarea"
+			},
+			{
+				"propertyName": "With default",
+				"propertyKeyword": "withDefault",
+				"propertyType": "checkbox"
+			},
+			{
 				"propertyName": "Default",
 				"propertyKeyword": "default",
 				"shouldValidate": true,
@@ -388,17 +401,13 @@ making sure that you maintain a proper JSON format.
 									"exist": false
 								}
 							]
+						},
+						{
+							"key": "withDefault",
+							"value": true
 						}
 					]
 				}
-			},
-			{
-				"propertyName": "Comments",
-				"propertyKeyword": "description",
-				"propertyTooltip": "comments",
-				"addTimestampButton": false,
-				"propertyType": "details",
-				"template": "textarea"
 			},
 			{
 				"propertyName": "Generated column",
@@ -965,6 +974,19 @@ making sure that you maintain a proper JSON format.
 				}
 			},
 			{
+				"propertyName": "Comments",
+				"propertyKeyword": "description",
+				"propertyTooltip": "comments",
+				"addTimestampButton": false,
+				"propertyType": "details",
+				"template": "textarea"
+			},
+			{
+				"propertyName": "With default",
+				"propertyKeyword": "withDefault",
+				"propertyType": "checkbox"
+			},
+			{
 				"propertyName": "Default",
 				"propertyKeyword": "default",
 				"shouldValidate": true,
@@ -987,17 +1009,13 @@ making sure that you maintain a proper JSON format.
 									"exist": false
 								}
 							]
+						},
+						{
+							"key": "withDefault",
+							"value": true
 						}
 					]
 				}
-			},
-			{
-				"propertyName": "Comments",
-				"propertyKeyword": "description",
-				"propertyTooltip": "comments",
-				"addTimestampButton": false,
-				"propertyType": "details",
-				"template": "textarea"
 			},
 			{
 				"propertyName": "Generated column",
@@ -2345,6 +2363,11 @@ making sure that you maintain a proper JSON format.
 			"relationshipName",
 			"cardinality",
 			{
+				"propertyName": "With default",
+				"propertyKeyword": "withDefault",
+				"propertyType": "checkbox"
+			},
+			{
 				"propertyName": "Default",
 				"propertyKeyword": "default",
 				"shouldValidate": true,
@@ -2367,6 +2390,10 @@ making sure that you maintain a proper JSON format.
 									"exist": false
 								}
 							]
+						},
+						{
+							"key": "withDefault",
+							"value": true
 						}
 					]
 				}
@@ -3496,6 +3523,11 @@ making sure that you maintain a proper JSON format.
 			"relationshipName",
 			"cardinality",
 			{
+				"propertyName": "With default",
+				"propertyKeyword": "withDefault",
+				"propertyType": "checkbox"
+			},
+			{
 				"propertyName": "Default",
 				"propertyKeyword": "default",
 				"shouldValidate": true,
@@ -3518,6 +3550,10 @@ making sure that you maintain a proper JSON format.
 									"exist": false
 								}
 							]
+						},
+						{
+							"key": "withDefault",
+							"value": true
 						}
 					]
 				}

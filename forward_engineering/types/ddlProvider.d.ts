@@ -47,6 +47,7 @@ export type ColumnDefinitionInput = {
 	type?: string;
 	nullable?: boolean;
 	default?: DefaultValue;
+	withDefault?: boolean;
 	isActivated?: boolean;
 	scale?: number;
 	precision?: number;
@@ -98,6 +99,7 @@ export type JsonSchemaColumn = {
 	scale?: number;
 	precision?: number;
 	length?: number;
+	withDefault?: boolean;
 };
 
 export type CompositeKeyGroup = {
@@ -148,6 +150,7 @@ export type HydratedColumn = {
 	implicitlyHidden?: boolean;
 	isUDTRef?: boolean;
 	itemsType?: string;
+	withDefault?: boolean;
 };
 
 export type SchemaSequence = {
@@ -543,6 +546,7 @@ export type ColumnConstraintParams = {
 
 export type ColumnDefaultParams = {
 	default?: DefaultValue;
+	withDefault?: boolean;
 	identity?: IdentityOptions;
 	type: string;
 	generated?: string;
