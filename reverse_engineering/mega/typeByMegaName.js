@@ -1,56 +1,74 @@
 /** @import {AttributeTypeProperties} from '../types/megaProvider' */
 
+/** @type {AttributeTypeProperties} */
+const CHAR = { type: 'string', childType: 'char' };
+
+/** @type {AttributeTypeProperties} */
+const NUMBER = { type: 'numeric', childType: 'number' };
+
+/** @type {AttributeTypeProperties} */
+const DATETIME = { type: 'string', childType: 'datetime' };
+
+/** @type {AttributeTypeProperties} */
+const BINARY = { type: 'string', childType: 'binary' };
+
+/** @type {AttributeTypeProperties} */
+const XML = { type: 'binary', childType: 'xml' };
+
+/** @type {AttributeTypeProperties} */
+const ROWID = { type: 'string', childType: 'rowid' };
+
 /** @type {Readonly<Record<string, AttributeTypeProperties>>} */
 const TYPE_BY_MEGA_NAME = {
-	'P-Character': { type: 'char', mode: 'char' },
-	'P-Variable Character': { type: 'char', mode: 'varchar' },
-	'P-Currency': { type: 'number', mode: 'decimal' },
-	'P-Numeric': { type: 'number', mode: 'decimal' },
-	'P-Date': { type: 'datetime', mode: 'date' },
-	'P-Time': { type: 'datetime', mode: 'time' },
-	'P-Datetime': { type: 'datetime', mode: 'timestamp' },
-	'P-Timestamp': { type: 'datetime', mode: 'timestamp' },
-	'P-Integer': { type: 'number', mode: 'integer' },
-	'P-Smallint': { type: 'number', mode: 'smallint' },
-	'P-Bigint': { type: 'number', mode: 'bigint' },
-	'P-Decimal': { type: 'number', mode: 'decimal' },
-	'P-Float': { type: 'number', mode: 'float' },
-	'P-Double': { type: 'number', mode: 'double' },
-	'P-Binary': { type: 'binary', mode: 'binary' },
-	'P-Blob': { type: 'binary', mode: 'blob' },
-	'P-Clob': { type: 'char', mode: 'clob' },
-	'P-Xml': { type: 'xml' },
-	CHAR: { type: 'char', mode: 'char' },
-	CHARACTER: { type: 'char', mode: 'char' },
-	VARCHAR: { type: 'char', mode: 'varchar' },
-	LONGVARCHAR: { type: 'char', mode: 'varchar' },
-	GRAPHIC: { type: 'char', mode: 'graphic' },
-	VARGRAPHIC: { type: 'char', mode: 'vargraphic' },
-	LONGVARGRAPHIC: { type: 'char', mode: 'vargraphic' },
-	NCHAR: { type: 'char', mode: 'graphic' },
-	NVARCHAR: { type: 'char', mode: 'vargraphic' },
-	CLOB: { type: 'char', mode: 'clob' },
-	DBCLOB: { type: 'char', mode: 'dbclob' },
-	BLOB: { type: 'binary', mode: 'blob' },
-	BINARY: { type: 'binary', mode: 'binary' },
-	VARBINARY: { type: 'binary', mode: 'varbinary' },
-	LONGVARBINARY: { type: 'binary', mode: 'varbinary' },
-	SMALLINT: { type: 'number', mode: 'smallint' },
-	INTEGER: { type: 'number', mode: 'integer' },
-	INT: { type: 'number', mode: 'integer' },
-	BIGINT: { type: 'number', mode: 'bigint' },
-	DECIMAL: { type: 'number', mode: 'decimal' },
-	DEC: { type: 'number', mode: 'decimal' },
-	NUMERIC: { type: 'number', mode: 'decimal' },
-	DECFLOAT: { type: 'number', mode: 'decfloat' },
-	REAL: { type: 'number', mode: 'real' },
-	FLOAT: { type: 'number', mode: 'float' },
-	DOUBLE: { type: 'number', mode: 'double' },
-	DATE: { type: 'datetime', mode: 'date' },
-	TIME: { type: 'datetime', mode: 'time' },
-	TIMESTAMP: { type: 'datetime', mode: 'timestamp' },
-	XML: { type: 'xml' },
-	ROWID: { type: 'rowid', mode: 'rowid' },
+	'P-Character': { ...CHAR, mode: 'char' },
+	'P-Variable Character': { ...CHAR, mode: 'varchar' },
+	'P-Currency': { ...NUMBER, mode: 'decimal' },
+	'P-Numeric': { ...NUMBER, mode: 'decimal' },
+	'P-Date': { ...DATETIME, mode: 'date' },
+	'P-Time': { ...DATETIME, mode: 'time' },
+	'P-Datetime': { ...DATETIME, mode: 'timestamp' },
+	'P-Timestamp': { ...DATETIME, mode: 'timestamp' },
+	'P-Integer': { ...NUMBER, mode: 'integer' },
+	'P-Smallint': { ...NUMBER, mode: 'smallint' },
+	'P-Bigint': { ...NUMBER, mode: 'bigint' },
+	'P-Decimal': { ...NUMBER, mode: 'decimal' },
+	'P-Float': { ...NUMBER, mode: 'float' },
+	'P-Double': { ...NUMBER, mode: 'double' },
+	'P-Binary': { ...BINARY, mode: 'binary' },
+	'P-Blob': { ...BINARY, mode: 'blob' },
+	'P-Clob': { ...CHAR, mode: 'clob' },
+	'P-Xml': XML,
+	CHAR: { ...CHAR, mode: 'char' },
+	CHARACTER: { ...CHAR, mode: 'char' },
+	VARCHAR: { ...CHAR, mode: 'varchar' },
+	LONGVARCHAR: { ...CHAR, mode: 'varchar' },
+	GRAPHIC: { ...CHAR, mode: 'graphic' },
+	VARGRAPHIC: { ...CHAR, mode: 'vargraphic' },
+	LONGVARGRAPHIC: { ...CHAR, mode: 'vargraphic' },
+	NCHAR: { ...CHAR, mode: 'graphic' },
+	NVARCHAR: { ...CHAR, mode: 'vargraphic' },
+	CLOB: { ...CHAR, mode: 'clob' },
+	DBCLOB: { ...CHAR, mode: 'dbclob' },
+	BLOB: { ...BINARY, mode: 'blob' },
+	BINARY: { ...BINARY, mode: 'binary' },
+	VARBINARY: { ...BINARY, mode: 'varbinary' },
+	LONGVARBINARY: { ...BINARY, mode: 'varbinary' },
+	SMALLINT: { ...NUMBER, mode: 'smallint' },
+	INTEGER: { ...NUMBER, mode: 'integer' },
+	INT: { ...NUMBER, mode: 'integer' },
+	BIGINT: { ...NUMBER, mode: 'bigint' },
+	DECIMAL: { ...NUMBER, mode: 'decimal' },
+	DEC: { ...NUMBER, mode: 'decimal' },
+	NUMERIC: { ...NUMBER, mode: 'decimal' },
+	DECFLOAT: { ...NUMBER, mode: 'decfloat' },
+	REAL: { ...NUMBER, mode: 'real' },
+	FLOAT: { ...NUMBER, mode: 'float' },
+	DOUBLE: { ...NUMBER, mode: 'double' },
+	DATE: { ...DATETIME, mode: 'date' },
+	TIME: { ...DATETIME, mode: 'time' },
+	TIMESTAMP: { ...DATETIME, mode: 'timestamp' },
+	ROWID: { ...ROWID, mode: 'rowid' },
+	XML,
 };
 
 module.exports = {

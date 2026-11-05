@@ -52,6 +52,60 @@
 				"to": {
 					"withDefault": true
 				}
+			},
+			{
+				"from": {
+					"type": "char",
+					"childType": "char"
+				},
+				"to": {
+					"type": "string"
+				}
+			},
+			{
+				"from": {
+					"type": "number",
+					"childType": "number"
+				},
+				"to": {
+					"type": "numeric"
+				}
+			},
+			{
+				"from": {
+					"type": "datetime",
+					"childType": "datetime"
+				},
+				"to": {
+					"type": "string"
+				}
+			},
+			{
+				"from": {
+					"type": "binary",
+					"childType": "binary"
+				},
+				"to": {
+					"type": "string"
+				}
+			},
+			{
+				"from": {
+					"type": "rowid",
+					"childType": "rowid"
+				},
+				"to": {
+					"type": "string"
+				}
+			},
+			{
+				"from": {
+					"type": "xml",
+					"childType": "xml"
+				},
+				"to": {
+					"type": "binary"
+				}
 			}
 		]
 	}
