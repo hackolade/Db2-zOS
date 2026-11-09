@@ -1,6 +1,7 @@
 /** @import {MegaTargetProvider} from './types/megaProvider' */
 
 const { decorateAttribute } = require('./mega/decorateAttribute');
+const { decorateIndexes } = require('./mega/decorateIndexes');
 const { decorateRelationship } = require('./mega/decorateRelationship');
 
 /** @type {MegaTargetProvider} */
@@ -9,5 +10,6 @@ module.exports = {
 	layer: 'physical',
 	dbmsNamePatterns: ['^DB2 OS', '^DB2 for z/OS'],
 	decorateAttribute,
+	decorateIndexes,
 	decorateRelationship,
 };
