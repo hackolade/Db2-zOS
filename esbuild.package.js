@@ -38,14 +38,6 @@ async function packagePlugin() {
 		parse: parseBooleanOption,
 	});
 
-	/**
-	 * Checks whether a packaging entry point exists on disk.
-	 *
-	 * @param {string} entryPoint Absolute path to a potential entry point.
-	 * @returns {boolean} `true` when the entry point file exists.
-	 */
-	const entryPointExists = entryPoint => fs.existsSync(entryPoint);
-
 	/** @type {string[]} */
 	const entryPoints = [
 		path.resolve(__dirname, 'forward_engineering', 'api.js'),
@@ -53,7 +45,7 @@ async function packagePlugin() {
 		path.resolve(__dirname, 'forward_engineering', 'ddlProvider.js'),
 		path.resolve(__dirname, 'reverse_engineering', 'api.js'),
 		path.resolve(__dirname, 'reverse_engineering', 'megaProvider.js'),
-	].filter(entryPoint => entryPointExists(entryPoint));
+	].filter(entryPoint => fs.existsSync(entryPoint));
 
 	await esbuild.build({
 		entryPoints,
