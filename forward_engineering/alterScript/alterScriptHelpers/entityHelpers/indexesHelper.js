@@ -16,6 +16,7 @@ const {
 	getSchemaOfAlterCollection,
 	getEntityName,
 	isObjectInDeltaModelActivated,
+	isParentContainerActivated,
 } = require('../../../utils/general');
 const { assignTemplates } = require('../../../utils/assignTemplates');
 const templates = require('../../../ddlProvider/templates');
@@ -101,15 +102,14 @@ const getRenameIndexScriptDto = ({ schemaName, oldIndexName, newIndexName, isAct
  */
 const getCreateIndexScriptDto = ({ index, collection, ddlProvider }) => {
 	const collectionSchema = getSchemaOfAlterCollection(collection);
-	// `createIndex` comments the statement out unless both flags are set, and only `hydrateIndex` - which the alter
-	// flow does not go through - would otherwise fill `isParentActivated` in.
-	const isCollectionActivated = isObjectInDeltaModelActivated(collection);
+	const isCollectionActivated =
+		isParentContainerActivated(collection) !== false && isObjectInDeltaModelActivated(collection) !== false;
 	const script = ddlProvider.createIndex(getEntityName(collectionSchema), {
 		...addNameToIndexKey({ index, collection }),
 		isParentActivated: isCollectionActivated,
 	});
 
-	return createAlterScriptDto([script], isCollectionActivated && Boolean(index.isActivated), false);
+	return createAlterScriptDto([script], true, false);
 };
 
 /**
@@ -125,7 +125,9 @@ const getDeleteIndexScriptDto = ({ index, collection, ddlProvider }) => {
 		schemaName: getSchemaNameFromCollection({ collection }),
 	});
 	const script = ddlProvider.dropIndex(fullIndexName);
-	const isActivated = Boolean(index.isActivated) && isObjectInDeltaModelActivated(collection);
+	const isCollectionActivated =
+		isParentContainerActivated(collection) !== false && isObjectInDeltaModelActivated(collection) !== false;
+	const isActivated = index.isActivated !== false && isCollectionActivated;
 
 	return createAlterScriptDto([script], isActivated, true);
 };
@@ -198,7 +200,10 @@ const getModifyIndexScriptDtos = ({ newIndex, oldIndex, collection, ddlProvider 
 				schemaName: getSchemaNameFromCollection({ collection }),
 				oldIndexName: oldIndex.indxName ?? '',
 				newIndexName: newIndex.indxName ?? '',
-				isActivated: isObjectInDeltaModelActivated(collection) && Boolean(newIndex.isActivated),
+				isActivated:
+					isParentContainerActivated(collection) !== false &&
+					isObjectInDeltaModelActivated(collection) !== false &&
+					newIndex.isActivated !== false,
 			}),
 		);
 	}

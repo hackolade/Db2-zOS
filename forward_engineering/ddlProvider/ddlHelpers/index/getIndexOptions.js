@@ -9,7 +9,7 @@ const isNumber = require('lodash/isNumber');
 const toUpper = require('lodash/toUpper');
 const trim = require('lodash/trim');
 const { getBasicValue, getOptionsByConfigs } = require('../options/getOptionsByConfigs');
-const { wrapInQuotes, columnMapToStringWithOrder } = require('../../../utils/general');
+const { wrapInQuotes, columnMapToStringWithOrder, checkAllKeysDeactivated, commentIfDeactivated } = require('../../../utils/general');
 
 /**
  * Convert a value to upper case.
@@ -28,17 +28,39 @@ const toUpperCase = value => toUpper(value);
 const getUpperCaseValue = prefix => getBasicValue({ prefix, modifier: toUpperCase });
 
 /**
+ * @param {IndexData} index Index data.
+ * @param {IndexKeyRef[]} keys Index keys.
+ * @returns {boolean} Whether the whole index statement will be commented.
+ */
+const isWholeIndexCommented = (index, keys) =>
+	index.isActivated === false ||
+	index.isParentActivated === false ||
+	checkAllKeysDeactivated({ keys: index.indxKey || keys });
+
+/**
  * Build index key list clause.
  *
  * @param {IndexKeyRef[]} [keys] Index keys.
+ * @param {IndexData} [index] Index data.
  * @returns {string} Keys clause.
  */
-const getIndexKeys = (keys = []) => {
+const getIndexKeys = (keys = [], index = {}) => {
 	if (keys.length === 0) {
 		return '';
 	}
 
-	const keysClause = keys.map(({ name, type }) => columnMapToStringWithOrder({ name: name ?? '', type })).join(', ');
+	const commentWholeIndex = isWholeIndexCommented(index, keys);
+	const keysClause = keys
+		.map(key => {
+			const statement = columnMapToStringWithOrder({ name: key.name ?? '', type: key.type });
+
+			if (commentWholeIndex) {
+				return statement;
+			}
+
+			return commentIfDeactivated(statement, { isActivated: key.isActivated !== false, isPartOfLine: true });
+		})
+		.join(', ');
 
 	return `(${keysClause})`;
 };
@@ -57,7 +79,18 @@ const getIncludeIndexKeys = (keys, index) => {
 		return '';
 	}
 
-	const includeIndexKeys = `(${keys.map(({ name }) => wrapInQuotes(name ?? '')).join(', ')})`;
+	const commentWholeIndex = isWholeIndexCommented(index, keys);
+	const includeIndexKeys = `(${keys
+		.map(key => {
+			const statement = wrapInQuotes(key.name ?? '');
+
+			if (commentWholeIndex) {
+				return statement;
+			}
+
+			return commentIfDeactivated(statement, { isActivated: key.isActivated !== false, isPartOfLine: true });
+		})
+		.join(', ')})`;
 
 	return getBasicValue({ prefix: 'INCLUDE' })(includeIndexKeys);
 };

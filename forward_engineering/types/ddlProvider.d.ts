@@ -617,7 +617,7 @@ export type TemporalPeriodsParams = {
 };
 
 export type ViewData = {
-	tables: string[];
+	tables: { statement: string; isActivated: boolean }[];
 	columns: ViewSelectColumn[];
 };
 

@@ -162,7 +162,15 @@ const getColumnComments = ({ tableName, columnDefinitions }) => {
 				description: columnDefinition.comment,
 			});
 
-			return commentIfDeactivated(comment, { isActivated: columnDefinition.isActivated ?? true });
+			if (columnDefinition.isActivated !== false) {
+				return comment;
+			}
+
+			const commentedLines = trim(comment)
+				.split('\n')
+				.map(line => commentIfDeactivated(line, { isActivated: false }));
+
+			return '\n' + commentedLines.join('\n') + '\n';
 		})
 		.join('\n');
 };

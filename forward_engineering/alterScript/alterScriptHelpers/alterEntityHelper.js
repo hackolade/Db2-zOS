@@ -29,8 +29,17 @@ const {
 	getSchemaOfAlterCollection,
 	getFullCollectionName,
 	wrapInQuotes,
+	isParentContainerActivated,
+	isObjectInDeltaModelActivated,
 } = require('../../utils/general');
-const { getRelationshipName } = require('./alterForeignKeyHelper');
+const { getRelationshipName, isRelatedTableActivated } = require('./alterForeignKeyHelper');
+
+/**
+ * @param {AlterCollection} collection Collection delta.
+ * @returns {boolean} Whether the collection and its schema are activated.
+ */
+const isCollectionActivated = collection =>
+	isParentContainerActivated(collection) !== false && isObjectInDeltaModelActivated(collection) !== false;
 const { createColumnDefinitionBySchema } = require('./createColumnDefinition');
 const { getRenameTableScriptDtos } = require('./entityHelpers/alterTableNameHelper');
 
@@ -58,8 +67,8 @@ const getInlineForeignKeyConstraints = ({ collection, inlineDeltaRelationships, 
 					foreignKey: compMod.child?.collection?.fkFields ?? [],
 					primaryTable: compMod.parent?.collection?.name ?? '',
 					primaryKey: compMod.parent?.collection?.fkFields ?? [],
-					primaryTableActivated: compMod.parent?.collection?.isActivated,
-					foreignTableActivated: compMod.child?.collection?.isActivated,
+					primaryTableActivated: isRelatedTableActivated(compMod.parent),
+					foreignTableActivated: isRelatedTableActivated(compMod.child),
 					primarySchemaName: compMod.parent?.bucket?.name,
 					customProperties: compMod.customProperties?.new,
 					isActivated: compMod.isActivated?.new,
@@ -116,7 +125,8 @@ const getAddCollectionScriptDto = (ddlProvider, inlineDeltaRelationships, relate
 		entityData: [collectionSchema],
 		jsonSchema: collectionSchema,
 	});
-	const script = ddlProvider.createTable(hydratedTable, collectionSchema.isActivated);
+	const isActivated = isCollectionActivated(collection);
+	const script = ddlProvider.createTable(hydratedTable, isActivated);
 
 	return createAlterScriptDto([script], true, false);
 };
@@ -131,7 +141,7 @@ const getDeleteCollectionScriptDto = ddlProvider => collection => {
 	const collectionSchema = getSchemaOfAlterCollection(collection);
 	const script = ddlProvider.dropTable({ tableName: getFullCollectionName({ collectionSchema }) });
 
-	return createAlterScriptDto([script], true, true);
+	return createAlterScriptDto([script], isCollectionActivated(collection), true);
 };
 
 /**
@@ -172,6 +182,7 @@ const getAddColumnScriptDtos = ddlProvider => collection => {
 	const collectionSchema = getSchemaOfAlterCollection(collection);
 	const fullTableName = getFullCollectionName({ collectionSchema });
 	const schemaData = { schemaName: getSchemaNameFromCollection({ collection }) ?? '' };
+	const isTableActivated = isCollectionActivated(collection);
 
 	return toPairs(collection.properties ?? {})
 		.filter(([, jsonSchema]) => !jsonSchema.compMod)
@@ -185,10 +196,11 @@ const getAddColumnScriptDtos = ddlProvider => collection => {
 			});
 			const script = ddlProvider.addColumn({
 				tableName: fullTableName,
-				columnDefinition: ddlProvider.convertColumnDefinition(columnDefinition),
+				columnDefinition: ddlProvider.convertColumnDefinition({ ...columnDefinition, isActivated: true }),
 			});
+			const isActivated = isTableActivated && jsonSchema.isActivated !== false;
 
-			return createAlterScriptDto([script], true, false);
+			return createAlterScriptDto([script], isActivated, false);
 		})
 		.filter(scriptDto => scriptDto !== undefined);
 };
@@ -202,13 +214,15 @@ const getAddColumnScriptDtos = ddlProvider => collection => {
 const getDeleteColumnScriptDtos = ddlProvider => collection => {
 	const collectionSchema = getSchemaOfAlterCollection(collection);
 	const fullTableName = getFullCollectionName({ collectionSchema, preferAlterName: false });
+	const isTableActivated = isCollectionActivated(collection);
 
 	return toPairs(collection.properties ?? {})
 		.filter(([, jsonSchema]) => !jsonSchema.compMod)
-		.map(([name]) => {
+		.map(([name, jsonSchema]) => {
 			const script = ddlProvider.dropColumn({ tableName: fullTableName, columnName: wrapInQuotes(name) });
+			const isActivated = isTableActivated && jsonSchema.isActivated !== false;
 
-			return createAlterScriptDto([script], true, true);
+			return createAlterScriptDto([script], isActivated, true);
 		})
 		.filter(scriptDto => scriptDto !== undefined);
 };

@@ -11,6 +11,7 @@ const {
 	getSchemaNameFromCollection,
 	getNamePrefixedWithSchemaName,
 	isObjectInDeltaModelActivated,
+	isParentContainerActivated,
 } = require('../../../utils/general');
 const {
 	getIndexCommentStatement,
@@ -31,7 +32,10 @@ const getModifyIndexCommentsScriptDtos = ({ newIndex, oldIndex, collection }) =>
 		name: newIndex.indxName ?? '',
 		schemaName: getSchemaNameFromCollection({ collection }),
 	});
-	const isActivated = isObjectInDeltaModelActivated(collection) && Boolean(newIndex.isActivated);
+	const isActivated =
+		isParentContainerActivated(collection) !== false &&
+		isObjectInDeltaModelActivated(collection) !== false &&
+		newIndex.isActivated !== false;
 
 	if (newDescription && newDescription !== oldDescription) {
 		const script = getIndexCommentStatement({ indexName, description: newDescription });

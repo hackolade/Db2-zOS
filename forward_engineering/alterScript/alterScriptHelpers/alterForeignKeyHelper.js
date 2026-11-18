@@ -13,6 +13,31 @@ const { assignTemplates } = require('../../utils/assignTemplates');
 const { getDefaultConstraintName } = require('../../ddlProvider/ddlHelpers/key/getDefaultConstraintName');
 const { CONSTRAINT_POSTFIX } = require('../../../shared/constants/constants');
 
+const isRelatedTableActivated = ({ bucket, collection } = {}) =>
+	bucket?.isActivated !== false && collection?.isActivated !== false;
+
+const areFkFieldsActivated = fields => (fields || []).every(field => field?.isActivated !== false);
+
+const getFkFieldsForStatement = fields => {
+	if (areFkFieldsActivated(fields)) {
+		return fields;
+	}
+
+	return (fields || []).map(field => ({ ...field, isActivated: true }));
+};
+
+const isForeignKeyConstraintActivated = (relationship, isActivated) => {
+	const compMod = relationship.role?.compMod;
+
+	return (
+		isActivated &&
+		compMod?.parent?.collection?.isActivated !== false &&
+		compMod?.child?.collection?.isActivated !== false &&
+		areFkFieldsActivated(compMod?.parent?.collection?.fkFields) &&
+		areFkFieldsActivated(compMod?.child?.collection?.fkFields)
+	);
+};
+
 /**
  * Resolve the current name of a relationship, falling back to a generated name (matching the PK/UK pattern) when the
  * relationship has none, so the FK statement is not silently dropped.
@@ -63,11 +88,11 @@ const getAddForeignKeyStatement = relationship => {
 	const compMod = relationship.role.compMod ?? {};
 	const ddlProvider = require('../../ddlProvider/ddlProvider')(null, null, null);
 
-	return ddlProvider.createForeignKey(
+	const statementDto = ddlProvider.createForeignKey(
 		{
 			name: getRelationshipName(relationship),
-			foreignKey: compMod.child?.collection?.fkFields ?? [],
-			primaryKey: compMod.parent?.collection?.fkFields ?? [],
+			foreignKey: getFkFieldsForStatement(compMod.child?.collection?.fkFields ?? []),
+			primaryKey: getFkFieldsForStatement(compMod.parent?.collection?.fkFields ?? []),
 			customProperties: compMod.customProperties?.new,
 			foreignTable: compMod.child?.collection?.name,
 			foreignSchemaName: compMod.child?.bucket?.name,
@@ -80,6 +105,11 @@ const getAddForeignKeyStatement = relationship => {
 		{},
 		{ schemaName: compMod.child?.bucket?.name ?? '' },
 	);
+
+	return {
+		...statementDto,
+		isActivated: isForeignKeyConstraintActivated(relationship, statementDto.isActivated),
+	};
 };
 
 /**
@@ -103,7 +133,10 @@ const getDeleteForeignKeyStatement = relationship => {
 
 	return {
 		statement,
-		isActivated: Boolean(compMod.isActivated?.new) && Boolean(compMod.child?.collection?.isActivated),
+		isActivated: isForeignKeyConstraintActivated(
+			relationship,
+			Boolean(compMod.isActivated?.new) && Boolean(compMod.child?.collection?.isActivated),
+		),
 	};
 };
 
@@ -205,6 +238,7 @@ const getModifyForeignKeyScriptDtos = modifiedRelationships => {
 
 module.exports = {
 	getRelationshipName,
+	isRelatedTableActivated,
 	getDeleteForeignKeyScriptDtos,
 	getModifyForeignKeyScriptDtos,
 	getAddForeignKeyScriptDtos,

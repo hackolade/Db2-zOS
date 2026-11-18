@@ -65,14 +65,16 @@ const getKeyStatement = key => key.statement;
  */
 const generateConstraintsString = ({ dividedConstraints, isParentActivated }) => {
 	const { activatedItems, deactivatedItems } = dividedConstraints;
-	const deactivatedItemsAsString = commentIfDeactivated(deactivatedItems.join(',\n\t'), {
-		isActivated: !isParentActivated,
-		isPartOfLine: true,
-	});
-	const activatedConstraints =
-		activatedItems.length > 0 ? ',\n\t' + dividedConstraints.activatedItems.join(',\n\t') : '';
-
-	const deactivatedConstraints = deactivatedItems.length > 0 ? '\n\t' + deactivatedItemsAsString : '';
+	const items = isParentActivated ? activatedItems : [...activatedItems, ...deactivatedItems];
+	const activatedConstraints = items.length > 0 ? ',\n\t' + items.join(',\n\t') : '';
+	const deactivatedConstraints =
+		isParentActivated && deactivatedItems.length > 0
+			? '\n\t' +
+				commentIfDeactivated(deactivatedItems.join(',\n\t'), {
+					isActivated: false,
+					isPartOfLine: true,
+				})
+			: '';
 
 	return activatedConstraints + deactivatedConstraints;
 };
@@ -161,7 +163,15 @@ const getTableProps = ({
 		},
 		isParentActivated: isActivated,
 	});
-	const columnsString = joinActivatedAndDeactivatedStatements({ statements: columns, indent: '\n\t' });
+	const hasActiveConstraintsAfterColumns = [
+		keyConstraintsString,
+		foreignKeyConstraintsString,
+		checkConstraintsString,
+		temporalPeriodsString,
+	].some(constraintsString => constraintsString.startsWith(','));
+	const columnsString = hasActiveConstraintsAfterColumns
+		? columns.join(',\n\t')
+		: joinActivatedAndDeactivatedStatements({ statements: columns, indent: '\n\t' });
 
 	const tableProps = assignTemplates({
 		template: templates.createTableProps,
