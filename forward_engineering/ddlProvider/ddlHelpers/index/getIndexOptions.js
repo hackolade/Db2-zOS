@@ -9,7 +9,12 @@ const isNumber = require('lodash/isNumber');
 const toUpper = require('lodash/toUpper');
 const trim = require('lodash/trim');
 const { getBasicValue, getOptionsByConfigs } = require('../options/getOptionsByConfigs');
-const { wrapInQuotes, columnMapToStringWithOrder, checkAllKeysDeactivated, commentIfDeactivated } = require('../../../utils/general');
+const {
+	wrapInQuotes,
+	columnMapToStringWithOrder,
+	checkAllKeysDeactivated,
+	commentIfDeactivated,
+} = require('../../../utils/general');
 
 /**
  * Convert a value to upper case.

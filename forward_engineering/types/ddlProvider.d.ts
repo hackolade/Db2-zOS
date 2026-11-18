@@ -753,6 +753,8 @@ export type HydrateViewColumnParams = {
 	alias?: string;
 	isActivated?: boolean;
 	dbName?: string;
+	entityData?: Array<{ isActivated?: boolean }>;
+	containerData?: Array<{ isActivated?: boolean }>;
 };
 
 export type HydrateViewParams = {

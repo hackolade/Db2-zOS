@@ -93,6 +93,12 @@ const getViewColumnsAsString = ({ columns }) => {
 };
 
 /**
+ * @param {{ statement: string }} table View table.
+ * @returns {string} Table statement.
+ */
+const getTableStatement = ({ statement }) => statement;
+
+/**
  * Format view source tables, commenting a table when every selected column from it is inactive.
  *
  * @param {{ tables: { statement: string; isActivated: boolean }[]; isViewActivated: boolean }} params View tables.
@@ -105,11 +111,12 @@ const getViewTablesAsString = ({ tables, isViewActivated }) => {
 
 	const { activatedItems, deactivatedItems } = divideIntoActivatedAndDeactivated({
 		items: tables,
-		mapFunction: ({ statement }) => statement,
+		mapFunction: getTableStatement,
 	});
-	const deactivatedTablesAsString = deactivatedItems.length
-		? commentDeactivatedStatement(deactivatedItems.join(', '), { isActivated: false, isPartOfLine: true })
-		: '';
+	const deactivatedTablesAsString =
+		deactivatedItems.length > 0
+			? commentDeactivatedStatement(deactivatedItems.join(', '), { isActivated: false, isPartOfLine: true })
+			: '';
 
 	return activatedItems.join(', ') + deactivatedTablesAsString;
 };
@@ -406,10 +413,10 @@ const createForeignKeyConstraint = (constraint, _dbData, schemaData) => {
 	});
 	const isActivated = Boolean(
 		!isAllPrimaryKeysDeactivated &&
-			!isAllForeignKeysDeactivated &&
-			primaryTableActivated &&
-			foreignTableActivated &&
-			isRelationshipActivated !== false,
+		!isAllForeignKeysDeactivated &&
+		primaryTableActivated &&
+		foreignTableActivated &&
+		isRelationshipActivated !== false,
 	);
 
 	const onDelete = keyHelper.customPropertiesForForeignKey({
@@ -480,10 +487,10 @@ const createForeignKey = (constraint, _dbData, schemaData) => {
 	});
 	const isActivated = Boolean(
 		!isAllPrimaryKeysDeactivated &&
-			!isAllForeignKeysDeactivated &&
-			primaryTableActivated &&
-			foreignTableActivated &&
-			isRelationshipActivated !== false,
+		!isAllForeignKeysDeactivated &&
+		primaryTableActivated &&
+		foreignTableActivated &&
+		isRelationshipActivated !== false,
 	);
 
 	const onDelete = keyHelper.customPropertiesForForeignKey({
@@ -982,8 +989,8 @@ const dropIndex = name => {
  * @returns {HydratedViewColumn} Hydrated view column.
  */
 const hydrateViewColumn = data => {
-	const isSourceTableActivated = get(data, 'entityData[0].isActivated') !== false;
-	const isSourceSchemaActivated = get(data, 'containerData[0].isActivated') !== false;
+	const isSourceTableActivated = data.entityData?.[0]?.isActivated !== false;
+	const isSourceSchemaActivated = data.containerData?.[0]?.isActivated !== false;
 
 	return {
 		name: data.name,
@@ -1033,7 +1040,7 @@ const createView = (viewData, _dbData, isActivated = true) => {
 	const { columns, tables } = getViewData({ keys: viewData.keys });
 	const hasCustomSelectStatement = Boolean(trim(viewData.selectStatement));
 	const hasActiveColumns = columns.some(column => column.isActivated !== false);
-	const isViewActivated = isActivated !== false && (hasCustomSelectStatement || hasActiveColumns);
+	const isViewActivated = isActivated && (hasCustomSelectStatement || hasActiveColumns);
 	const columnsAsString = getViewColumnsAsString({ columns });
 	const tablesAsString = getViewTablesAsString({ tables, isViewActivated });
 	const commentStatement = getTableCommentStatement({
@@ -1049,7 +1056,7 @@ const createView = (viewData, _dbData, isActivated = true) => {
 	const viewColumns = columns.length > 0 ? ` (${columnsAsString}\n\t)` : '';
 
 	const selectStatement = hasCustomSelectStatement
-		? trim(setTab({ text: viewData.selectStatement }))
+		? trim(setTab({ text: viewData.selectStatement ?? '' }))
 		: assignTemplates({
 				template: templates.viewSelectStatement,
 				templateData: {

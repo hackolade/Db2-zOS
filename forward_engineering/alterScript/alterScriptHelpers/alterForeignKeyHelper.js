@@ -1,9 +1,13 @@
 /**
  * @import {
  *   AlterRelationship,
- *   AlterScriptDto
+ *   AlterScriptDto,
+ *   RelationshipEndpoint
  * } from '../../types/alterScript'
- * @import {ForeignKeyStatement} from '../../types/ddlProvider'
+ * @import {
+ *   ForeignKeyStatement,
+ *   KeyConstraintColumn
+ * } from '../../types/ddlProvider'
  */
 
 const { createAlterScriptDto, createDropAndRecreateAlterScriptDto } = require('../dto/alterScriptDto');
@@ -13,19 +17,42 @@ const { assignTemplates } = require('../../utils/assignTemplates');
 const { getDefaultConstraintName } = require('../../ddlProvider/ddlHelpers/key/getDefaultConstraintName');
 const { CONSTRAINT_POSTFIX } = require('../../../shared/constants/constants');
 
+/**
+ * @param {RelationshipEndpoint} [endpoint] Relationship endpoint.
+ * @returns {boolean} Whether the table and its schema are activated.
+ */
 const isRelatedTableActivated = ({ bucket, collection } = {}) =>
 	bucket?.isActivated !== false && collection?.isActivated !== false;
 
-const areFkFieldsActivated = fields => (fields || []).every(field => field?.isActivated !== false);
+/**
+ * @param {KeyConstraintColumn[] | undefined} fields Foreign key fields.
+ * @returns {boolean} Whether every field is activated.
+ */
+const areFkFieldsActivated = fields => {
+	const keyFields = fields ?? [];
 
-const getFkFieldsForStatement = fields => {
-	if (areFkFieldsActivated(fields)) {
-		return fields;
-	}
-
-	return (fields || []).map(field => ({ ...field, isActivated: true }));
+	return keyFields.every(field => field?.isActivated !== false);
 };
 
+/**
+ * @param {KeyConstraintColumn[] | undefined} fields Foreign key fields.
+ * @returns {KeyConstraintColumn[]} Fields for the foreign key statement.
+ */
+const getFkFieldsForStatement = fields => {
+	const keyFields = fields ?? [];
+
+	if (areFkFieldsActivated(keyFields)) {
+		return keyFields;
+	}
+
+	return keyFields.map(field => Object.assign({}, field, { isActivated: true }));
+};
+
+/**
+ * @param {AlterRelationship} relationship Relationship delta.
+ * @param {boolean} isActivated Relationship activation from the statement.
+ * @returns {boolean} Whether the constraint should stay active.
+ */
 const isForeignKeyConstraintActivated = (relationship, isActivated) => {
 	const compMod = relationship.role?.compMod;
 

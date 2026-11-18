@@ -36,9 +36,7 @@ const getRenameViewScriptDtos = (view, ddlProvider, mapProperties) => {
 	return [
 		createAlterScriptDto([dropScript], isViewActivated(view), true),
 		createAlterScriptDto([createScript], true, false),
-	].filter(
-		scriptDto => scriptDto !== undefined,
-	);
+	].filter(scriptDto => scriptDto !== undefined);
 };
 
 module.exports = {

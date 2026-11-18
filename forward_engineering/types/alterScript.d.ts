@@ -197,7 +197,7 @@ export type MapPropertiesFn = (
 ) => HydratedViewColumn[];
 
 export type RelationshipEndpoint = {
-	bucket?: { name?: string };
+	bucket?: { name?: string; isActivated?: boolean };
 	collection?: {
 		name?: string;
 		fkFields?: KeyConstraintColumn[];

@@ -39,7 +39,7 @@ const { getRelationshipName, isRelatedTableActivated } = require('./alterForeign
  * @returns {boolean} Whether the collection and its schema are activated.
  */
 const isCollectionActivated = collection =>
-	isParentContainerActivated(collection) !== false && isObjectInDeltaModelActivated(collection) !== false;
+	isParentContainerActivated(collection) && isObjectInDeltaModelActivated(collection);
 const { createColumnDefinitionBySchema } = require('./createColumnDefinition');
 const { getRenameTableScriptDtos } = require('./entityHelpers/alterTableNameHelper');
 

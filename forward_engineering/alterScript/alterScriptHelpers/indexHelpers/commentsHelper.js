@@ -33,8 +33,8 @@ const getModifyIndexCommentsScriptDtos = ({ newIndex, oldIndex, collection }) =>
 		schemaName: getSchemaNameFromCollection({ collection }),
 	});
 	const isActivated =
-		isParentContainerActivated(collection) !== false &&
-		isObjectInDeltaModelActivated(collection) !== false &&
+		isParentContainerActivated(collection) &&
+		isObjectInDeltaModelActivated(collection) &&
 		newIndex.isActivated !== false;
 
 	if (newDescription && newDescription !== oldDescription) {

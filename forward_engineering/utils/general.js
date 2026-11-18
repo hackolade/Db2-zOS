@@ -257,7 +257,11 @@ const getSchemaOfAlterCollection = collection => {
 /**
  * Check whether an object is activated in a delta model.
  *
- * @param {ModelObject} modelObject Model object.
+ * @param {{
+ * 	compMod?: { isActivated?: { new?: boolean } };
+ * 	role?: { isActivated?: boolean };
+ * }} modelObject
+ *   Model object.
  * @returns {boolean} Activation flag.
  */
 const isObjectInDeltaModelActivated = modelObject => {

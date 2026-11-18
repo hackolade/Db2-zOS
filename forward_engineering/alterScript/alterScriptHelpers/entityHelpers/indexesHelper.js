@@ -102,8 +102,7 @@ const getRenameIndexScriptDto = ({ schemaName, oldIndexName, newIndexName, isAct
  */
 const getCreateIndexScriptDto = ({ index, collection, ddlProvider }) => {
 	const collectionSchema = getSchemaOfAlterCollection(collection);
-	const isCollectionActivated =
-		isParentContainerActivated(collection) !== false && isObjectInDeltaModelActivated(collection) !== false;
+	const isCollectionActivated = isParentContainerActivated(collection) && isObjectInDeltaModelActivated(collection);
 	const script = ddlProvider.createIndex(getEntityName(collectionSchema), {
 		...addNameToIndexKey({ index, collection }),
 		isParentActivated: isCollectionActivated,
@@ -125,8 +124,7 @@ const getDeleteIndexScriptDto = ({ index, collection, ddlProvider }) => {
 		schemaName: getSchemaNameFromCollection({ collection }),
 	});
 	const script = ddlProvider.dropIndex(fullIndexName);
-	const isCollectionActivated =
-		isParentContainerActivated(collection) !== false && isObjectInDeltaModelActivated(collection) !== false;
+	const isCollectionActivated = isParentContainerActivated(collection) && isObjectInDeltaModelActivated(collection);
 	const isActivated = index.isActivated !== false && isCollectionActivated;
 
 	return createAlterScriptDto([script], isActivated, true);
@@ -201,8 +199,8 @@ const getModifyIndexScriptDtos = ({ newIndex, oldIndex, collection, ddlProvider 
 				oldIndexName: oldIndex.indxName ?? '',
 				newIndexName: newIndex.indxName ?? '',
 				isActivated:
-					isParentContainerActivated(collection) !== false &&
-					isObjectInDeltaModelActivated(collection) !== false &&
+					isParentContainerActivated(collection) &&
+					isObjectInDeltaModelActivated(collection) &&
 					newIndex.isActivated !== false,
 			}),
 		);
