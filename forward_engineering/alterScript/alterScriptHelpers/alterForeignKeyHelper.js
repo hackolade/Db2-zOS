@@ -1,9 +1,13 @@
 /**
  * @import {
  *   AlterRelationship,
- *   AlterScriptDto
+ *   AlterScriptDto,
+ *   RelationshipEndpoint
  * } from '../../types/alterScript'
- * @import {ForeignKeyStatement} from '../../types/ddlProvider'
+ * @import {
+ *   ForeignKeyStatement,
+ *   KeyConstraintColumn
+ * } from '../../types/ddlProvider'
  */
 
 const { createAlterScriptDto, createDropAndRecreateAlterScriptDto } = require('../dto/alterScriptDto');
@@ -12,6 +16,54 @@ const templates = require('../../ddlProvider/templates');
 const { assignTemplates } = require('../../utils/assignTemplates');
 const { getDefaultConstraintName } = require('../../ddlProvider/ddlHelpers/key/getDefaultConstraintName');
 const { CONSTRAINT_POSTFIX } = require('../../../shared/constants/constants');
+
+/**
+ * @param {RelationshipEndpoint} [endpoint] Relationship endpoint.
+ * @returns {boolean} Whether the table and its schema are activated.
+ */
+const isRelatedTableActivated = ({ bucket, collection } = {}) =>
+	bucket?.isActivated !== false && collection?.isActivated !== false;
+
+/**
+ * @param {KeyConstraintColumn[] | undefined} fields Foreign key fields.
+ * @returns {boolean} Whether every field is activated.
+ */
+const areFkFieldsActivated = fields => {
+	const keyFields = fields ?? [];
+
+	return keyFields.every(field => field?.isActivated !== false);
+};
+
+/**
+ * @param {KeyConstraintColumn[] | undefined} fields Foreign key fields.
+ * @returns {KeyConstraintColumn[]} Fields for the foreign key statement.
+ */
+const getFkFieldsForStatement = fields => {
+	const keyFields = fields ?? [];
+
+	if (areFkFieldsActivated(keyFields)) {
+		return keyFields;
+	}
+
+	return keyFields.map(field => Object.assign({}, field, { isActivated: true }));
+};
+
+/**
+ * @param {AlterRelationship} relationship Relationship delta.
+ * @param {boolean} isActivated Relationship activation from the statement.
+ * @returns {boolean} Whether the constraint should stay active.
+ */
+const isForeignKeyConstraintActivated = (relationship, isActivated) => {
+	const compMod = relationship.role?.compMod;
+
+	return (
+		isActivated &&
+		compMod?.parent?.collection?.isActivated !== false &&
+		compMod?.child?.collection?.isActivated !== false &&
+		areFkFieldsActivated(compMod?.parent?.collection?.fkFields) &&
+		areFkFieldsActivated(compMod?.child?.collection?.fkFields)
+	);
+};
 
 /**
  * Resolve the current name of a relationship, falling back to a generated name (matching the PK/UK pattern) when the
@@ -63,11 +115,11 @@ const getAddForeignKeyStatement = relationship => {
 	const compMod = relationship.role.compMod ?? {};
 	const ddlProvider = require('../../ddlProvider/ddlProvider')(null, null, null);
 
-	return ddlProvider.createForeignKey(
+	const statementDto = ddlProvider.createForeignKey(
 		{
 			name: getRelationshipName(relationship),
-			foreignKey: compMod.child?.collection?.fkFields ?? [],
-			primaryKey: compMod.parent?.collection?.fkFields ?? [],
+			foreignKey: getFkFieldsForStatement(compMod.child?.collection?.fkFields ?? []),
+			primaryKey: getFkFieldsForStatement(compMod.parent?.collection?.fkFields ?? []),
 			customProperties: compMod.customProperties?.new,
 			foreignTable: compMod.child?.collection?.name,
 			foreignSchemaName: compMod.child?.bucket?.name,
@@ -80,6 +132,11 @@ const getAddForeignKeyStatement = relationship => {
 		{},
 		{ schemaName: compMod.child?.bucket?.name ?? '' },
 	);
+
+	return {
+		...statementDto,
+		isActivated: isForeignKeyConstraintActivated(relationship, statementDto.isActivated),
+	};
 };
 
 /**
@@ -103,7 +160,10 @@ const getDeleteForeignKeyStatement = relationship => {
 
 	return {
 		statement,
-		isActivated: Boolean(compMod.isActivated?.new) && Boolean(compMod.child?.collection?.isActivated),
+		isActivated: isForeignKeyConstraintActivated(
+			relationship,
+			Boolean(compMod.isActivated?.new) && Boolean(compMod.child?.collection?.isActivated),
+		),
 	};
 };
 
@@ -205,6 +265,7 @@ const getModifyForeignKeyScriptDtos = modifiedRelationships => {
 
 module.exports = {
 	getRelationshipName,
+	isRelatedTableActivated,
 	getDeleteForeignKeyScriptDtos,
 	getModifyForeignKeyScriptDtos,
 	getAddForeignKeyScriptDtos,

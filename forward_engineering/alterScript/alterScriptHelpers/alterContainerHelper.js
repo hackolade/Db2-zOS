@@ -10,6 +10,7 @@
  */
 
 const { createAlterScriptDto } = require('../dto/alterScriptDto');
+const { isObjectInDeltaModelActivated } = require('../../utils/general');
 
 /**
  * Build the SET SCHEMA statement for an added container.
@@ -20,7 +21,7 @@ const { createAlterScriptDto } = require('../dto/alterScriptDto');
 const getAddContainerScriptDto = ddlProvider => containerData => {
 	const script = ddlProvider.createSchema({
 		schemaName: containerData.role.name,
-		isActivated: containerData.role.isActivated,
+		isActivated: isObjectInDeltaModelActivated(containerData),
 	});
 
 	return createAlterScriptDto([script], true, false);

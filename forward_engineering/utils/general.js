@@ -92,7 +92,7 @@ const divideIntoActivatedAndDeactivated = ({ items, mapFunction }) => {
  */
 const commentIfDeactivated = (statement, { isActivated, isPartOfLine, inlineComment }) => {
 	const commentMarker = inlineComment ?? INLINE_COMMENT;
-	if (isActivated) {
+	if (isActivated !== false) {
 		return statement;
 	}
 
@@ -257,11 +257,15 @@ const getSchemaOfAlterCollection = collection => {
 /**
  * Check whether an object is activated in a delta model.
  *
- * @param {ModelObject} modelObject Model object.
+ * @param {{
+ * 	compMod?: { isActivated?: { new?: boolean } };
+ * 	role?: { isActivated?: boolean };
+ * }} modelObject
+ *   Model object.
  * @returns {boolean} Activation flag.
  */
 const isObjectInDeltaModelActivated = modelObject => {
-	return modelObject.compMod?.isActivated?.new ?? modelObject.role?.isActivated ?? false;
+	return modelObject.compMod?.isActivated?.new ?? modelObject.role?.isActivated ?? true;
 };
 
 /**
@@ -271,8 +275,10 @@ const isObjectInDeltaModelActivated = modelObject => {
  * @returns {boolean} Activation flag.
  */
 const isParentContainerActivated = collection => {
-	return Boolean(
-		collection?.compMod?.bucketProperties?.isActivated ?? collection?.role?.compMod?.bucketProperties?.isActivated,
+	return (
+		collection?.compMod?.bucketProperties?.isActivated ??
+		collection?.role?.compMod?.bucketProperties?.isActivated ??
+		true
 	);
 };
 

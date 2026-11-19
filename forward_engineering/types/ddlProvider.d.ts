@@ -617,7 +617,7 @@ export type TemporalPeriodsParams = {
 };
 
 export type ViewData = {
-	tables: string[];
+	tables: { statement: string; isActivated: boolean }[];
 	columns: ViewSelectColumn[];
 };
 
@@ -753,6 +753,8 @@ export type HydrateViewColumnParams = {
 	alias?: string;
 	isActivated?: boolean;
 	dbName?: string;
+	entityData?: Array<{ isActivated?: boolean }>;
+	containerData?: Array<{ isActivated?: boolean }>;
 };
 
 export type HydrateViewParams = {

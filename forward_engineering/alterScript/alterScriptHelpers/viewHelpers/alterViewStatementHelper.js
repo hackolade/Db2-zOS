@@ -9,7 +9,7 @@
 
 const { getSchemaOfAlterCollection } = require('../../../utils/general');
 const { createAlterScriptDto } = require('../../dto/alterScriptDto');
-const { createView, dropView } = require('./createDropViewHelper');
+const { createView, dropView, isViewActivated } = require('./createDropViewHelper');
 
 /**
  * Build the statements applying a new select statement. Db2 for z/OS cannot alter the body of a view, so the view is
@@ -31,9 +31,10 @@ const getModifySelectStatementScriptDtos = (view, ddlProvider, mapProperties) =>
 	const dropScript = dropView({ viewSchema, ddlProvider });
 	const createScript = createView({ ddlProvider, mapProperties, view });
 
-	return [createAlterScriptDto([dropScript], true, true), createAlterScriptDto([createScript], true, false)].filter(
-		scriptDto => scriptDto !== undefined,
-	);
+	return [
+		createAlterScriptDto([dropScript], isViewActivated(view), true),
+		createAlterScriptDto([createScript], true, false),
+	].filter(scriptDto => scriptDto !== undefined);
 };
 
 module.exports = {

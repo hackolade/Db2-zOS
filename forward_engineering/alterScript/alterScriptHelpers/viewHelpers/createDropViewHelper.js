@@ -15,7 +15,15 @@ const {
 	getSchemaNameFromCollection,
 	getFullCollectionName,
 	getEntityName,
+	isParentContainerActivated,
+	isObjectInDeltaModelActivated,
 } = require('../../../utils/general');
+
+/**
+ * @param {AlterView} view View delta.
+ * @returns {boolean} Whether the view and its schema are activated.
+ */
+const isViewActivated = view => isParentContainerActivated(view) && isObjectInDeltaModelActivated(view);
 
 /**
  * Build the column list of a view, resolving each property to the table column it selects.
@@ -74,7 +82,7 @@ const createView = ({ ddlProvider, mapProperties, view }) => {
 		entityData: [viewSchema],
 	});
 
-	return ddlProvider.createView(hydratedView, {}, viewSchema.isActivated);
+	return ddlProvider.createView(hydratedView, {}, isViewActivated(view));
 };
 
 /**
@@ -90,4 +98,5 @@ const dropView = ({ ddlProvider, viewSchema }) => {
 module.exports = {
 	createView,
 	dropView,
+	isViewActivated,
 };

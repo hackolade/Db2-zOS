@@ -27,7 +27,7 @@ const getKeyWithAlias = ({ key }) => {
 
 /**
  * @param {{ keys?: HydratedViewColumn[] }} params View keys.
- * @returns {ViewData} View data.
+ * @returns {{ tables: { statement: string; isActivated: boolean }[]; columns: ViewData['columns'] }} View data.
  */
 const getViewData = ({ keys }) => {
 	if (!Array.isArray(keys)) {
@@ -50,8 +50,15 @@ const getViewData = ({ keys }) => {
 				schemaName: key.dbName,
 			});
 
-			if (!result.tables.includes(tableName)) {
-				result.tables.push(tableName);
+			const addedTable = result.tables.find(table => table.statement === tableName);
+
+			if (addedTable) {
+				addedTable.isActivated = addedTable.isActivated || key.isActivated !== false;
+			} else {
+				result.tables.push({
+					statement: tableName,
+					isActivated: key.isActivated !== false,
+				});
 			}
 
 			result.columns.push({

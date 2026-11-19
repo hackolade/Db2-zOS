@@ -9,7 +9,7 @@
 
 const { createAlterScriptDto } = require('../../dto/alterScriptDto');
 const { getSchemaOfAlterCollection } = require('../../../utils/general');
-const { createView, dropView } = require('./createDropViewHelper');
+const { createView, dropView, isViewActivated } = require('./createDropViewHelper');
 
 /**
  * Build the statements renaming a view. Db2 for z/OS has no RENAME VIEW, so the view is dropped and recreated.
@@ -33,9 +33,10 @@ const getRenameViewScriptDtos = (view, ddlProvider, mapProperties) => {
 	});
 	const createScript = createView({ ddlProvider, mapProperties, view });
 
-	return [createAlterScriptDto([dropScript], true, true), createAlterScriptDto([createScript], true, false)].filter(
-		scriptDto => scriptDto !== undefined,
-	);
+	return [
+		createAlterScriptDto([dropScript], isViewActivated(view), true),
+		createAlterScriptDto([createScript], true, false),
+	].filter(scriptDto => scriptDto !== undefined);
 };
 
 module.exports = {
