@@ -41,6 +41,8 @@ const {
 	divideIntoActivatedAndDeactivated,
 	hasType,
 	setTab,
+	isViewColumnSourceActivated,
+	isViewActivated,
 } = require('../utils/general.js');
 const { assignTemplates } = require('../utils/assignTemplates');
 const keyHelper = require('./ddlHelpers/key/keyHelper.js');
@@ -101,11 +103,11 @@ const getTableStatement = ({ statement }) => statement;
 /**
  * Format view source tables, commenting a table when every selected column from it is inactive.
  *
- * @param {{ tables: { statement: string; isActivated: boolean }[]; isViewActivated: boolean }} params View tables.
+ * @param {{ tables: { statement: string; isActivated: boolean }[]; viewIsActivated: boolean }} params View tables.
  * @returns {string} FROM table list.
  */
-const getViewTablesAsString = ({ tables, isViewActivated }) => {
-	if (!isViewActivated) {
+const getViewTablesAsString = ({ tables, viewIsActivated }) => {
+	if (!viewIsActivated) {
 		return tables.map(({ statement }) => statement).join(', ');
 	}
 
@@ -989,14 +991,11 @@ const dropIndex = name => {
  * @returns {HydratedViewColumn} Hydrated view column.
  */
 const hydrateViewColumn = data => {
-	const isSourceTableActivated = data.entityData?.[0]?.isActivated !== false;
-	const isSourceSchemaActivated = data.containerData?.[0]?.isActivated !== false;
-
 	return {
 		name: data.name,
 		tableName: data.entityName,
 		alias: data.alias,
-		isActivated: data.isActivated !== false && isSourceTableActivated && isSourceSchemaActivated,
+		isActivated: data.isActivated !== false && isViewColumnSourceActivated(data),
 		dbName: data.dbName,
 	};
 };
@@ -1028,10 +1027,10 @@ const hydrateView = ({ viewData, entityData }) => {
  *
  * @param {HydratedView} viewData View data.
  * @param {unknown} _dbData Database data.
- * @param {boolean} [isActivated] Activation flag.
+ * @param {boolean} [viewIsActivated] Activation flag.
  * @returns {string} View DDL.
  */
-const createView = (viewData, _dbData, isActivated = true) => {
+const createView = (viewData, _dbData, viewIsActivated = true) => {
 	const viewName = getNamePrefixedWithSchemaName({
 		name: viewData.name,
 		schemaName: viewData.schemaName,
@@ -1039,10 +1038,9 @@ const createView = (viewData, _dbData, isActivated = true) => {
 
 	const { columns, tables } = getViewData({ keys: viewData.keys });
 	const hasCustomSelectStatement = Boolean(trim(viewData.selectStatement));
-	const hasActiveColumns = columns.some(column => column.isActivated !== false);
-	const isViewActivated = isActivated && (hasCustomSelectStatement || hasActiveColumns);
+	const viewActivated = isViewActivated(viewData, { isActivated: viewIsActivated });
 	const columnsAsString = getViewColumnsAsString({ columns });
-	const tablesAsString = getViewTablesAsString({ tables, isViewActivated });
+	const tablesAsString = getViewTablesAsString({ tables, viewIsActivated: viewActivated });
 	const commentStatement = getTableCommentStatement({
 		tableName: viewName,
 		description: viewData.description,
@@ -1076,7 +1074,7 @@ const createView = (viewData, _dbData, isActivated = true) => {
 		},
 	});
 
-	return commentDeactivatedStatement(statement + comment, { isActivated: isViewActivated });
+	return commentDeactivatedStatement(statement + comment, { isActivated: viewActivated });
 };
 
 /**

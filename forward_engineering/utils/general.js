@@ -17,6 +17,7 @@
 const isEqual = require('lodash/isEqual');
 const omit = require('lodash/omit');
 const toLower = require('lodash/toLower');
+const trim = require('lodash/trim');
 const { INLINE_COMMENT } = require('../../shared/constants/constants');
 
 /**
@@ -283,6 +284,116 @@ const isParentContainerActivated = collection => {
 };
 
 /**
+ * @typedef {{
+ * 	isActivated?: boolean;
+ * 	isContainerActivated?: boolean;
+ * 	collectionRefsDefinitionsMap?: Record<string, import('../types/ddlProvider').ViewColumnSourceRef>;
+ * }} IsViewActivatedOptions
+ */
+
+/**
+ * @param {ModelObject} view View.
+ * @returns {Record<string, import('../types/ddlProvider').ViewColumnSourceRef>} Source column references.
+ */
+const getCollectionRefsDefinitionsMap = view =>
+	view.compMod?.collectionData?.collectionRefsDefinitionsMap ||
+	view.role?.compMod?.collectionData?.collectionRefsDefinitionsMap ||
+	{};
+
+/**
+ * Resolve source table/schema/field refs for a view column.
+ *
+ * @param {{ refId?: string; GUID?: string; ref?: string; isActivated?: boolean }} column View column.
+ * @param {Record<string, import('../types/ddlProvider').ViewColumnSourceRef>} [collectionRefsDefinitionsMap] Source
+ *   column references.
+ * @returns {import('../types/ddlProvider').ViewColumnSourceRef} Source definition.
+ */
+const getViewColumnSource = (column, collectionRefsDefinitionsMap = {}) =>
+	(column?.refId ? collectionRefsDefinitionsMap[column.refId] : undefined) ||
+	Object.values(collectionRefsDefinitionsMap).find(
+		item => item.definitionId === column?.GUID || item.definitionId === column?.ref,
+	) ||
+	{};
+
+/**
+ * Shared source activation for CREATE VIEW (hydrateViewColumn) and view activation. Accepts either map source `{
+ * collection, bucket, definition }` or hydrate payload `{ entityData, containerData, definition }`.
+ *
+ * @param {import('../types/ddlProvider').ViewColumnSourceRef} [source] Source refs or hydrate payload.
+ * @returns {boolean} Whether the source is activated.
+ */
+const isViewColumnSourceActivated = (source = {}) => {
+	const sourceCollection = source.collection?.[0] ?? source.entityData?.[0] ?? {};
+	const sourceBucket = source.bucket?.[0] ?? source.containerData?.[0] ?? {};
+	const sourceDefinition = source.definition ?? {};
+
+	return (
+		sourceCollection.isActivated !== false &&
+		sourceBucket.isActivated !== false &&
+		sourceDefinition.isActivated !== false
+	);
+};
+
+/**
+ * A view column is active only when it, its source table/schema, and its source field are active.
+ *
+ * @param {{ refId?: string; GUID?: string; ref?: string; isActivated?: boolean }} column View column.
+ * @param {Record<string, import('../types/ddlProvider').ViewColumnSourceRef>} [collectionRefsDefinitionsMap] Source
+ *   column references.
+ * @returns {boolean} Whether the view column is activated.
+ */
+const isViewColumnActivated = (column, collectionRefsDefinitionsMap = {}) => {
+	if (column?.isActivated === false) {
+		return false;
+	}
+
+	return isViewColumnSourceActivated(getViewColumnSource(column, collectionRefsDefinitionsMap));
+};
+
+/**
+ * Whether view DDL (CREATE VIEW, COMMENT ON VIEW, other ALTER VIEW) should stay uncommented. Checks: parent container,
+ * view, and custom SELECT or at least one active view column (including source collection/schema/field). Also accepts
+ * hydrated `keys` from CREATE VIEW.
+ *
+ * @param {ModelObject} [view] View.
+ * @param {IsViewActivatedOptions} [options] Options.
+ * @returns {boolean} Whether the view DDL should stay uncommented.
+ */
+const isViewActivated = (
+	view = {},
+	{ isActivated, isContainerActivated, collectionRefsDefinitionsMap: refsMap } = {},
+) => {
+	const containerActivated = isContainerActivated ?? isParentContainerActivated(view);
+	if (!containerActivated) {
+		return false;
+	}
+
+	const viewActivated =
+		isActivated ?? view.compMod?.isActivated?.new ?? view.role?.isActivated ?? view.isActivated ?? true;
+	if (!viewActivated) {
+		return false;
+	}
+
+	const selectStatement = view.selectStatement ?? view.role?.selectStatement ?? '';
+	if (trim(selectStatement)) {
+		return true;
+	}
+
+	const collectionRefsDefinitionsMap = refsMap || getCollectionRefsDefinitionsMap(view);
+	const columns = Object.values(view.properties || view.role?.properties || {});
+	if (columns.length > 0) {
+		return columns.some(column => isViewColumnActivated(column, collectionRefsDefinitionsMap));
+	}
+
+	const keys = view.keys ?? [];
+	if (keys.length > 0) {
+		return keys.some(key => key.isActivated !== false);
+	}
+
+	return true;
+};
+
+/**
  * Check whether field properties changed.
  *
  * @param {FieldComparisonParams} compMod CompMod object.
@@ -353,6 +464,11 @@ module.exports = {
 	getSchemaOfAlterCollection,
 	isObjectInDeltaModelActivated,
 	isParentContainerActivated,
+	getCollectionRefsDefinitionsMap,
+	getViewColumnSource,
+	isViewColumnSourceActivated,
+	isViewColumnActivated,
+	isViewActivated,
 	getSchemaNameFromCollection,
 	getUpdatedProperties,
 	checkFieldPropertiesChanged,
