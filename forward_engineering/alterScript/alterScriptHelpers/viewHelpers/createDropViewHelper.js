@@ -15,15 +15,8 @@ const {
 	getSchemaNameFromCollection,
 	getFullCollectionName,
 	getEntityName,
-	isParentContainerActivated,
-	isObjectInDeltaModelActivated,
+	isViewActivated,
 } = require('../../../utils/general');
-
-/**
- * @param {AlterView} view View delta.
- * @returns {boolean} Whether the view and its schema are activated.
- */
-const isViewActivated = view => isParentContainerActivated(view) && isObjectInDeltaModelActivated(view);
 
 /**
  * Build the column list of a view, resolving each property to the table column it selects.

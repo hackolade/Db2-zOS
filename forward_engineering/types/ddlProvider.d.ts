@@ -510,19 +510,41 @@ export type ActivatedKey = {
 
 export type DefaultValue = string | number | boolean;
 
+export type ViewColumnSourceRef = {
+	definitionId?: string;
+	name?: string;
+	collection?: Array<{ isActivated?: boolean; code?: string; collectionName?: string }>;
+	bucket?: Array<{ isActivated?: boolean; code?: string; name?: string }>;
+	definition?: { isActivated?: boolean };
+	entityData?: Array<{ isActivated?: boolean }>;
+	containerData?: Array<{ isActivated?: boolean }>;
+};
+
 export type CompMod = {
 	collectionName?: PropertyPair<string>;
 	keyspaceName?: string;
 	isActivated?: PropertyPair<boolean>;
 	bucketProperties?: { isActivated?: boolean };
+	collectionData?: {
+		collectionRefsDefinitionsMap?: Record<string, ViewColumnSourceRef>;
+	};
 };
 
 export type ModelObject = {
 	code?: string;
 	collectionName?: string;
 	name?: string;
+	isActivated?: boolean;
+	selectStatement?: string;
+	properties?: Record<string, { refId?: string; GUID?: string; ref?: string; isActivated?: boolean }>;
+	keys?: ActivatedKey[];
 	compMod?: CompMod;
-	role?: { properties?: unknown; isActivated?: boolean; compMod?: CompMod };
+	role?: {
+		properties?: Record<string, { refId?: string; GUID?: string; ref?: string; isActivated?: boolean }>;
+		isActivated?: boolean;
+		selectStatement?: string;
+		compMod?: CompMod;
+	};
 };
 
 export type JsonSchemaPropertyCallback = (params: {
@@ -755,6 +777,7 @@ export type HydrateViewColumnParams = {
 	dbName?: string;
 	entityData?: Array<{ isActivated?: boolean }>;
 	containerData?: Array<{ isActivated?: boolean }>;
+	definition?: { isActivated?: boolean };
 };
 
 export type HydrateViewParams = {
