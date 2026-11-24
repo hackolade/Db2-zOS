@@ -1074,7 +1074,15 @@ const createView = (viewData, _dbData, viewIsActivated = true) => {
 		},
 	});
 
-	return commentDeactivatedStatement(statement + comment, { isActivated: viewActivated });
+	const fullStatement = statement + comment;
+
+	// Only self-comment when the caller thinks the view is active but columns/sources
+	// make it inactive. When viewIsActivated is false, the caller comments the statement.
+	if (viewIsActivated && !viewActivated) {
+		return commentDeactivatedStatement(fullStatement, { isActivated: false });
+	}
+
+	return fullStatement;
 };
 
 /**
